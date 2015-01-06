@@ -1,0 +1,251 @@
+Description of the public data traces of iMotes experiment deployment.
+
+========================
+I Terms and conditions: 
+========================
+
+ - You are welcome to use them for your research. We ask you in return to 
+ accept the following terms:
+ 
+ 1- To acknowledge the use of the data in all resulting publications. In 
+ particular include a reference to our tech report:
+ 
+@ARTICLE{CHSGCD07Impact,
+  AUTHOR = {A. Chaintreau and P. Hui and J. Scott and R. Gass and J. Crowcroft and C. Diot},
+  TITLE = {Impact of Human Mobility on Opportunistic Forwarding Algorithms},
+  JOURNAL = {IEEE Transactions on Mobile Computing},
+  volume = 6,
+  number = 6,
+  pages = {606--620},
+  YEAR = 2007,
+  MONTH = {June},
+  note = {(previously published in the Proceedings of IEEE INFOCOM 2006)},
+URL = {http://www.thomson.net/~chaintre/pub/chaintreau07impact.pdf}, }
+
+ 2- Not to redistribute the data set to anyone without our permission.
+ 
+ 3- Not to use the data for any other purpose than education and research.
+
+========================
+II Data collection and pre-processing: 
+========================
+
+We tried to keep the processing of data before public release to a
+minimum, to allow any flexibility for possible research use. Some
+choices had to be made to reduce power consumption, memory use, and
+because of specific aspect of the iMote prototype. 
+Before using these data for your research, it may be important to
+check that it does not impact any of your findings.
+
+1- periodic desynchronized scanning.
+
+In all our experiments, iMotes were distributed to a group of people
+to collect any opportunistic sighting of other Bluetooth devices
+(including the other iMotes distributed). Each iMotes scans on a
+periodic basis for device, asking them to respond with their MAC
+address, via the paging function. 
+
+It takes approximately 5 to 10s to perform the complete
+scanning. After initial test we observe that most of the contacts were
+recorded with 5s scaning time, and this value was ultimately chosen. 
+
+The time granularity between two scanning is 120s. It is important to
+avoid synchronization of two iMotes around the same cycle clock, as
+each of them cannot respond to any request when it is actively
+scanning. We implemented a random dephasing on [-12s;+12s] to handle
+this case.
+
+2- skip-length sequence.
+
+A contact "A sees B" is defined as a period of time where all
+successive scanning by A receive a positive answer by B. Ideally an
+information should be kept at the end of each contact period. 
+
+After preliminary test it became quite clear that a very large number
+of contact periods were only separated by two intervals. We decided,
+to avoid memory overflow, to implement a skip sequence of "one",
+meaning that a contact period will only be stopped after two
+successive failure of a scanning response. As a consequence, no
+inter-contact time of less than two intervales could have been observed.
+
+3- Manual Time synchronization.
+
+Time between iMotes is not synchronized by a central entity, and
+traces belonging to different devices bears time which are relative to
+the starting time of each device. To read all data with the same time
+axis, devices were started as much as possible at the same time, and a
+method based on mutual sightings were used to compute manually the
+shift between different traces. This will certainly prove to be quite
+accurate for interval of time above 5mn, we cannot claim a complete
+accuracy for smaller time-scale. And we recommend to compute mutual
+sightings to check any inaccuracies that we may incur in this data.
+
+The time is expressed in seconds, the origin ( 0s ) corresponds to
+12am on the first day of the experiment. Hence time of the day can be
+computed from it. Again, the operation was to add a constant to all
+previously synchronized traces, to reflect the time of beginnning of
+the experiment. We cannot claim high accuracy (under 5mn). 
+
+4- Corrupted MAC address, and discarded mote.
+
+After the first couple of experiments, we observe that a number of MAC
+addresses recorded were different from a known one only by one or two
+digit. They were most of the time recorded once for a single time
+slot. It is clear that at least a part of them comes for a corrupted
+signal received on the link level by our devices. to ignore this
+artificial data, we implement the following rule:
+
+"Any MAC address that were recorded only once, for a single scanning
+(that is, related with a unique contact, with length 1s), are supposed
+defective and ignored." We did not discard any other one: a node that
+was seen twice, each contact being of length 1s, or a node that was
+seen once for two successive scanning, was included in the final
+datasets. 
+
+Another important aspect is that some iMotes could not come up with
+data that can be used, mostly due to unfortunate hardware reset, or
+losses. These devices may still appear in the traces of other iMotes,
+and are difficult to interpret as they seems to follow an intermittent
+presence during the experiment. All of them were discarded from the
+final datasets, to avoid impacting the results in any way.
+
+5- Anonymization and Address Identifier.
+
+To protect participants privacy, we choose not to release the MAC
+address, neither from the iMotes nor from other external devices
+recorded. Every device is given a unique identifier, usually called ID
+number in this document. Depending on which number, it might be an
+iMote or another MAC address that were recorded from other active
+bluetooth devices around. 
+
+========================
+III Description of the files 
+========================
+
+=====
+"table.Exp1.dat"
+is a file describing the contact where a certain device is seen. 
+
+========================
+Examples taken from table.Exp1.dat (two first columns and first rows)
+========================
+ID #    Class   Incidence       Occurence   :   Total   ID 1    ID 2  
+                                Contact Time :
+1       1       8                               143     0       32    
+                                                69951   0       4835  
+
+2       1       8                               168     19      0     
+                                                68818   1260    0     
+========================
+========================
+
+- The first column describes the ID of the device. 
+
+- The second column takes value 1 or 2, it describes whether it is 
+	1- an internal device (one of iMotes we distributed).
+	2- an external device (identified by his MAC address).
+	
+  We usually give smaller ID to internal nodes. That is the reason why
+all tables start with devices of class 1.
+
+- The third column describes the incidence of this device, namely the
+number of iMote that recorded its MAC address during this
+experiment. It is usually between 1 and n for an external device
+(where n is the number of iMotes deployed), and between 1 and n-1 for
+an internal device.
+
+- The rest of the table describes the number of contacts (first line)
+where this device were seen, and the cumulated time of these contacts
+(second line). Columns correspond to which iMotes recorded this
+devices. From the example above, node with ID 1 was seen in total 143
+time during Experiment 1, and it was seen 32 time by node with ID
+2. The cumulated time where 2 saw 1 is 4835 s. Node 2 was seen 168
+time in total, and 19 time by node 1, the total time it saw node 1 is
+1260. Note that, as we usually observe, this number may not be
+symmetric, as interference and the limit of our implementation can
+create non-mutual sightings. They are, however, usually of the same
+order. 
+
+=====
+"MAC3Btable.Exp1.dat"
+is a file that contains the three first bytes of the MAC address, associated with each ID. It could be useful to identify what is the kind of each external device.
+
+=====
+"contacts.Exp1.dat"
+is a file which describes the contact that were recorded by all
+devices we distributed during this experiment.
+
+========================
+Examples taken from table.Exp1.dat (two first columns and first rows)
+========================
+1       8       121     121     1       0
+1       3       236     347     1       0
+1       4       236     347     1       0
+1       5       121     464     1       0
+1       8       585     585     2       464
+========================
+========================
+
+- The first column gives the ID of the device who recorded the sightings.
+- The second column gives the ID of the device who was seen 
+(it may be an iMote, or another device recorded during the experiment). 
+
+- The third and fourth column describe, respectively, the first and
+last time when the address of ID2 were recorded by ID1 for this
+contact. 
+
+- The fifth and sixth column are here for reading convenience. The
+fifth enumerate contacts with same ID1 and ID2, as 1,2,... . The last
+column describes the time difference between the beginning of this
+contact and the end of the previous contact with same ID1 and ID2. It
+is by convention set to 0 if this is the first contact for this ID1
+and ID2. 
+
+- Note, again, that these contacts may not be mutual between a pair of
+iMotes, because scanning period of different iMotes are not
+synchronized, and because the sightings might not be symmetric.
+
+========================
+IV Answer to some additional questions
+========================
+
+- Do you have any location or speed data ?
+
+The answer is no. We did only gather data on the contacts between
+mobile devices, that is an indication of their proximity.
+In that sense, they may not be considered as classical mobility
+traces, focusing on geographical position or speed. 
+
+========================
+V History of Experiments
+========================
+
+- Two preliminary test were conducted at Intel Research Cambridge, at
+December 9th, 2005, and December 15th, 2005. It did not run properly
+due to some memory exhaustion in the first version of the software,
+and some problem of data collection. For these reasons these datas
+were not used and are not reported here. 
+
+- Experiment 1 and 2 were conducted in Cambridge during the month of
+January 2005. 
+- Experiment 3 was conducted in the Conference INFOCOM'05 in March
+2005 in Miami. 
+- Experiment 4 and 5 were conducted in Hong Kong during the month of
+June 2005.
+- Experiment 6 was conducted in the conference INFOCOM'06 in April in Barcelona.
+
+========================
+VI Feedback
+========================
+
+Feedback on these data are extremely welcomed. Please do not hesitate
+to contact one of us if you have any question, or need any extra
+information about the experimental settings.
+
+|===============================================|
+|	Pan Hui, T-Labs			 	|
+|	James W. Scott, Microsoft 	 	|
+|	Augustin Chaintreau, Thomson		|
+|	For any function please contact 	|
+|	augustin.chaintreau@thomson.net 	|
+|===============================================|

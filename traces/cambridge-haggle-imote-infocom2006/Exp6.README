@@ -1,0 +1,127 @@
+﻿=======================
+README for the Haggle data sets collected at Infocom 2006. 
+=======================
+NB: Please read the General README of Haggle data sets which contains a description of the software and pre-processing steps used.
+=====
+This file contains information on Experiment 6, which was conducted during Infocom 2006 in Barcelona
+
+Location: Princesa Sofia Gran Hotel, Barcelona
+
+Date: Monday, April 24th to Thursday April 27th, 2006
+
+Duration: 
+	  Devices distributed on Sundary April 23rd, between 7:00 and 9:00 pm.
+	  Devices collected back starting from April 26th and on April 27th during the day.
+Origin of time: 
+	  All times indicated in the files corresponds to the seconds elapsed since the motes were turned on. 
+	  The motes had been all turned on on Sunday April 23rd at 5:01pm (which is 61260 seconds after midnight on that day). 
+
+Participants: 
+70 students and researchers, attending the student workshop.
+
+Collected datas: 
+- 2 iMotes did not deliver useful data, as a consequence of accidental hardware reset. Contacts with any of these were discarded from the traces of other iMotes to avoid any consequence on the experimental results.
+
+Participating nodes:
+- Nodes with ID#1 through #17 are static long range iMotes iMotes deployed throughout the area.
+- The three nodes with ID#18-#20 are long range iMotes that have been placed in lift of the hotel.
+- Nodes #21-#98 are participants of the Infocom student workshop.
+- Nodes with ID larger or equal than #100 are external devices.
+
+Note that the 20 stationary (long range) iMotes have more powerful battery and extended radio range (around 100 meters). The 78 mobile iMotes have a wireless range around 30 meters. 
+
+=====
+=====
+Details of the files contained in this dataset:
+
+=====
+"infocom06floormap.pdf"
+Precise the approximate location and range of the static iMotes deployed.
+
+Please note that among the static nodes
+Mezzanine: ID #6, #8 (wrongly indicated on the map as 87239), #9, #10, #12, #17
+Floor -1: ID #3, #14, #16, 
+Floor -2: ID #1, #4, #5, #7, #11, #15
+Others: ID#2 (Bar) #13 (Concierge)
+Lifts: ID #17, #18, #19
+
+=====
+"MAC2id.dat"
+
+is a file that contains the MAC address, associated with each ID for the static motes only (others have been removed to preserve participants privacy). It allows in particular to relate the node ID and the location as mentioned on the floormap.
+
+=====
+"table.Exp6.dat"
+is a file which describes the amount of contacts between the different pairs of devices (Please see the General README for the detailed description of this file).
+
+=====
+"contacts.Exp6.dat"
+is a file which describes the contact that were recorded by all devices we distributed during this experiment.
+
+========================
+Examples
+========================
+1       8       121     121     1       0
+1       3       236     347     1       0
+1       4       236     347     1       0
+1       5       121     464     1       0
+1       8       585     585     2       464
+========================
+========================
+
+- The first column gives the ID of the device who recorded the sightings. 
+- The second column gives the ID of the device who was seen (it may be an iMote, or another device recorded during the experiment).
+
+- The third and fourth column describe, respectively, the first and last time when the address of ID2 were recorded by ID1 for this contact.
+Note that the time were computed in seconds, with the zero starting on Sunday at 5:01pm (Please see Origin of time above).
+
+- The fifth and sixth column are here for reading convenience. The fifth enumerate contacts with same ID1 and ID2, as 1,2,... . The last column describes the time difference between the beginning of this contact and the end of the previous contact with same ID1 and ID2. It is by convention set to 0 if this is the first contact for this ID1 and ID2.
+
+- Note, again, that these contacts may not be mutual between a pair of iMotes, because scanning period of different iMotes are not synchronized, and because the sightings might not be symmetric.
+
+=====
+Profile of participants. 
+During the experiments, we ask each participants to fill a questionnaire with a number of information about this person. We give the full results (unfortunately not complete as many participants did not answer the questionnaire fully).
+NB: To preserver participants privacy the answer has been reassigned to numbers, so that the file allows to know, e.g., which participants are from the the same affiliation without disclosing the name of this affiliation.
+
+The folder forms contains:
+- The Questionnaire.doc document used for fill the form by participants.
+- the answers of each participants in the file corresponding to its ID:
+"<ID>.txt"
+Please refer to the Questionnaire for the exact formulation of the question.
+Here is a summary of what the file contains:
+Row 1, 2 
+- corresponds to name and email addresses. 
+For confidentiality reasons here they only present the ID of the node.
+Row 3
+- indicates nationalities of the experimentalist.
+Row 4
+- the school where the participants completed her or his study
+Row 5
+- the languages spoken by the participants
+Row 6
+- the current affiliation(s)
+Row 7 
+- Position: Student/Researcher/Professor
+Row 8, 9
+- indicates the city and the country of residence
+Row 10
+- please ignore this field (project membership that was not included)
+Row 11
+- airport the participant is flying from.
+Row 12
+- please ignore this field (cellphone/PDA carried, not filled by participants)
+Row 13 
+- please ignore this field (number of Infocom conference attended before)
+Row 14
+- indicates the hotel where the participant is staying during the conference.
+Row 15
+- please ignore this field (roommate during the conference, not indicated)
+Row 16
+- please ignore this field (subway station while in Barcelona, not indicated by participants)
+Row 17
+- please ignore this field (presenter or not, not indicated by participants)
+Row 18
+- indicates membership of ACM, IEEE, ComSoc
+Row 19
+- indicates the list of topics of interest (selected from those of the CFP) which are relevant to the research of the participant
