@@ -30,7 +30,7 @@ public class ONSIDE extends Node {
      */
     private boolean altruismAnalysis;
     /**
-     * Common interests requires between two nodes, in order for them to
+     * Common interests required between two nodes, in order for them to
      * exchange data.
      */
     private int commonInterests;
@@ -60,7 +60,7 @@ public class ONSIDE extends Node {
      * @param nodes array of all the nodes in the network
      * @param interestedFriendsThreshold threshold for interested friends
      * @param encounteredInterestsThreshold threshold for encountered interests
-     * @param commonInterests common interests requires between two nodes, in
+     * @param commonInterests common interests required between two nodes, in
      * order for them to exchange data
      * @param sort type of sort to be performed on the messages at each data
      * exchange

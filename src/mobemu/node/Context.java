@@ -40,6 +40,19 @@ public class Context {
     }
 
     /**
+     * Instantiates a {@code Context} object.
+     *
+     * @param context context to be copies
+     */
+    public Context(Context context) {
+        this.id = context.id;
+        this.topics = new HashSet<>();
+        for (Topic topic : context.topics) {
+            topics.add(topic);
+        }
+    }
+
+    /**
      * Gets the ID of the node whose context this is.
      *
      * @return the ID of the node

@@ -505,10 +505,15 @@ public abstract class Node {
                 computeCentrality(encounteredNode, currentTime - Node.traceStart);
                 encounteredNode.computeCentrality(this, currentTime - Node.traceStart);
 
+                preDataExchange(encounteredNode, currentTime);
+
                 onDataExchange(encounteredNode, contactDuration, currentTime);
                 encounteredNode.onDataExchange(this, contactDuration, currentTime);
             }
         }
+    }
+
+    protected void preDataExchange(Node encounteredNode, long currentTime) {
     }
 
     /**
