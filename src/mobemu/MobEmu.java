@@ -191,6 +191,10 @@ public class MobEmu {
             //        parser.getSocialNetwork()[i], dataMemorySize, exchangeHistorySize, seed,
             //        traceStart, traceEnd, dissemination);
 
+            //nodes[i] = new InterestSpace(i, parser.getContextData().get(i), parser.getSocialNetwork()[i],
+            //        dataMemorySize, exchangeHistorySize, seed, traceStart, traceEnd, false, nodes,
+            //        0.95, 0.98, 30, InterestSpace.InterestSpaceAlgorithm.ONSIDE);
+
             //nodes[i] = new ONSIDE(i, parser.getContextData().get(i), parser.getSocialNetwork()[i],
             //      dataMemorySize, exchangeHistorySize, seed, traceStart, traceEnd, false, nodes,
             //    interestedFriendsThreshold, encounteredInterestsThreshold, commonInterests, ONSIDE.ONSIDESort.None);
