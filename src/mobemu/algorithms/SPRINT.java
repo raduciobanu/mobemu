@@ -79,6 +79,11 @@ public class SPRINT extends Node {
         this.encounterProbabilities = new ArrayList<>(Collections.nCopies(nodes.length, new Probability(0, 0.0)));
     }
 
+    @Override
+    public String getName() {
+        return "SPRINT";
+    }
+
     /**
      * Data exchange function for SAP routing between two nodes.
      *

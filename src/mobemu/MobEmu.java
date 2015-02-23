@@ -8,7 +8,7 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
 import java.util.Random;
-import mobemu.algorithms.Epidemic;
+import mobemu.algorithms.InterestSpace;
 import mobemu.node.Message;
 import mobemu.node.Node;
 import mobemu.node.Stats;
@@ -28,18 +28,18 @@ public class MobEmu {
      */
     public static void main(String[] args) {
         long seed = 0;
-        boolean dissemination = false;
+        boolean dissemination = true;
         boolean batteryComputation = false;
 
         Parser sigcomm = new Sigcomm();
         Node[] nodes = initNodes(sigcomm, dissemination, seed);
         List<Message> messages = run(nodes, sigcomm.getTraceData(), batteryComputation, dissemination, seed);
 
-        System.out.println("Total number of messages generated: " + messages.size());
-        System.out.println("Hit rate: " + Stats.computeHitRate(messages, nodes, dissemination));
-        System.out.println("Delivery cost: " + Stats.computeDeliveryCost(messages, nodes, dissemination));
-        System.out.println("Delivery latency: " + Stats.computeDeliveryLatency(messages, nodes, dissemination));
-        System.out.println("Hop count: " + Stats.computeHopCount(messages, nodes, dissemination));
+        System.out.println(nodes[0].getName());
+        System.out.println("" + Stats.computeHitRate(messages, nodes, dissemination));
+        System.out.println("" + Stats.computeDeliveryCost(messages, nodes, dissemination));
+        System.out.println("" + Stats.computeDeliveryLatency(messages, nodes, dissemination));
+        System.out.println("" + Stats.computeHopCount(messages, nodes, dissemination));
     }
 
     /**
@@ -55,8 +55,8 @@ public class MobEmu {
      * @return list of messages generated during the trace
      */
     private static List<Message> run(Node[] nodes, Trace trace, boolean batteryComputation, boolean dissemination, long seed) {
-        int messageCopies = 30;
-        int messageCount = 30;
+        int messageCopies = nodes.length;
+        int messageCount = nodes.length;
 
         int contactCount = trace.getContactsCount();
         long startTime = trace.getStartTime();
@@ -70,8 +70,6 @@ public class MobEmu {
         Random messageRandom = new Random(seed);
 
         List<Message> messages = new ArrayList<>();
-
-        int twoDays = 0;
 
         for (long tick = startTime; tick < endTime; tick += sampleTime) {
             int count = 0;
@@ -92,7 +90,7 @@ public class MobEmu {
             }
 
             // generate messages
-            if (generate && generationTime.get(Calendar.HOUR) == currentDay.get(Calendar.HOUR) && twoDays++ < 2) {
+            if (generate && generationTime.get(Calendar.HOUR) == currentDay.get(Calendar.HOUR)) {
                 messages.addAll(Message.generateMessages(nodes, messageCount, messageCopies, tick, dissemination, messageRandom));
                 generate = false;
                 System.out.println(messages.size());
@@ -111,7 +109,7 @@ public class MobEmu {
 
                     if (!nodes[observer].inFamiliarSet(observed)) {
                         // update total contact duration of encountered node.
-                        nodes[observer].updateContactDuration(observed, sampleTime);
+                        nodes[observer].updateContactDuration(observed, sampleTime, tick);
 
                         // when the threshold has been exceeded, insert vi in F0 and C0
                         nodes[observer].checkThreshold(observed);
@@ -123,7 +121,7 @@ public class MobEmu {
                     // do these steps only if the contact just began.
                     if (contact.getStart() == tick) {
                         // update the number of contacts
-                        nodes[observer].updateContactsNumber(observed);
+                        nodes[observer].updateContactsNumber(observed, tick);
 
                         // update the global familiar set of the current node.
                         nodes[observer].updateFamiliarSet(nodes[observed], true);
@@ -179,8 +177,8 @@ public class MobEmu {
         int exchangeHistorySize = 100;
         int cacheMemorySize = 40;
         int commonInterests = 1;
-        int interestedFriendsThreshold = 1;
-        double encounteredInterestsThreshold = 1.0;
+        int interestedFriendsThreshold = 0;//1;//5;
+        double encounteredInterestsThreshold = 0.3;//1.0;//0.2;
         long traceStart = parser.getTraceData().getStartTime();
         long traceEnd = parser.getTraceData().getEndTime();
 
@@ -190,31 +188,25 @@ public class MobEmu {
             //nodes[i] = new MoghadamSchulzrinne(i, nodes.length, parser.getContextData().get(i),
             //        parser.getSocialNetwork()[i], dataMemorySize, exchangeHistorySize, seed,
             //        traceStart, traceEnd, dissemination);
-
-            //nodes[i] = new InterestSpace(i, parser.getContextData().get(i), parser.getSocialNetwork()[i],
-            //        dataMemorySize, exchangeHistorySize, seed, traceStart, traceEnd, false, nodes,
-            //        0.95, 0.98, 30, InterestSpace.InterestSpaceAlgorithm.ONSIDE);
-
+            nodes[i] = new InterestSpace(i, parser.getContextData().get(i), parser.getSocialNetwork()[i],
+                    dataMemorySize, exchangeHistorySize, seed, traceStart, traceEnd, false, nodes,
+                    1.0, 0.5, 0, InterestSpace.InterestSpaceAlgorithm.CacheDecision);
             //nodes[i] = new ONSIDE(i, parser.getContextData().get(i), parser.getSocialNetwork()[i],
             //      dataMemorySize, exchangeHistorySize, seed, traceStart, traceEnd, false, nodes,
             //    interestedFriendsThreshold, encounteredInterestsThreshold, commonInterests, ONSIDE.ONSIDESort.None);
-
-            nodes[i] = new Epidemic(i, nodes.length, parser.getContextData().get(i), parser.getSocialNetwork()[i],
-                    dataMemorySize, exchangeHistorySize, seed, traceStart, traceEnd, dissemination, false);
-
+            //nodes[i] = new Epidemic(i, nodes.length, parser.getContextData().get(i), parser.getSocialNetwork()[i],
+            //        dataMemorySize, exchangeHistorySize, seed, traceStart, traceEnd, dissemination, false);
+            //nodes[i] = new MLSOR(i, parser.getContextData().get(i), parser.getSocialNetwork()[i],
+            //        dataMemorySize, exchangeHistorySize, seed, traceStart, traceEnd, false, nodes);
             //nodes[i] = new SPRINT(i, parser.getContextData().get(i), parser.getSocialNetwork()[i],
             //      dataMemorySize, exchangeHistorySize, seed, traceStart, traceEnd, false, nodes, cacheMemorySize);
-
             //nodes[i] = new IRONMAN(i, nodes.length, parser.getContextData().get(i), parser.getSocialNetwork()[i],
             //        dataMemorySize, exchangeHistorySize, seed, traceStart, traceEnd, true);
-
             //nodes[i] = new BubbleRap(i, nodes.length, parser.getContextData().get(i), parser.getSocialNetwork()[i],
             //      dataMemorySize, exchangeHistorySize, seed, traceStart, traceEnd);
-
             //nodes[i] = new Jaccard(i, nodes.length, parser.getContextData().get(i), parser.getSocialNetwork()[i],
             //      dataMemorySize, exchangeHistorySize, seed, traceStart, traceEnd, cacheMemorySize,
             //    false, false, false, parser.getTraceData());
-
             //nodes[i] = new SENSE(i, parser.getContextData().get(i), parser.getSocialNetwork()[i],
             //        dataMemorySize, exchangeHistorySize, seed, traceStart, traceEnd, true, nodes);
         }

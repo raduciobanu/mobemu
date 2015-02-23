@@ -45,6 +45,11 @@ public class Epidemic extends Node {
     }
 
     @Override
+    public String getName() {
+        return "Epidemic";
+    }
+
+    @Override
     protected void onDataExchange(Node encounteredNode, long contactDuration, long currentTime) {
         if (!(encounteredNode instanceof Epidemic)) {
             return;

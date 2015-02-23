@@ -18,7 +18,7 @@ import java.util.*;
  */
 public abstract class Node {
 
-    protected static int contactThreshold = 1200; // contact threshold for the K-clique algorithm
+    protected static int contactThreshold = 20 * 60 * 1000; // contact threshold for the K-clique algorithm
     protected static int communityThreshold = 6; // community threshold for the K-clique algorithm.
     protected static Random deliveryRandom = null; // random number generator for node delivery
     protected static Random batteryRandom = null; // random number generator for battery levels
@@ -115,13 +115,13 @@ public abstract class Node {
             calendar.set(Calendar.HOUR_OF_DAY, 23);
             calendar.set(Calendar.MINUTE, 59);
             calendar.set(Calendar.SECOND, 59);
-            calendar.set(Calendar.MILLISECOND, 59);
+            calendar.set(Calendar.MILLISECOND, 999);
             Node.traceEndReset = calendar.getTimeInMillis();
         }
 
         this.encounteredNodes = new HashMap<>();
-        this.encountersPerHour = new int[HOURS_IN_DAY][(int) (traceEndReset - traceStartReset) / MILLIS_IN_DAY + 1][nodes];
-        this.timesPerHour = new long[HOURS_IN_DAY][(int) (traceEndReset - traceStartReset) / MILLIS_IN_DAY + 1][nodes];
+        this.encountersPerHour = new int[HOURS_IN_DAY][(int) ((double) (traceEndReset - traceStartReset) / MILLIS_IN_DAY) + 1][nodes];
+        this.timesPerHour = new long[HOURS_IN_DAY][(int) ((double) (traceEndReset - traceStartReset) / MILLIS_IN_DAY) + 1][nodes];
         this.exchangeStats = new HashMap<>();
         this.familiarSet = new boolean[nodes];
         this.familiarSetSize = 0;
@@ -145,6 +145,14 @@ public abstract class Node {
         this.network = new Network();
         this.context = context;
     }
+
+    /**
+     * Returns the name of the dissemination or routing algorithm this node is
+     * running.
+     *
+     * @return name of the algorithm
+     */
+    public abstract String getName();
 
     /**
      * Gets the ID of the node.
@@ -269,7 +277,7 @@ public abstract class Node {
         day.setTimeInMillis(currentTime);
         int hour = day.get(Calendar.HOUR_OF_DAY);
 
-        encountersPerHour[hour][(int) (currentTime - traceStart) / MILLIS_IN_DAY][id]++;
+        encountersPerHour[hour][(int) ((double) (currentTime - traceStart) / MILLIS_IN_DAY)][id]++;
     }
 
     /**
@@ -278,13 +286,14 @@ public abstract class Node {
      *
      * @param id ID of the encountered node
      * @param sampleTime number of milliseconds the trace is sampled in
+     * @param currentTime current trace time
      */
-    public void updateContactDuration(int id, long sampleTime) {
+    public void updateContactDuration(int id, long sampleTime, long currentTime) {
         ContactInfo info = encounteredNodes.get(id);
         if (info != null) {
             info.increaseDuration(sampleTime);
         } else {
-            encounteredNodes.put(id, new ContactInfo());
+            encounteredNodes.put(id, new ContactInfo(currentTime));
         }
     }
 
@@ -293,15 +302,17 @@ public abstract class Node {
      * hasn't been encountered before, add a new entry to the list of contacts.
      *
      * @param id ID of the encountered node
+     * @param currentTime current trace time
      */
-    public void updateContactsNumber(int id) {
+    public void updateContactsNumber(int id, long currentTime) {
         encounters[id]++;
 
         ContactInfo info = encounteredNodes.get(id);
         if (info != null) {
             info.increaseContacts();
+            info.setLastEncounterTime(currentTime);
         } else {
-            encounteredNodes.put(id, new ContactInfo());
+            encounteredNodes.put(id, new ContactInfo(currentTime));
         }
     }
 
@@ -316,7 +327,7 @@ public abstract class Node {
         day.setTimeInMillis(currentTime);
         int hour = day.get(Calendar.HOUR_OF_DAY);
 
-        timesPerHour[hour][(int) (currentTime - traceStart) / MILLIS_IN_DAY][id]++;
+        timesPerHour[hour][(int) ((double) (currentTime - traceStart) / MILLIS_IN_DAY)][id]++;
     }
 
     /**

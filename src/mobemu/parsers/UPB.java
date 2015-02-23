@@ -7,6 +7,7 @@ package mobemu.parsers;
 import java.io.*;
 import java.util.Calendar;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.Map;
 import mobemu.node.Context;
 import mobemu.node.Topic;
@@ -173,6 +174,12 @@ public class UPB implements Parser {
         long start = Long.MAX_VALUE;
 
         Map<Integer, Integer> users = Upb2012GetValidUsers();
+        for (int i = 0; i < users.size(); i++) {
+            Context contextItem = context.get(i);
+            if (contextItem == null) {
+                context.put(i, new Context(i));
+            }
+        }
 
         // parse proximity file.
         try {
