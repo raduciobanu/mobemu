@@ -44,6 +44,11 @@ public class SENSE extends Node {
     }
 
     @Override
+    public String getName() {
+        return "SENSE";
+    }
+
+    @Override
     protected void onDataExchange(Node encounteredNode, long contactDuration, long currentTime) {
         if (!(encounteredNode instanceof SENSE)) {
             return;

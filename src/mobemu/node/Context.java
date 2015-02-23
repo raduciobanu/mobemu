@@ -110,6 +110,30 @@ public class Context {
     }
 
     /**
+     * Checks whether a given topic is present in the context at a given time.
+     *
+     * @param topic topic to be searched
+     * @param time current time
+     * @return {@code true} if the topic is in the context at the given time, {@code false}
+     * otherwise
+     */
+    public boolean isTopicCommon(Topic topic, long time) {
+        return Topic.isTopicCommon(topics, topic, time);
+    }
+
+    /**
+     * Checks whether a given topic is present in the context at a given time.
+     *
+     * @param topicID ID of the topic to be searched
+     * @param time current time
+     * @return {@code true} if the topic is in the context at the given time, {@code false}
+     * otherwise
+     */
+    public boolean isTopicCommon(int topic, long time) {
+        return Topic.isTopicCommon(topics, topic, time);
+    }
+
+    /**
      * Gets the number of topics of a context.
      *
      * @param time time the request is made at

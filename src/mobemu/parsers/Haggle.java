@@ -95,6 +95,13 @@ public class Haggle implements Parser {
 
     @Override
     public Map<Integer, Context> getContextData() {
+        for (int i = 0; i < socialNetwork.length; i++) {
+            Context contextItem = context.get(i);
+            if (contextItem == null) {
+                context.put(i, new Context(i));
+            }
+        }
+
         return context;
     }
 

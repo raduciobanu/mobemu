@@ -39,6 +39,11 @@ public class MoghadamSchulzrinne extends Node {
     }
 
     @Override
+    public String getName() {
+        return "Moghadam Schulzrinne";
+    }
+
+    @Override
     protected void onDataExchange(Node encounteredNode, long contactDuration, long currentTime) {
         if (!(encounteredNode instanceof MoghadamSchulzrinne)) {
             return;

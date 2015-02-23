@@ -34,6 +34,11 @@ public class BubbleRap extends Node {
     }
 
     @Override
+    public String getName() {
+        return "Bubble Rap";
+    }
+
+    @Override
     protected void onDataExchange(Node encounteredNode, long contactDuration, long currentTime) {
         if (!(encounteredNode instanceof BubbleRap)) {
             return;

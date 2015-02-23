@@ -42,6 +42,11 @@ public class IRONMAN extends Node {
     }
 
     @Override
+    public String getName() {
+        return "IRONMAN";
+    }
+
+    @Override
     protected void onDataExchange(Node encounteredNode, long contactDuration, long currentTime) {
         if (!(encounteredNode instanceof IRONMAN)) {
             return;

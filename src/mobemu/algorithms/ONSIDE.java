@@ -81,6 +81,11 @@ public class ONSIDE extends Node {
         }
     }
 
+    @Override
+    public String getName() {
+        return "ONSIDE";
+    }
+
     /**
      * Type of sort to be performed on the messages at each data exchange.
      */

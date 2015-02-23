@@ -96,6 +96,11 @@ public class Jaccard extends Node {
     }
 
     @Override
+    public String getName() {
+        return "Jaccard";
+    }
+
+    @Override
     protected void onDataExchange(Node encounteredNode, long contactDuration, long currentTime) {
         if (!(encounteredNode instanceof Jaccard)) {
             return;
