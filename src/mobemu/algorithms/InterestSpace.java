@@ -28,19 +28,19 @@ public class InterestSpace extends Node {
     /**
      * Aggregation weights.
      */
-    private static final double w1 = 0.25, w2 = 0.25, w3 = 0.25, w4 = 0.25;
+    private double w1, w2, w3, w4;
     /**
      * Social network threshold.
      */
-    private final double socialNetworkThreshold; // sigcomm: 0.95 // upb: 0.5
+    private final double socialNetworkThreshold;
     /**
      * Interest threshold.
      */
-    private final double interestThreshold; // sigcomm: 0.98 // upb: 0.1
+    private final double interestThreshold;
     /**
      * Contacts threshold.
      */
-    private final int contactsThreshold; // sigcomm: 30 // upb 50/0
+    private final int contactsThreshold;
     /**
      * Interest Spaces context.
      */
@@ -57,6 +57,23 @@ public class InterestSpace extends Node {
      * Algorithm to be used for dissemination.
      */
     Algorithm algorithm;
+    /**
+     * List of nodes encountered by the current node during a time window.
+     */
+    private Map<Integer, ContactInfo> encounteredNodesInterestSpace;
+    /**
+     * Default value for the time window.
+     * TODO(Radu): make window dynamically adjustable?
+     */
+    private static final long DEFAULT_TIME_WINDOW = 1800 * 1000; // 1 hour (Sigcomm), 12 hours (UPB 2012), 0.1 hours (Infocom 2006), 0.5 hours (SocialBlueCon)
+    /**
+     * Time window for storing contact information.
+     */
+    private long timeWindow = DEFAULT_TIME_WINDOW;
+    /**
+     * Last tick when a contact was registered.
+     */
+    private long lastTick;
 
     /**
      * Instantiates an {@code InterestSpace} object.
@@ -87,6 +104,13 @@ public class InterestSpace extends Node {
         this.interestThreshold = interestThreshold;
         this.contactsThreshold = contactsThreshold;
         this.interestSpaceContext = new Context(context);
+        this.encounteredNodesInterestSpace = new HashMap<>();
+        this.lastTick = traceStart;
+
+        this.w1 = 0.25;
+        this.w2 = 0.25;
+        this.w3 = 0.25;
+        this.w4 = 0.25;
 
         if (InterestSpace.nodes == null) {
             InterestSpace.nodes = nodes;
@@ -104,6 +128,47 @@ public class InterestSpace extends Node {
             default: {
                 this.algorithm = null;
             }
+        }
+    }
+
+    /**
+     * Instantiates an {@code InterestSpace} object.
+     *
+     * @param id ID of the node
+     * @param context the context of this node
+     * @param socialNetwork the social network as seen by this node
+     * @param dataMemorySize the maximum allowed size of the data memory
+     * @param exchangeHistorySize the maximum allowed size of the exchange
+     * history
+     * @param seed the seed for the random number generators if routing is used
+     * @param traceStart timestamp of the start of the trace
+     * @param traceEnd timestamp of the end of the trace
+     * @param altruism {@code true} if altruism computations are performed, {@code false}
+     * otherwise
+     * @param nodes array of all the nodes in the network
+     * @param aggregationW1 aggregation weight for the node similarity component
+     * @param aggregationW2 aggregation weight for the node friendship component
+     * @param aggregationW3 aggregation weight for the node connectivity
+     * component
+     * @param aggregationW4 aggregation weight for the node contacts component
+     * @param cacheW1 cache weight for the interested nodes ratio component
+     * @param cacheW2 cache weight for the interests encountered ratio component
+     * @param cacheW3 cache weight for the interested friends ratio component
+     */
+    public InterestSpace(int id, Context context, boolean[] socialNetwork, int dataMemorySize, int exchangeHistorySize,
+            long seed, long traceStart, long traceEnd, boolean altruism, Node[] nodes, double socialNetworkThreshold,
+            double interestThreshold, int contactsThreshold, InterestSpaceAlgorithm algorithm, double aggregationW1,
+            double aggregationW2, double aggregationW3, double aggregationW4, double cacheW1, double cacheW2, double cacheW3) {
+        this(id, context, socialNetwork, dataMemorySize, exchangeHistorySize, seed, traceStart, traceEnd, altruism,
+                nodes, socialNetworkThreshold, interestThreshold, contactsThreshold, algorithm);
+
+        this.w1 = aggregationW1;
+        this.w2 = aggregationW2;
+        this.w3 = aggregationW3;
+        this.w4 = aggregationW4;
+
+        if (this.algorithm instanceof CacheDecisionAlgorithm) {
+            ((CacheDecisionAlgorithm) this.algorithm).setCacheWeights(cacheW1, cacheW2, cacheW3);
         }
     }
 
@@ -143,6 +208,12 @@ public class InterestSpace extends Node {
         this.encounteredNodes = nodeNewMap;
         interestSpaceEncounteredNode.encounteredNodes = encounteredNewMap;
 
+        // aggregate Interest Space contacts
+        nodeNewMap = aggregateInterestSpaceContacts(interestSpaceEncounteredNode, aggregationWeightNode);
+        encounteredNewMap = interestSpaceEncounteredNode.aggregateInterestSpaceContacts(this, aggregationWeightEncountered);
+        this.encounteredNodesInterestSpace = nodeNewMap;
+        interestSpaceEncounteredNode.encounteredNodesInterestSpace = encounteredNewMap;
+
         // aggregate social network
         boolean[] nodeNewSocialNetwork = aggregateSocialNetwork(interestSpaceEncounteredNode, aggregationWeightNode);
         boolean[] encounteredNewSocialNetwork = interestSpaceEncounteredNode.aggregateSocialNetwork(this, aggregationWeightEncountered);
@@ -165,6 +236,60 @@ public class InterestSpace extends Node {
         if (algorithm != null) {
             algorithm.exchangeData((InterestSpace) encounteredNode, contactDuration, currentTime);
         }
+    }
+
+    @Override
+    public void updateContactDuration(int id, long sampleTime, long currentTime) {
+        super.updateContactDuration(id, sampleTime, currentTime);
+
+        if (updateTimeWindow(currentTime)) {
+            encounteredNodesInterestSpace.clear();
+        }
+
+        ContactInfo info = encounteredNodesInterestSpace.get(id);
+        if (info != null) {
+            info.increaseDuration(sampleTime);
+        } else {
+            encounteredNodesInterestSpace.put(id, new ContactInfo(currentTime));
+        }
+    }
+
+    @Override
+    public void updateContactsNumber(int id, long currentTime) {
+        super.updateContactsNumber(id, currentTime);
+
+        if (updateTimeWindow(currentTime)) {
+            encounteredNodesInterestSpace.clear();
+        }
+
+        ContactInfo info = encounteredNodesInterestSpace.get(id);
+        if (info != null) {
+            info.increaseContacts();
+            info.setLastEncounterTime(currentTime);
+        } else {
+            encounteredNodesInterestSpace.put(id, new ContactInfo(currentTime));
+        }
+    }
+
+    /**
+     * Updates the time window based on the current time.
+     *
+     * @param currentTime current trace time
+     * @return {@code true} if the time window was reset, {@code false}
+     * otherwise
+     */
+    private boolean updateTimeWindow(long currentTime) {
+        boolean result = false;
+
+        timeWindow -= currentTime - lastTick;
+        if (timeWindow < 0) {
+            timeWindow = DEFAULT_TIME_WINDOW;
+            result = true;
+        }
+
+        lastTick = currentTime;
+
+        return result;
     }
 
     /**
@@ -242,6 +367,55 @@ public class InterestSpace extends Node {
 
             ContactInfo encounteredInfo = pairs.getValue();
             ContactInfo info = encounteredNodes.get(pairs.getKey());
+
+            if (info == null) {
+                ContactInfo newInfo = new ContactInfo((long) (weight * encounteredInfo.getDuration()),
+                        (int) (weight * encounteredInfo.getContacts()), (long) (weight * encounteredInfo.getLastEncounterTime()));
+                result.put(pairs.getKey(), newInfo);
+            }
+        }
+
+        return result;
+    }
+
+    /**
+     * Aggregates the number of Interest Space contacts at a given node, when it
+     * comes into contact with another node.
+     *
+     * @param encounteredNode encountered node
+     * @param weight aggregation weight
+     *
+     * @return hash map of new contact info for node
+     */
+    private HashMap<Integer, ContactInfo> aggregateInterestSpaceContacts(InterestSpace encounteredNode, double weight) {
+        HashMap<Integer, ContactInfo> result = new HashMap<>();
+
+        Iterator it = encounteredNodesInterestSpace.entrySet().iterator();
+        while (it.hasNext()) {
+            Map.Entry<Integer, ContactInfo> pairs = (Map.Entry) it.next();
+
+            ContactInfo info = pairs.getValue();
+            ContactInfo encounteredInfo = encounteredNode.encounteredNodesInterestSpace.get(pairs.getKey());
+
+            if (encounteredInfo != null) {
+                long newDuration = (long) Math.max(info.getDuration(), weight * encounteredInfo.getDuration());
+                int newContacts = (int) Math.max(info.getContacts(), weight * encounteredInfo.getContacts());
+                long newLastEncounterTime = (long) Math.max(info.getLastEncounterTime(),
+                        weight * encounteredInfo.getLastEncounterTime());
+
+                ContactInfo newInfo = new ContactInfo(newDuration, newContacts, newLastEncounterTime);
+                result.put(pairs.getKey(), newInfo);
+            } else {
+                result.put(pairs.getKey(), info);
+            }
+        }
+
+        it = encounteredNode.encounteredNodesInterestSpace.entrySet().iterator();
+        while (it.hasNext()) {
+            Map.Entry<Integer, ContactInfo> pairs = (Map.Entry) it.next();
+
+            ContactInfo encounteredInfo = pairs.getValue();
+            ContactInfo info = encounteredNodesInterestSpace.get(pairs.getKey());
 
             if (info == null) {
                 ContactInfo newInfo = new ContactInfo((long) (weight * encounteredInfo.getDuration()),
@@ -370,8 +544,7 @@ public class InterestSpace extends Node {
         /**
          * Cache function weights.
          */
-        //private static final double cacheW1 = 0.2, cacheW2 = 0.4, cacheW3 = 0.4;
-        private static final double cacheW1 = 0.34, cacheW2 = 0.66, cacheW3 = 0.0;
+        private double cacheW1, cacheW2, cacheW3;
 
         /**
          * Instantiates a {@code CacheDecisionAlgorithm} object.
@@ -379,8 +552,36 @@ public class InterestSpace extends Node {
          * @param seed random number generator seed
          */
         public CacheDecisionAlgorithm(long seed) {
+            this(seed, 0.33, 0.33, 0.33);
+        }
+
+        /**
+         * Instantiates a {@code CacheDecisionAlgorithm} object.
+         *
+         * @param seed random number generator seed
+         * @param w1 weight for the interested nodes ratio component
+         * @param w2 weight for the interests encountered ratio component
+         * @param w3 weight for the interested friends ratio component
+         */
+        public CacheDecisionAlgorithm(long seed, double w1, double w2, double w3) {
             cacheProbabilities = new HashMap<>();
             cacheDecisionRandom = new Random(seed);
+            cacheW1 = w1;
+            cacheW2 = w2;
+            cacheW3 = w3;
+        }
+
+        /**
+         * Sets the cache weights.
+         *
+         * @param w1 weight for the interested nodes ratio component
+         * @param w2 weight for the interests encountered ratio component
+         * @param w3 weight for the interested friends ratio component
+         */
+        public void setCacheWeights(double w1, double w2, double w3) {
+            this.cacheW1 = w1;
+            this.cacheW2 = w2;
+            this.cacheW3 = w3;
         }
 
         /**
@@ -391,9 +592,16 @@ public class InterestSpace extends Node {
          * @return {@code true} if the message should be downloaded, {@code false}
          * otherwise
          */
-        private boolean shouldDownload(Message message) {
+        private boolean shouldDownload(InterestSpace encounteredNode, Message message) {
+            if (!(encounteredNode.algorithm instanceof CacheDecisionAlgorithm)) {
+                return false;
+            }
+
             double value = cacheDecisionRandom.nextDouble();
             double maxCacheProbability = Double.MIN_VALUE;
+            double maxEncounterProbability = Double.MIN_VALUE;
+            Map<Integer, Double> encounteredCacheProbabilities =
+                    ((CacheDecisionAlgorithm) encounteredNode.algorithm).cacheProbabilities;
 
             for (Topic topic : message.getTags().getTopics()) {
                 Double probability = cacheProbabilities.get(topic.getTopic());
@@ -404,9 +612,19 @@ public class InterestSpace extends Node {
                 if (probability > maxCacheProbability) {
                     maxCacheProbability = probability;
                 }
+
+                probability = encounteredCacheProbabilities.get(topic.getTopic());
+                if (probability == null) {
+                    continue;
+                }
+
+                if (probability > maxEncounterProbability) {
+                    maxEncounterProbability = probability;
+                }
             }
 
-            if (value <= maxCacheProbability || maxCacheProbability >= downloadThreshold) {
+            if (value <= maxCacheProbability || maxCacheProbability >= downloadThreshold
+                    || (maxEncounterProbability != Long.MIN_VALUE && (maxCacheProbability - maxEncounterProbability > 0.5))) {
                 return true;
             }
 
@@ -423,7 +641,7 @@ public class InterestSpace extends Node {
                     return;
                 }
 
-                if (!dataMemory.contains(message) && !ownMessages.contains(message) && shouldDownload(message)) {
+                if (!dataMemory.contains(message) && !ownMessages.contains(message) && shouldDownload(encounteredNode, message)) {
 
                     if (altruismAnalysis) {
                         if (!encounteredNode.altruism.isSelfish() && !checkAltruism(encounteredNode, message)) {
@@ -451,7 +669,7 @@ public class InterestSpace extends Node {
                     return;
                 }
 
-                if (!dataMemory.contains(message) && !ownMessages.contains(message) && shouldDownload(message)) {
+                if (!dataMemory.contains(message) && !ownMessages.contains(message) && shouldDownload(encounteredNode, message)) {
 
                     if (altruismAnalysis) {
                         if (!encounteredNode.altruism.isSelfish() && !checkAltruism(encounteredNode, message)) {
@@ -477,7 +695,6 @@ public class InterestSpace extends Node {
 
         @Override
         public void preExchangeData(InterestSpace encounteredNode, long currentTime) {
-            // TODO(Radu): think about resetting the encountered nodes array after a window
             Map<Integer, Integer> interestsEncountered = new HashMap<>();
             int totalInterestsEncountered = 0;
 
@@ -488,7 +705,7 @@ public class InterestSpace extends Node {
             Map<Integer, Integer> friendsInterested = new HashMap<>();
             Set<Integer> totalFriendsInterested = new HashSet<>(); // which of my friends have I encountered
 
-            Iterator it = encounteredNodes.entrySet().iterator();
+            Iterator it = encounteredNodesInterestSpace.entrySet().iterator();
             while (it.hasNext()) {
                 Map.Entry<Integer, ContactInfo> pairs = (Map.Entry) it.next();
 
@@ -549,11 +766,11 @@ public class InterestSpace extends Node {
 
                 double interestedNodesRatio, interestsEncounteredRatio, interestedFriendsRatio;
 
-                if (encounteredNodes.isEmpty() || totalContacts == 0) {
+                if (encounteredNodesInterestSpace.isEmpty() || totalContacts == 0) {
                     interestedNodesRatio = 0;
                 } else {
                     interestedNodesRatio = (double) (nodesInterested.get(key) * contactsWithNodesInterested.get(key))
-                            / (encounteredNodes.size() * totalContacts);
+                            / (encounteredNodesInterestSpace.size() * totalContacts);
                 }
 
                 if (totalInterestsEncountered == 0) {
@@ -586,6 +803,10 @@ public class InterestSpace extends Node {
                 }
             }
 
+            // sort messages in my memory by cache probability (so that, when I
+            //have to drop some of them, I drop the ones with lower probabilities)
+            Collections.sort(dataMemory, new CacheProbabilityComparator(cacheProbabilities));
+
             /*
              * look at all tags (that nodes are interested in) that I have seen,
              * and perform a ratio of the amount of encounters vs. all tags take
@@ -597,6 +818,44 @@ public class InterestSpace extends Node {
              * result should be a value between 0 and 1, and should be composed
              * with the previous one
              */
+        }
+
+        /**
+         * Class that sorts messages by caching probability.
+         */
+        class CacheProbabilityComparator implements Comparator<Message> {
+
+            private Map<Integer, Double> cacheProbabilities;
+
+            /**
+             * Instantiates a {@code CacheProbabilityComparator} object.
+             *
+             * @param cacheProbabilities map of caching probabilities per tag
+             */
+            public CacheProbabilityComparator(Map<Integer, Double> cacheProbabilities) {
+                this.cacheProbabilities = cacheProbabilities;
+            }
+
+            @Override
+            public int compare(Message m1, Message m2) {
+                double probabilityM1 = 0, probabilityM2 = 0;
+
+                for (Topic tag : m1.getTags().getTopics()) {
+                    probabilityM1 += cacheProbabilities.get(tag.getTopic());
+                }
+
+                for (Topic tag : m2.getTags().getTopics()) {
+                    probabilityM2 += cacheProbabilities.get(tag.getTopic());
+                }
+
+                if (probabilityM1 < probabilityM2) {
+                    return -1;
+                } else if (probabilityM1 > probabilityM2) {
+                    return 1;
+                } else {
+                    return 0;
+                }
+            }
         }
     }
 
