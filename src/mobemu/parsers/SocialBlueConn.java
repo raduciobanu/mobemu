@@ -92,7 +92,8 @@ public class SocialBlueConn implements Parser {
                         Contact previousContact = trace.getContactAt(trace.getContactsCount() - 1);
 
                         if (previousContact.getObserver() == observerID && previousContact.getObserved() == observedID
-                                && Math.abs(previousContact.getStart() - contactStart) < MILLIS_PER_MINUTE) {
+                                && Math.abs(previousContact.getStart() - contactStart) < 10 * MILLIS_PER_MINUTE) {
+                            previousContact.setEnd(Math.max(previousContact.getEnd(), contactEnd));
                             continue;
                         }
                     }

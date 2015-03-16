@@ -4,15 +4,12 @@
  */
 package mobemu;
 
-import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.List;
-import java.util.Random;
-import mobemu.algorithms.InterestSpace;
+import java.util.*;
+import mobemu.algorithms.*;
 import mobemu.node.Message;
 import mobemu.node.Node;
 import mobemu.node.Stats;
-import mobemu.parsers.Sigcomm;
+import mobemu.parsers.*;
 import mobemu.trace.Contact;
 import mobemu.trace.Parser;
 import mobemu.trace.Trace;
@@ -31,9 +28,20 @@ public class MobEmu {
         boolean dissemination = true;
         boolean batteryComputation = false;
 
-        Parser sigcomm = new Sigcomm();
-        Node[] nodes = initNodes(sigcomm, dissemination, seed);
-        List<Message> messages = run(nodes, sigcomm.getTraceData(), batteryComputation, dissemination, seed);
+        //Parser parser = new Sigcomm();
+        //Parser parser = new UPB(UPB.UpbTrace.UPB2012);
+        //Parser parser = new Haggle(Haggle.HaggleTrace.INFOCOM2006);
+        Parser parser = new SocialBlueConn();
+        //Parser parser = new HCMM(33, 3 * 24 * 3600, 30 * 24 * 3600, 1.25f, 1.50f, 0.1f, 400f, 400f, 40, 40, 10.0, 0.7, 7, 0, 0.0, 0.8f, 0);
+
+        double duration = (double) (parser.getTraceData().getEndTime() - parser.getTraceData().getStartTime()) / (Parser.MILLIS_PER_MINUTE * 60);
+        System.out.println("Trace duration in hours: " + duration);
+        System.out.println("Trace contacts: " + parser.getTraceData().getContactsCount());
+        System.out.println("Trace contacts per hour: " + (parser.getTraceData().getContactsCount() / duration));
+        System.out.println("Nodes: " + parser.getNodesNumber());
+
+        Node[] nodes = initNodes(parser, dissemination, seed);
+        List<Message> messages = run(nodes, parser.getTraceData(), batteryComputation, dissemination, seed);
 
         System.out.println(nodes[0].getName());
         System.out.println("" + Stats.computeHitRate(messages, nodes, dissemination));
@@ -173,27 +181,28 @@ public class MobEmu {
      * @return
      */
     private static Node[] initNodes(Parser parser, boolean dissemination, long seed) {
-        int dataMemorySize = 4500;
+        int dataMemorySize = 10000;
         int exchangeHistorySize = 100;
         int cacheMemorySize = 40;
-        int commonInterests = 1;
-        int interestedFriendsThreshold = 0;//1;//5;
-        double encounteredInterestsThreshold = 0.3;//1.0;//0.2;
         long traceStart = parser.getTraceData().getStartTime();
         long traceEnd = parser.getTraceData().getEndTime();
-
         Node[] nodes = new Node[parser.getNodesNumber()];
+
+        PerTraceParams p = getPerTraceParams(parser.getTraceData().getName());
 
         for (int i = 0; i < nodes.length; i++) {
             //nodes[i] = new MoghadamSchulzrinne(i, nodes.length, parser.getContextData().get(i),
-            //        parser.getSocialNetwork()[i], dataMemorySize, exchangeHistorySize, seed,
+            //       parser.getSocialNetwork()[i], dataMemorySize, exchangeHistorySize, seed,
             //        traceStart, traceEnd, dissemination);
             nodes[i] = new InterestSpace(i, parser.getContextData().get(i), parser.getSocialNetwork()[i],
                     dataMemorySize, exchangeHistorySize, seed, traceStart, traceEnd, false, nodes,
-                    1.0, 0.5, 0, InterestSpace.InterestSpaceAlgorithm.CacheDecision);
+                    p.socialNetworkThreshold, p.interestThreshold, p.contactsThreshold,
+                    InterestSpace.InterestSpaceAlgorithm.CacheDecision, p.aggregationW1,
+                    p.aggregationW2, p.aggregationW3, p.aggregationW4, p.cacheW1, p.cacheW2, p.cacheW3);
             //nodes[i] = new ONSIDE(i, parser.getContextData().get(i), parser.getSocialNetwork()[i],
-            //      dataMemorySize, exchangeHistorySize, seed, traceStart, traceEnd, false, nodes,
-            //    interestedFriendsThreshold, encounteredInterestsThreshold, commonInterests, ONSIDE.ONSIDESort.None);
+            //        dataMemorySize, exchangeHistorySize, seed, traceStart, traceEnd, false, nodes,
+            //        p.interestedFriendsThreshold, p.encounteredInterestsThreshold, p.commonInterests,
+            //        ONSIDE.ONSIDESort.None);
             //nodes[i] = new Epidemic(i, nodes.length, parser.getContextData().get(i), parser.getSocialNetwork()[i],
             //        dataMemorySize, exchangeHistorySize, seed, traceStart, traceEnd, dissemination, false);
             //nodes[i] = new MLSOR(i, parser.getContextData().get(i), parser.getSocialNetwork()[i],
@@ -209,8 +218,75 @@ public class MobEmu {
             //    false, false, false, parser.getTraceData());
             //nodes[i] = new SENSE(i, parser.getContextData().get(i), parser.getSocialNetwork()[i],
             //        dataMemorySize, exchangeHistorySize, seed, traceStart, traceEnd, true, nodes);
+
         }
 
         return nodes;
+    }
+
+    /**
+     * Gets the ONSIDE parameters for a given trace.
+     *
+     * @param trace name of the trace
+     * @return ONSIDE parameters for the specified trace
+     */
+    private static PerTraceParams getPerTraceParams(String trace) {
+        Map<String, PerTraceParams> perTraceParams = new HashMap<>();
+        perTraceParams.put("Sigcomm", new PerTraceParams(1, 1, 1.0, 0.95, 0.98, 30, 0.25, 0.25, 0.25, 0.25, 0.2, 0.4, 0.4));
+        perTraceParams.put("UPB 2012", new PerTraceParams(1, 5, 0.2, 0.5, 0.1, 50, 0.25, 0.25, 0.25, 0.25, 0.2, 0.4, 0.4));
+        perTraceParams.put("Haggle Infocom 2006", new PerTraceParams(1, 0, 0.3, 1, 0.5, 0, 0.25, 0.25, 0.25, 0.25, 0.34, 0.66, 0.0));
+        perTraceParams.put("SocialBlueConn", new PerTraceParams(1, 3, 0.32, 0.7, 0.2, 30, 0.25, 0.25, 0.25, 0.25, 0.2, 0.4, 0.4));
+        // TODO: add window as param
+
+        return perTraceParams.get(trace);
+    }
+
+    /**
+     * Specifies the variable per-trace parameters.
+     */
+    private static class PerTraceParams {
+
+        int commonInterests; // ONSIDE
+        int interestedFriendsThreshold; // ONSIDE
+        double encounteredInterestsThreshold; // ONSIDE
+        double socialNetworkThreshold; // Interest Space
+        double interestThreshold; // Interest Space
+        int contactsThreshold; // Interest Spaces
+        double aggregationW1; // Interest Spaces
+        double aggregationW2; // Interest Spaces
+        double aggregationW3; // Interest Spaces
+        double aggregationW4; // Interest Spaces
+        double cacheW1; // Interest Spaces
+        double cacheW2; // Interest Spaces
+        double cacheW3; // Interest Spaces
+
+        /**
+         * Instantiates a {@code PerTraceParams} object.
+         *
+         * @param commonInterests number of common interests
+         * @param interestedFriendsThreshold threshold for the number of
+         * interested friends
+         * @param encounteredInterestsThreshold threshold for percentage of
+         * encountered interests
+         */
+        public PerTraceParams(int commonInterests, int interestedFriendsThreshold,
+                double encounteredInterestsThreshold, double socialNetworkThreshold,
+                double interestThreshold, int contactsThreshold, double aggregationW1,
+                double aggregationW2, double aggregationW3, double aggregationW4,
+                double cacheW1, double cacheW2, double cacheW3) {
+            this.commonInterests = commonInterests;
+            this.interestedFriendsThreshold = interestedFriendsThreshold;
+            this.encounteredInterestsThreshold = encounteredInterestsThreshold;
+            this.socialNetworkThreshold = socialNetworkThreshold;
+            this.interestThreshold = interestThreshold;
+            this.contactsThreshold = contactsThreshold;
+            this.aggregationW1 = aggregationW1;
+            this.aggregationW2 = aggregationW2;
+            this.aggregationW3 = aggregationW3;
+            this.aggregationW4 = aggregationW4;
+            this.cacheW1 = cacheW1;
+            this.cacheW2 = cacheW2;
+            this.cacheW3 = cacheW3;
+        }
     }
 }
