@@ -63,13 +63,12 @@ public class InterestSpace extends Node {
     private Map<Integer, ContactInfo> encounteredNodesInterestSpace;
     /**
      * Default value for the time window.
-     * TODO(Radu): make window dynamically adjustable?
      */
-    private static final long DEFAULT_TIME_WINDOW = 1800 * 1000; // 1 hour (Sigcomm), 12 hours (UPB 2012), 0.1 hours (Infocom 2006), 0.5 hours (SocialBlueCon)
+    private long timeWindow;
     /**
-     * Time window for storing contact information.
+     * Current value of the time window for storing contact information.
      */
-    private long timeWindow = DEFAULT_TIME_WINDOW;
+    private long currentTimeWindow;
     /**
      * Last tick when a contact was registered.
      */
@@ -111,6 +110,9 @@ public class InterestSpace extends Node {
         this.w2 = 0.25;
         this.w3 = 0.25;
         this.w4 = 0.25;
+
+        this.timeWindow = Long.MAX_VALUE;
+        this.currentTimeWindow = timeWindow;
 
         if (InterestSpace.nodes == null) {
             InterestSpace.nodes = nodes;
@@ -154,11 +156,13 @@ public class InterestSpace extends Node {
      * @param cacheW1 cache weight for the interested nodes ratio component
      * @param cacheW2 cache weight for the interests encountered ratio component
      * @param cacheW3 cache weight for the interested friends ratio component
+     * @param timeWindow duration of the time window
      */
     public InterestSpace(int id, Context context, boolean[] socialNetwork, int dataMemorySize, int exchangeHistorySize,
             long seed, long traceStart, long traceEnd, boolean altruism, Node[] nodes, double socialNetworkThreshold,
-            double interestThreshold, int contactsThreshold, InterestSpaceAlgorithm algorithm, double aggregationW1,
-            double aggregationW2, double aggregationW3, double aggregationW4, double cacheW1, double cacheW2, double cacheW3) {
+            double interestThreshold, int contactsThreshold, InterestSpaceAlgorithm algorithm,
+            double aggregationW1, double aggregationW2, double aggregationW3, double aggregationW4,
+            double cacheW1, double cacheW2, double cacheW3, long timeWindow) {
         this(id, context, socialNetwork, dataMemorySize, exchangeHistorySize, seed, traceStart, traceEnd, altruism,
                 nodes, socialNetworkThreshold, interestThreshold, contactsThreshold, algorithm);
 
@@ -166,6 +170,9 @@ public class InterestSpace extends Node {
         this.w2 = aggregationW2;
         this.w3 = aggregationW3;
         this.w4 = aggregationW4;
+
+        this.timeWindow = timeWindow;
+        this.currentTimeWindow = timeWindow;
 
         if (this.algorithm instanceof CacheDecisionAlgorithm) {
             ((CacheDecisionAlgorithm) this.algorithm).setCacheWeights(cacheW1, cacheW2, cacheW3);
@@ -281,9 +288,9 @@ public class InterestSpace extends Node {
     private boolean updateTimeWindow(long currentTime) {
         boolean result = false;
 
-        timeWindow -= currentTime - lastTick;
-        if (timeWindow < 0) {
-            timeWindow = DEFAULT_TIME_WINDOW;
+        currentTimeWindow -= currentTime - lastTick;
+        if (currentTimeWindow < 0) {
+            currentTimeWindow = timeWindow;
             result = true;
         }
 
