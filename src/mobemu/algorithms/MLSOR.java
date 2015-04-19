@@ -79,7 +79,7 @@ public class MLSOR extends Node {
 
                         continue;
                     } else if (!mlsorEncounteredNode.altruism.isSelfish()) {
-                        altruism.setSelfishness(true);
+                        altruism.setSelfishness(false);
                     }
                 }
 
@@ -108,7 +108,7 @@ public class MLSOR extends Node {
 
                         continue;
                     } else if (!mlsorEncounteredNode.altruism.isSelfish()) {
-                        altruism.setSelfishness(true);
+                        altruism.setSelfishness(false);
                     }
                 }
 

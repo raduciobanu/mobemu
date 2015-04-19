@@ -73,7 +73,7 @@ public class MoghadamSchulzrinne extends Node {
 
                         continue;
                     } else if (!mogSchuNode.altruism.isSelfish()) {
-                        altruism.setSelfishness(true);
+                        altruism.setSelfishness(false);
                     }
                 }
 
@@ -102,7 +102,7 @@ public class MoghadamSchulzrinne extends Node {
 
                         continue;
                     } else if (!mogSchuNode.altruism.isSelfish()) {
-                        altruism.setSelfishness(true);
+                        altruism.setSelfishness(false);
                     }
                 }
 

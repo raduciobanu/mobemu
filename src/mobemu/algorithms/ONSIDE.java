@@ -152,7 +152,7 @@ public class ONSIDE extends Node {
 
                         continue;
                     } else if (!onsideEncounteredNode.altruism.isSelfish()) {
-                        altruism.setSelfishness(true);
+                        altruism.setSelfishness(false);
                     }
                 }
 
@@ -188,7 +188,7 @@ public class ONSIDE extends Node {
 
                         continue;
                     } else if (!onsideEncounteredNode.altruism.isSelfish()) {
-                        altruism.setSelfishness(true);
+                        altruism.setSelfishness(false);
                     }
                 }
 
