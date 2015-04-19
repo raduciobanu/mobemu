@@ -19,7 +19,7 @@ import java.util.*;
 public abstract class Node {
 
     protected static int contactThreshold = 20 * 60 * 1000; // contact threshold for the K-clique algorithm
-    protected static int communityThreshold = 6; // community threshold for the K-clique algorithm.
+    protected static int communityThreshold = 5; // community threshold for the K-clique algorithm.
     protected static Random deliveryRandom = null; // random number generator for node delivery
     protected static Random batteryRandom = null; // random number generator for battery levels
     protected static Random altruismRandom = null; // random number generator for altruism values
@@ -200,12 +200,21 @@ public abstract class Node {
     }
 
     /**
-     * Return this node's battery information.
+     * Returns this node's battery information.
      *
      * @return the battery information of this node
      */
     public Battery getBattery() {
         return battery;
+    }
+
+    /**
+     * Gets the node's local community (computed using k-CLIQUE).
+     *
+     * @return the node's local community
+     */
+    public List<Integer> getLocalCommunity() {
+        return localCommunity;
     }
 
     /**
