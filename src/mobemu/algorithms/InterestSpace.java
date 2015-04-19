@@ -784,7 +784,7 @@ public class InterestSpace extends Node {
                     interestsEncounteredRatio = 0;
                 } else {
                     interestsEncounteredRatio = (double) interestsEncountered.get(key) / totalInterestsEncountered;
-                    if (interestsEncounteredRatio >= (double) 1 / Context.getMaxTopicsNumber()) {
+                    if (interestsEncounteredRatio >= (double) 1 / Context.getMaxTopicsPerNode()) {
                         interestsEncounteredRatio = Math.pow(Math.E, interestsEncounteredRatio - 1);
                     }
                 }

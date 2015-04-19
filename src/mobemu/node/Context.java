@@ -20,6 +20,7 @@ public class Context {
     private Set<Topic> topics; // topics belonging to this context
     private static int maxTopicsNo = 0;
     private static int maxTopicId = -1;
+    private static Set<Integer> uniqueTopicsIds = new HashSet<>();
     public static final int MESSAGE_CONTEXT = -1;
 
     /**
@@ -185,7 +186,7 @@ public class Context {
      *
      * @return maximum number of topics
      */
-    public static int getMaxTopicsNumber() {
+    public static int getMaxTopicsPerNode() {
         return maxTopicsNo;
     }
 
@@ -199,11 +200,21 @@ public class Context {
     }
 
     /**
+     * Gets the unique topic IDs.
+     *
+     * @return a set containing the unique topic IDs
+     */
+    public static Set<Integer> getUniqueTopicsIds() {
+        return uniqueTopicsIds;
+    }
+
+    /**
      * Resets the static data of the context.
      */
     public static void reset() {
         maxTopicsNo = 0;
         maxTopicId = -1;
+        uniqueTopicsIds.clear();
     }
 
     /**
@@ -235,18 +246,16 @@ public class Context {
      * Updates the maximum number of topics.
      */
     private void updateMaxTopics() {
-        int current = 0;
-
-        current += topics.size();
-
-        if (current > maxTopicsNo) {
-            maxTopicsNo = current;
+        if (topics.size() > maxTopicsNo) {
+            maxTopicsNo = topics.size();
         }
 
         for (Topic topic : topics) {
             if (topic.getTopic() > maxTopicId) {
                 maxTopicId = topic.getTopic();
             }
+
+            uniqueTopicsIds.add(topic.getTopic());
         }
     }
 }

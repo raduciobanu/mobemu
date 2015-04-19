@@ -7,7 +7,6 @@ package mobemu.parsers;
 import java.io.*;
 import java.util.Calendar;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.Map;
 import mobemu.node.Context;
 import mobemu.node.Topic;
