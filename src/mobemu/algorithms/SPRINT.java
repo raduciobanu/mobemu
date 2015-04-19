@@ -172,12 +172,9 @@ public class SPRINT extends Node {
                 continue;
             }
 
-            tempDataMemory.add(message);
-
             if ((sprintEncounteredNode.dataMemory.contains(message)
                     || sprintEncounteredNode.ownMessages.contains(message))
                     && !dataMemory.contains(message)) {
-                totalMessages++;
 
                 // compute perceived altruism and decide if the encountered node accepts
                 // sending the message to the current node
@@ -194,10 +191,14 @@ public class SPRINT extends Node {
 
                         continue;
                     } else if (!sprintEncounteredNode.altruism.isSelfish()) {
-                        altruism.setSelfishness(true);
+                        altruism.setSelfishness(false);
                     }
                 }
+
+                totalMessages++;
             }
+
+            tempDataMemory.add(message);
         }
 
         ArrayList<Message> toRemove = new ArrayList<>();
@@ -256,12 +257,9 @@ public class SPRINT extends Node {
                 continue;
             }
 
-            tempDataMemory.add(message);
-
             if ((sprintEncounteredNode.dataMemory.contains(message)
                     || sprintEncounteredNode.ownMessages.contains(message))
                     && !dataMemory.contains(message)) {
-                totalMessages++;
 
                 // compute perceived altruism and decide if the encountered node accepts
                 // sending the message to the current node
@@ -278,10 +276,14 @@ public class SPRINT extends Node {
 
                         continue;
                     } else if (!sprintEncounteredNode.altruism.isSelfish()) {
-                        altruism.setSelfishness(true);
+                        altruism.setSelfishness(false);
                     }
                 }
+
+                totalMessages++;
             }
+
+            tempDataMemory.add(message);
         }
 
         // if there's still room in the data memory, add some of the previously removed nodes
@@ -296,12 +298,9 @@ public class SPRINT extends Node {
                 continue;
             }
 
-            tempDataMemory.add(message);
-
             if ((sprintEncounteredNode.dataMemory.contains(message)
                     || sprintEncounteredNode.ownMessages.contains(message))
                     && !dataMemory.contains(message)) {
-                totalMessages++;
 
                 // compute perceived altruism and decide if the encountered node accepts
                 // sending the message to the current node
@@ -318,10 +317,14 @@ public class SPRINT extends Node {
 
                         continue;
                     } else if (!sprintEncounteredNode.altruism.isSelfish()) {
-                        altruism.setSelfishness(true);
+                        altruism.setSelfishness(false);
                     }
                 }
+
+                totalMessages++;
             }
+
+            tempDataMemory.add(message);
         }
 
         toRemove.clear(); // toRemive -> all messages from the data memory not in the temp data memory

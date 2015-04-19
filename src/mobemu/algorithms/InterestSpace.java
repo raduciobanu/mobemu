@@ -662,7 +662,7 @@ public class InterestSpace extends Node {
 
                             continue;
                         } else if (!encounteredNode.altruism.isSelfish()) {
-                            altruism.setSelfishness(true);
+                            altruism.setSelfishness(false);
                         }
                     }
 
@@ -690,7 +690,7 @@ public class InterestSpace extends Node {
 
                             continue;
                         } else if (!encounteredNode.altruism.isSelfish()) {
-                            altruism.setSelfishness(true);
+                            altruism.setSelfishness(false);
                         }
                     }
 
@@ -937,7 +937,7 @@ public class InterestSpace extends Node {
 
                             continue;
                         } else if (!encounteredNode.altruism.isSelfish()) {
-                            altruism.setSelfishness(true);
+                            altruism.setSelfishness(false);
                         }
                     }
 
@@ -969,7 +969,7 @@ public class InterestSpace extends Node {
 
                             continue;
                         } else if (!encounteredNode.altruism.isSelfish()) {
-                            altruism.setSelfishness(true);
+                            altruism.setSelfishness(false);
                         }
                     }
 
