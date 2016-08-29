@@ -166,4 +166,10 @@ public class Topic {
 
         return null;
     }
+    
+    @Override
+    public String toString()
+    {
+        return "" + topic +  "@" + time;
+    }
 }
