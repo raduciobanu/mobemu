@@ -13,16 +13,22 @@ import java.util.*;
  */
 public class Message implements Comparable<Message> {
 
-    private int id;
-    private int source; // ID of source node
-    private int destination; // ID of destination node or -1 if transmission is pub/sub
-    private String message; // message content
-    private long timestamp; // time when the message was generated
-    private Context tags; // tags of this message
-    private double utility = 1.0; // utility of this message
-    private MessageStats stats; // message statistics
-    private static int messageCount = 0;
+    protected int id;
+    protected int source; // ID of source node
+    protected int destination; // ID of destination node or -1 if transmission is pub/sub
+    protected String message; // message content
+    protected long timestamp; // time when the message was generated
+    protected Context tags; // tags of this message
+    protected double utility = 1.0; // utility of this message
+    protected MessageStats stats; // message statistics
+    protected static int messageCount = 0;
     public static final int DISSEMINATION_ID = -1;
+
+    /**
+     * Constructor for a routing {@link Message}.
+     */
+    public Message() {
+    }
 
     /**
      * Constructor for a routing {@link Message}.
@@ -123,6 +129,15 @@ public class Message implements Comparable<Message> {
      */
     public double getUtility() {
         return utility;
+    }
+
+    /**
+     * Gets the message's stats.
+     *
+     * @return the stats of this message
+     */
+    public MessageStats getStats() {
+        return stats;
     }
 
     /**

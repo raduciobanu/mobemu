@@ -845,4 +845,20 @@ public abstract class Node {
 
         return count;
     }
+
+    /**
+     * Gets the number of friends (connections) in the social network.
+     *
+     * @return the number of friends (connections) in the social network.
+     */
+    public int getSocialNetworkFriends() {
+        int socialNetworkFriends = 0;
+        for (int i = 0; i < socialNetwork.length; i++) {
+            if (socialNetwork[i]) {
+                socialNetworkFriends++;
+            }
+        }
+
+        return socialNetworkFriends;
+    }
 }
