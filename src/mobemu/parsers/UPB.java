@@ -237,7 +237,7 @@ public class UPB implements Parser {
                 while ((line = br.readLine()) != null) {
 
                     String[] tokens;
-                    String delimiter = "\t";
+                    String delimiter = " ";
 
                     tokens = line.split(delimiter);
 
@@ -251,9 +251,9 @@ public class UPB implements Parser {
                         contextItem = new Context(id);
                     }
 
-                    if (tokens.length >= 3) {
+                    if (tokens.length >= 2 && !tokens[1].equals("0")) {
                         delimiter = ",";
-                        tokens = tokens[2].split(delimiter);
+                        tokens = tokens[1].split(delimiter);
 
                         for (String interest : tokens) {
                             contextItem.addTopic(new Topic(Integer.parseInt(interest) - 1, 0));
