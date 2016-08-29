@@ -115,6 +115,15 @@ public class Altruism {
     }
 
     /**
+     * Sets a new value for the local altruism.
+     *
+     * @param value new value for the local altruism
+     */
+    public void setLocal(double value) {
+        local = value;
+    }
+
+    /**
      * Increases the global altruism value.
      *
      * @return new global altruism value
@@ -199,5 +208,15 @@ public class Altruism {
      */
     public static void setBehaviorConstant(double behaviorConstant) {
         Altruism.behaviorConstant = behaviorConstant;
+    }
+
+    /**
+     * Sets the perceived behavior constant.
+     *
+     * @param perceivedBehaviorConstant the new value of the perceived behavior
+     * constant
+     */
+    public static void setPerceivedBehaviorConstant(double perceivedBehaviorConstant) {
+        Altruism.perceivedBehaviorConstant = perceivedBehaviorConstant;
     }
 }
