@@ -5,11 +5,11 @@
 package mobemu;
 
 import java.util.*;
-import mobemu.algorithms.*;
+import mobemu.algorithms.InterestSpace;
 import mobemu.node.Message;
 import mobemu.node.Node;
 import mobemu.node.Stats;
-import mobemu.parsers.*;
+import mobemu.parsers.NCCU;
 import mobemu.trace.Contact;
 import mobemu.trace.Parser;
 import mobemu.trace.Trace;
@@ -31,7 +31,7 @@ public class MobEmu {
         //Parser parser = new Sigcomm();
         //Parser parser = new UPB(UPB.UpbTrace.UPB2012);
         //Parser parser = new Haggle(Haggle.HaggleTrace.INFOCOM2006);
-        Parser parser = new SocialBlueConn();
+        Parser parser = new NCCU();
         //Parser parser = new HCMM(33, 3 * 24 * 3600, 30 * 24 * 3600, 1.25f, 1.50f, 0.1f, 400f, 400f, 40, 40, 10.0, 0.7, 7, 0, 0.0, 0.8f, 0);
 
         double duration = (double) (parser.getTraceData().getEndTime() - parser.getTraceData().getStartTime()) / (Parser.MILLIS_PER_MINUTE * 60);
@@ -39,6 +39,10 @@ public class MobEmu {
         System.out.println("Trace contacts: " + parser.getTraceData().getContactsCount());
         System.out.println("Trace contacts per hour: " + (parser.getTraceData().getContactsCount() / duration));
         System.out.println("Nodes: " + parser.getNodesNumber());
+        
+        if (true) {
+            System.exit(0);
+        }
 
         Node[] nodes = initNodes(parser, dissemination, seed);
         List<Message> messages = run(nodes, parser.getTraceData(), batteryComputation, dissemination, seed);
