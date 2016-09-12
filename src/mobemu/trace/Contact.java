@@ -103,6 +103,15 @@ public class Contact implements Comparable<Contact> {
     }
 
     /**
+     * Returns the type of this contact.
+     *
+     * @return the type
+     */
+    public boolean getType() {
+        return type;
+    }
+
+    /**
      * Sets the observed node of this contact.
      *
      * @param observed the observed ID to be set
@@ -136,6 +145,15 @@ public class Contact implements Comparable<Contact> {
      */
     public void setEnd(long end) {
         this.end = end;
+    }
+
+    /**
+     * Sets the type of this contact.
+     *
+     * @param type type to be set
+     */
+    public void setType(boolean type) {
+        this.type = type;
     }
 
     /**

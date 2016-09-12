@@ -13,7 +13,7 @@ import mobemu.trace.Parser;
 import mobemu.trace.Trace;
 
 /**
- * St. Andrews parser.
+ * St. Andrews trace parser (http://crawdad.org/st_andrews/sassy/20110603/).
  *
  * @author Radu
  */
@@ -23,6 +23,9 @@ public class StAndrews implements Parser {
     private Map<Integer, Context> context;
     private boolean[][] socialNetwork;
 
+    /**
+     * Constructs a {@link StAndrews} object.
+     */
     public StAndrews() {
         String prefix = "traces" + File.separator + "standrews-sassy" + File.separator;
         parseStAndrews(prefix + "srsn.csv", prefix + "dsn.csv", 27);
@@ -87,8 +90,6 @@ public class StAndrews implements Parser {
                     int observedID = Integer.parseInt(tokens[1]);
 
                     socialNetwork[observerID - 1][observedID - 1] = true;
-
-                    // use observerID, observedID to form objects.
                 }
             }
         } catch (IOException | NumberFormatException e) {

@@ -43,7 +43,7 @@ public class Context {
     /**
      * Instantiates a {@code Context} object.
      *
-     * @param context context to be copies
+     * @param context context to be copied
      */
     public Context(Context context) {
         this.id = context.id;

@@ -13,7 +13,7 @@ import mobemu.trace.Parser;
 import mobemu.trace.Trace;
 
 /**
- * NUS parser.
+ * NUS trace parser (http://crawdad.org/nus/contact/20060801/).
  *
  * @author Radu
  */
@@ -23,6 +23,9 @@ public class NUS implements Parser {
     private Map<Integer, Context> context;
     private boolean[][] socialNetwork;
 
+    /**
+     * Constructs an {@link NUS} object.
+     */
     public NUS() {
         parseNus("traces" + File.separator + "nus-contact" + File.separator + "mobicom06-trace.txt", 22341);
     }

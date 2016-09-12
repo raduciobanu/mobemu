@@ -10,7 +10,7 @@ import java.util.Map;
 import java.util.Set;
 
 /**
- * Class for opportunistic message stats.
+ * Class for opportunistic message statistics.
  *
  * @author Radu
  */
@@ -86,9 +86,7 @@ public class MessageStats {
      */
     public void markAsDelivered(int id, long deliveryLatency) {
         delivered.add(id);
-
         increaseHopCount(id);
-
         latency.put(id, deliveryLatency);
     }
 
@@ -127,7 +125,6 @@ public class MessageStats {
      */
     public long getLatency(int id) {
         Long result = latency.get(id);
-
         return result == null ? -1 : result;
     }
 
@@ -139,7 +136,6 @@ public class MessageStats {
      */
     public int getHopCount(int id) {
         Integer result = hops.get(id);
-
         return result == null ? -1 : result;
     }
 

@@ -16,7 +16,8 @@ import static mobemu.trace.Parser.MILLIS_PER_SECOND;
 import mobemu.trace.Trace;
 
 /**
- * SocialBlueConn parser.
+ * SocialBlueConn trace parser
+ * (http://crawdad.org/unical/socialblueconn/20150208/).
  *
  * @author Radu
  */
@@ -26,6 +27,9 @@ public class SocialBlueConn implements Parser {
     private Map<Integer, Context> context;
     private boolean[][] socialNetwork;
 
+    /**
+     * Constructs a {@link StAndrews} object.
+     */
     public SocialBlueConn() {
         String prefix = "traces" + File.separator + "socialblueconn" + File.separator;
         parseSocialBlueConn(prefix + "contacts" + File.separator + "Bluetooth_contacts.txt",
@@ -54,6 +58,14 @@ public class SocialBlueConn implements Parser {
         return socialNetwork.length;
     }
 
+    /**
+     * Parses the SocialBlueConn trace.
+     *
+     * @param contacts contacts file
+     * @param friendship social connections file
+     * @param interestsFolder folder with interests file
+     * @param devices number of devices in the trace
+     */
     private void parseSocialBlueConn(String contacts, String friendship, String interestsFolder, int devices) {
         trace = new Trace("SocialBlueConn");
         socialNetwork = new boolean[devices][devices];

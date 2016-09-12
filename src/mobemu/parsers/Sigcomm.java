@@ -15,7 +15,7 @@ import mobemu.trace.Parser;
 import mobemu.trace.Trace;
 
 /**
- * Sigcomm parser.
+ * Sigcomm trace parser (http://crawdad.org/thlab/sigcomm2009/20120715/).
  *
  * @author Radu
  */
@@ -26,6 +26,9 @@ public class Sigcomm implements Parser {
     private boolean[][] socialNetwork;
     private Calendar calendar;
 
+    /**
+     * Constructs a {@link Sigcomm} object.
+     */
     public Sigcomm() {
         calendar = Calendar.getInstance();
         calendar.set(2009, 7, 17, 8, 0, 0); // start of the trace (17/08/2009 08:00)

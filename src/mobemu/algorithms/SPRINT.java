@@ -11,7 +11,12 @@ import java.util.List;
 import mobemu.node.*;
 
 /**
- * Class for a {@code SPRINT} node.
+ * Class for a SPRINT node.
+ *
+ * Radu Ioan Ciobanu, Ciprian Dobre, and Valentin Cristea. SPRINT: Social
+ * prediction-based opportunistic routing. In IEEE 14th International Symposium
+ * and Workshops on a World of Wireless, Mobile and Multimedia Networks
+ * (WoWMoM), pages 1-7, June 2013.
  *
  * @author Radu
  */
@@ -85,12 +90,11 @@ public class SPRINT extends Node {
     }
 
     /**
-     * Data exchange function for SAP routing between two nodes.
+     * Data exchange function for SPRINT routing between two nodes.
      *
-     * @param node current node
      * @param encounteredNode encountered node
      * @param contactDuration duration of the contact
-     * @return temporary data memory for the current node after the routing
+     * @param currentTime current trace time
      */
     @Override
     protected void onDataExchange(Node encounteredNode, long contactDuration, long currentTime) {
@@ -124,7 +128,7 @@ public class SPRINT extends Node {
             return;
         }
 
-        // compute the extended data memory with messages from my cache, encountered
+        // compose the extended data memory with messages from my cache, encountered
         // node's cache and encountered node's own messages
         List<Message> extendedDataMemory = new ArrayList<>(3 * dataMemorySize);
         for (Message message : sprintEncounteredNode.dataMemory) {
@@ -145,18 +149,17 @@ public class SPRINT extends Node {
             }
         }
 
+        // compute first-tier utility for the extended data memory
         for (Message message : extendedDataMemory) {
             computeUtility(message, thisFutureEncounters, currentTime);
         }
 
-        /*
-         * select what messages to download from the encountered node based on
-         * what nodes I will encounter and the encountered node will encounter
-         * in the next 24 hours
-         */
+        // select what messages to download from the encountered node based on
+        // what nodes I will encounter and the encountered node will encounter
+        // in the next 24 hours
         Collections.sort(extendedDataMemory);
 
-        // copy new messages with positive utility in data memory
+        // copy new messages with positive utility in the data memory
         for (int i = 0; i < Math.min(dataMemorySize, extendedDataMemory.size()); i++) {
             if (totalMessages >= remainingMessages) {
                 break;
@@ -210,11 +213,9 @@ public class SPRINT extends Node {
             }
         }
 
-        /*
-         * eliminate messages that don't have the destination in my social
-         * community (or in the communities of nodes I'll presumably encounter
-         * or k-CLIQUE community)
-         */
+        // eliminate messages that don't have the destination in my social
+        // community (or in the communities of nodes I'll presumably encounter
+        // or k-CLIQUE community)
         for (Message message : extendedDataMemory) {
             if (!(inSocialNetwork(message.getDestination()) || inLocalCommunity(message.getDestination()))
                     && !willEncounterCommunity(thisFutureEncounters, message.getDestination())) {
@@ -327,7 +328,7 @@ public class SPRINT extends Node {
             tempDataMemory.add(message);
         }
 
-        toRemove.clear(); // toRemive -> all messages from the data memory not in the temp data memory
+        toRemove.clear(); // toRemove -> all messages from the data memory not in the temp data memory
         for (Message message : dataMemory) {
             if (!tempDataMemory.contains(message)) {
                 toRemove.add(message);
@@ -351,7 +352,6 @@ public class SPRINT extends Node {
      * Checks the altruism of a given message with regard to a carrier and a
      * potential receiver.
      *
-     * @param node potential receiver node
      * @param encounteredNode carrier node
      * @param message message to be analyzed
      * @return {@code true} if the message is to be transferred, {@code false}
@@ -410,7 +410,7 @@ public class SPRINT extends Node {
 
     /**
      * Checks if a message's destination is in the social community with a node
-     * what will be met.
+     * that will be met.
      *
      * @param futureEncounters array of nodes that are to be encountered in the
      * next 24 hours
@@ -435,6 +435,9 @@ public class SPRINT extends Node {
      * Computes the future encounters for the next 24 hours.
      *
      * @param node node to compute encounters for
+     * @param currentTime current trace time
+     * @param hourNow current hour of the day
+     * @param dayNow current day of the week
      * @return array of future encounters per hour for 24 hours
      */
     private static ArrayList<ArrayList<Probability>> computeFutureEncounters(SPRINT node, long currentTime, int hourNow, int dayNow) {
@@ -453,12 +456,15 @@ public class SPRINT extends Node {
                 totalEncountersInCache++;
             }
         }
-        for (int i = 0; i < devices; i++) { // cycle through all devices
-            for (int j = 0; j < cacheMemorySize; j++) { // check the cache
+
+        // cycle through all devices
+        for (int i = 0; i < devices; i++) {
+            // check the cache
+            for (int j = 0; j < cacheMemorySize; j++) {
                 if (i == node.cacheMemory.get(j).node) {
                     node.encounterProbabilities.get(i).add(1);
 
-                    // increase probability for those device that have been met in the same day/hour
+                    // increase probability for those device that have been met in the same day/2-hour interval
                     if (node.cacheMemory.get(j).day % 7 == dayNow % 7) {
                         totalEncountersInCache++;
                         node.encounterProbabilities.get(i).add(1);
@@ -472,12 +478,13 @@ public class SPRINT extends Node {
             }
         }
 
-        for (int i = 0; i < node.encounterProbabilities.size(); i++) { // cycle through all devices
+        // cycle through all devices
+        for (int i = 0; i < node.encounterProbabilities.size(); i++) {
             node.encounterProbabilities.get(i).divideBy(totalEncountersInCache);
         }
 
         // double the chance of meeting a node if it's in my community
-        for (int i = 0; i < node.encounterProbabilities.size(); i++) { // cycle through all devices
+        for (int i = 0; i < node.encounterProbabilities.size(); i++) {
             if (node.inSocialNetwork(i) || node.inLocalCommunity(i)) {
                 node.encounterProbabilities.get(i).multiplyBy(2);
             }
@@ -485,10 +492,10 @@ public class SPRINT extends Node {
 
         // renormalize values
         double probabilitiesSum = 0;
-        for (int i = 0; i < node.encounterProbabilities.size(); i++) { // cycle through all devices
+        for (int i = 0; i < node.encounterProbabilities.size(); i++) {
             probabilitiesSum += node.encounterProbabilities.get(i).probability;
         }
-        for (int i = 0; i < node.encounterProbabilities.size(); i++) { // cycle through all devices
+        for (int i = 0; i < node.encounterProbabilities.size(); i++) {
             node.encounterProbabilities.get(i).divideBy(probabilitiesSum);
         }
 
@@ -519,7 +526,7 @@ public class SPRINT extends Node {
             }
             maxLikelihood /= (double) ((int) (currentDay / DAYS_IN_WEEK + 1));
 
-            // compute Poisson values for meeting 0, 1, ... devices and see how many we will meet in the current hour
+            // compute Poisson values for meeting 0, 1, ... devices and see how many I will meet in the current hour
             double poisson;
             double maxPoissonValue = -1;
             int devicesToMeet = -1;
@@ -541,16 +548,16 @@ public class SPRINT extends Node {
 
             // normalize the future encounters array too
             probabilitiesSum = 0;
-            for (int i = 0; i < futureEncounters.size(); i++) { // cycle through all devices
+            for (int i = 0; i < futureEncounters.size(); i++) {
                 probabilitiesSum += futureEncounters.get(i).probability;
             }
-            for (int i = 0; i < futureEncounters.size(); i++) { // cycle through all devices
+            for (int i = 0; i < futureEncounters.size(); i++) {
                 futureEncounters.get(i).divideBy(probabilitiesSum);
             }
 
             // add to total array
             totalFutureEncounters.add(futureEncounters);
-        } // end 24-hour cycling
+        }
 
         return totalFutureEncounters;
     }
@@ -561,13 +568,14 @@ public class SPRINT extends Node {
      * @param message message that the utility will be computed for
      * @param futureEncounters the list of future encounters for the current
      * node
+     * @param currentTime current trace time
      */
     private void computeUtility(Message message, ArrayList<ArrayList<Probability>> futureEncounters, long currentTime) {
         double utility = 0.0;
-
         message.setUtility(0.0f);
 
-        for (int i = 0; i < futureEncounters.size(); i++) { // i = in what hour will I meet the devices
+        // i -> what hour will I meet the devices at
+        for (int i = 0; i < futureEncounters.size(); i++) {
             ArrayList<Probability> probabilityList = futureEncounters.get(i);
 
             for (Probability prob : probabilityList) {
@@ -596,7 +604,6 @@ public class SPRINT extends Node {
      * @param message message that the utility will be computed for
      * @param encounteredNode encountered node
      * @param currentTime current trace time
-     * @param currentDay current day
      * @param currentHour current hour of the day
      */
     private void computeSecondTierUtility(Message message, SPRINT encounteredNode, long currentTime, int currentHour) {
@@ -742,8 +749,6 @@ public class SPRINT extends Node {
     /**
      * Class for storing the probability of encountering a certain node in a
      * SPRINT-based network.
-     *
-     * @author Radu
      */
     private static class Probability implements Comparable<Probability> {
 

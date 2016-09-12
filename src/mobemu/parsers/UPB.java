@@ -15,7 +15,7 @@ import mobemu.trace.Parser;
 import mobemu.trace.Trace;
 
 /**
- * UPB parser.
+ * UPB trace parser (http://crawdad.org/upb/mobility2011/20120618/).
  *
  * @author Radu
  */
@@ -26,6 +26,11 @@ public class UPB implements Parser {
     private boolean[][] socialNetwork;
     private Calendar calendar;
 
+    /**
+     * Constructs a {@link UPB} object.
+     *
+     * @param subtrace type of UPB trace to be parsed
+     */
     public UPB(UpbTrace subtrace) {
         this.trace = null;
         this.context = new HashMap<>();
@@ -305,7 +310,7 @@ public class UPB implements Parser {
      * participated in the trace and had at least one interest). This function
      * can be modified depending on what is required.
      *
-     * @return a map that correlated between the valid user's real ID from the
+     * @return a map that correlates between the valid user's real ID from the
      * trace and the newly-assigned one (since the IDs should be consecutive)
      */
     private static Map<Integer, Integer> Upb2012GetValidUsers() {

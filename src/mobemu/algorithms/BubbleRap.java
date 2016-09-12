@@ -9,7 +9,12 @@ import mobemu.node.Message;
 import mobemu.node.Node;
 
 /**
- * Class for a {@code BUBBLE Rap} node.
+ * Class for a BUBBLE Rap node.
+ *
+ * Pan Hui, Jon Crowcroft, and Eiko Yoneki. BUBBLE Rap: social-based forwarding
+ * in delay tolerant networks. In Proceedings of the 9th ACM International
+ * Symposium on Mobile Ad Hoc Networking and Computing, MobiHoc '08, pages
+ * 241-250, New York, USA, 2008. ACM.
  *
  * @author Radu
  */
@@ -54,11 +59,13 @@ public class BubbleRap extends Node {
             }
 
             if (bubbleRapEncounteredNode.inLocalCommunity(message.getDestination())) {
+                // if the encountered node is in the same community as the message's destination, use the local centrality
                 if (inLocalCommunity(message.getDestination()) && (getCentrality(true) > bubbleRapEncounteredNode.getCentrality(true))) {
                     insertMessage(message, bubbleRapEncounteredNode, currentTime, false, false);
                     totalMessages++;
                 }
             } else {
+                // otherwise, use the global centrality
                 if (inLocalCommunity(message.getDestination()) || (getCentrality(false) > bubbleRapEncounteredNode.getCentrality(false))) {
                     insertMessage(message, bubbleRapEncounteredNode, currentTime, false, false);
                     totalMessages++;
@@ -72,11 +79,13 @@ public class BubbleRap extends Node {
             }
 
             if (bubbleRapEncounteredNode.inLocalCommunity(message.getDestination())) {
+                // if the encountered node is in the same community as the message's destination, use the local centrality
                 if (inLocalCommunity(message.getDestination()) && (getCentrality(true) > bubbleRapEncounteredNode.getCentrality(true))) {
                     insertMessage(message, bubbleRapEncounteredNode, currentTime, false, false);
                     totalMessages++;
                 }
             } else {
+                // otherwise, use the global centrality
                 if (inLocalCommunity(message.getDestination()) || (getCentrality(false) > bubbleRapEncounteredNode.getCentrality(false))) {
                     insertMessage(message, bubbleRapEncounteredNode, currentTime, false, false);
                     totalMessages++;

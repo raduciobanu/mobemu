@@ -8,6 +8,7 @@ import java.util.Map;
 import mobemu.node.Context;
 
 /**
+ * Interface to be implemented by a trace parser.
  *
  * @author Radu
  */

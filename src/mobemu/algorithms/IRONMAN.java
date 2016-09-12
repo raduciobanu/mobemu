@@ -7,7 +7,11 @@ package mobemu.algorithms;
 import mobemu.node.*;
 
 /**
- * Class for an {@code IRONMAN} node.
+ * Class for an IRONMAN node.
+ *
+ * Greg Bigwood and Tristan Henderson. IRONMAN: Using social networks to add
+ * incentives and reputation to opportunistic networks. In SocialCom/PASSAT,
+ * pages 65-72. IEEE, 2011.
  *
  * @author Radu
  */

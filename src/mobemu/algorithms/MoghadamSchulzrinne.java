@@ -7,7 +7,12 @@ package mobemu.algorithms;
 import mobemu.node.*;
 
 /**
- * Class for a Moghadam-Schulzrinne algorithm node.
+ * Class for a Moghadam-Schulzrinne node.
+ *
+ * Arezu Moghadam and Henning Schulzrinne. Interest-aware content distribution
+ * protocol for mobile disruption-tolerant networks. In IEEE International
+ * Symposium on a World of Wireless, Mobile and Multimedia Networks Workshops,
+ * WoWMoM 2009, pages 1-7, June 2009.
  *
  * @author Radu
  */
@@ -16,7 +21,7 @@ public class MoghadamSchulzrinne extends Node {
     private boolean altruismAnalysis;
 
     /**
-     * Instantiates a {@code Moghadam-Schulzrinne} object.
+     * Instantiates a {@code MoghadamSchulzrinne} object.
      *
      * @param id ID of the node
      * @param nodes total number of existing nodes

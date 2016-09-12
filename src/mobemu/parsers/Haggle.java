@@ -15,7 +15,7 @@ import mobemu.trace.Parser;
 import mobemu.trace.Trace;
 
 /**
- * Haggle parser.
+ * Haggle trace parser (http://crawdad.org/cambridge/haggle/20090529/).
  *
  * @author Radu
  */
@@ -26,6 +26,11 @@ public class Haggle implements Parser {
     private boolean[][] socialNetwork;
     private Calendar calendar;
 
+    /**
+     * Constructs a {@link Haggle} object.
+     *
+     * @param subtrace type of Haggle trace to be parsed
+     */
     public Haggle(HaggleTrace subtrace) {
         this.trace = null;
         this.context = new HashMap<>();
@@ -202,7 +207,7 @@ public class Haggle implements Parser {
                     int ID = Integer.parseInt(tokens[0]);
                     String startMAC = tokens[1];
 
-                    // TODO: use ID and startMAC to add data if necessary.
+                    // use ID and startMAC to add data if necessary.
                 }
             }
         } catch (IOException | NumberFormatException e) {
@@ -254,10 +259,10 @@ public class Haggle implements Parser {
                         }
 
                         // read empty line.
-                        line = br.readLine();
+                        br.readLine();
                         linesRead++;
 
-                        // TODO: use gathered fields to store data.
+                        // use gathered fields to store data.
                     }
                 }
             }
@@ -272,7 +277,6 @@ public class Haggle implements Parser {
      * @param MAC MAC addresses file
      * @param folder folder containing contact details file
      * @param devices number of devices
-     * @param result trace where the results are added
      */
     private void parseHaggle(String MAC, String folder, int devices) {
 
@@ -296,7 +300,7 @@ public class Haggle implements Parser {
                     String startMAC = tokens[0];
                     int ID = Integer.parseInt(tokens[1]);
 
-                    // TODO: use ID and startMAC to add data.
+                    // use ID and startMAC to add data.
                 }
             }
         } catch (IOException | NumberFormatException e) {
@@ -385,7 +389,6 @@ public class Haggle implements Parser {
      * @param MAC MAC addresses file
      * @param forms additional info file
      * @param devices number of devices
-     * @param result trace where the results are added
      */
     private void parseHaggle(String contacts, String table, String MAC, String forms, int devices) {
 

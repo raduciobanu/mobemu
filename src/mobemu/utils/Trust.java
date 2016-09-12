@@ -113,6 +113,12 @@ public class Trust {
          */
         public long timestamp;
 
+        /**
+         * Constructor for a {@link TrustData} object.
+         *
+         * @param trust trust value
+         * @param timestamp time when the trust value was recorded
+         */
         public TrustData(double trust, long timestamp) {
             this.trust = trust;
             this.timestamp = timestamp;
@@ -261,6 +267,7 @@ public class Trust {
         /**
          * Instantiates a {@code TrustMessageInfo} object.
          *
+         * @param id message ID
          * @param source message source
          */
         public TrustMessageInfo(int id, int source) {
@@ -292,7 +299,7 @@ public class Trust {
         /**
          * Checks whether this message has been modified.
          *
-         * @return {@code true} if the message has been modified, {@code false}
+         * @return 0 if the message has not been modified, any other value
          * otherwise
          */
         public int getModified() {
@@ -302,7 +309,8 @@ public class Trust {
         /**
          * Gets the path of this message.
          *
-         * @return list containing the node this message has passed through
+         * @return list containing the IDs of the nodes this message has passed
+         * through
          */
         public List<Integer> getPath() {
             return path;
