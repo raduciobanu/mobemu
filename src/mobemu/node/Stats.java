@@ -7,6 +7,7 @@ package mobemu.node;
 import java.util.List;
 
 /**
+ * Class with static methods for performing computations on message statistics.
  *
  * @author Radu
  */
@@ -16,7 +17,7 @@ public class Stats {
      * Computes the overall hit rate for a given list of messages.
      *
      * @param messages list of messages to compute the hit rate for
-     * @param dissemination {@code true} if the messages war used for
+     * @param dissemination {@code true} if the messages were used for
      * disseminating data, {@code false} if they were employed for forwarding
      * @return the hit rate for the given list of messages
      */
@@ -26,6 +27,8 @@ public class Stats {
         if (dissemination) {
             int totalMessagesGenerated = 0;
 
+            // for dissemination messages, compute the total number of generated
+            // messages as the sum of all nodes interested in each message
             for (Message message : messages) {
                 for (Node node : nodes) {
                     if (node.getContext().getCommonTopics(message.getTags(), Long.MAX_VALUE) > 0 && node.getId() != message.getSource()) {
@@ -56,7 +59,7 @@ public class Stats {
      * Computes the overall delivery cost for a given list of messages.
      *
      * @param messages list of messages to compute the delivery cost for
-     * @param dissemination {@code true} if the messages war used for
+     * @param dissemination {@code true} if the messages were used for
      * disseminating data, {@code false} if they were employed for forwarding
      * @return the delivery cost for the given list of messages
      */
@@ -70,6 +73,8 @@ public class Stats {
                 deliveryCost += node.getMessagesExchanged();
             }
 
+            // for dissemination messages, compute the total number of generated
+            // messages as the sum of all nodes interested in each message
             for (Message message : messages) {
                 for (Node node : nodes) {
                     if (node.getContext().getCommonTopics(message.getTags(), Long.MAX_VALUE) > 0 && node.getId() != message.getSource()) {
@@ -94,7 +99,7 @@ public class Stats {
      * Computes the overall delivery latency for a given list of messages.
      *
      * @param messages list of messages to compute the delivery latency for
-     * @param dissemination {@code true} if the messages war used for
+     * @param dissemination {@code true} if the messages were used for
      * disseminating data, {@code false} if they were employed for forwarding
      * @return the delivery latency (in seconds) for the given list of messages
      */
@@ -103,6 +108,8 @@ public class Stats {
         double deliveredRate = 0.0;
 
         if (dissemination) {
+            // for dissemination messages, compute the total number of generated
+            // messages as the sum of all nodes interested in each message
             for (Message message : messages) {
                 for (Node node : nodes) {
                     if (node.getContext().getCommonTopics(message.getTags(), Long.MAX_VALUE) > 0
@@ -132,7 +139,7 @@ public class Stats {
      * Computes the overall hop count for a given list of messages.
      *
      * @param messages list of messages to compute the hop count for
-     * @param dissemination {@code true} if the messages war used for
+     * @param dissemination {@code true} if the messages were used for
      * disseminating data, {@code false} if they were employed for forwarding
      * @return the hop count for the given list of messages
      */
@@ -141,6 +148,8 @@ public class Stats {
         double deliveredRate = 0.0;
 
         if (dissemination) {
+            // for dissemination messages, compute the total number of generated
+            // messages as the sum of all nodes interested in each message
             for (Message message : messages) {
                 for (Node node : nodes) {
                     if (node.getContext().getCommonTopics(message.getTags(), Long.MAX_VALUE) > 0

@@ -13,11 +13,16 @@ import mobemu.trace.Contact;
 import mobemu.trace.Trace;
 
 /**
- * Class for a {@code Jaccard} node.
+ * Class for a JDER node.
+ *
+ * Radu Ioan Ciobanu, Daniel Gutierrez Reina, Ciprian Dobre, Sergio L. Toral,
+ * and Princy Johnson. JDER: A history-based forwarding scheme for delay
+ * tolerant networks using Jaccard distance and encountered ration. Journal of
+ * Network and Computer Applications, 40:279-291, April 2014.
  *
  * @author Radu
  */
-public class Jaccard extends Node {
+public class JDER extends Node {
 
     /**
      * Size of a node's cache memory.
@@ -32,13 +37,13 @@ public class Jaccard extends Node {
      */
     private int cacheMemoryPosition;
     /**
-     * Algorithm uses the historical form of Jaccard.
+     * Algorithm uses the historical form of JDER.
      */
-    private boolean historicalJaccard;
+    private boolean historicalJDER;
     /**
-     * Algorithm uses the historical form of Jaccard with limited cache
+     * Algorithm uses the historical form of JDER with limited cache
      */
-    private boolean historicalJaccardLimitedCache;
+    private boolean historicalJDERLimitedCache;
     /**
      * Algorithm uses encountered ratio.
      */
@@ -53,7 +58,7 @@ public class Jaccard extends Node {
     private Random random;
 
     /**
-     * Instantiates an {@code Jaccard} object.
+     * Instantiates a {@code JDER} object.
      *
      * @param id ID of the node
      * @param nodes total number of existing nodes
@@ -67,29 +72,29 @@ public class Jaccard extends Node {
      * @param traceEnd timestamp of the end of the trace
      * @param cacheMemorySize size of the cache holding the most recent
      * encounters exchange
-     * @param historicalJaccard use the historical form of Jaccard
-     * @param historicalJaccardLimitedCache use the historical form of Jaccard
-     * with limited cache
+     * @param historicalJDER use the historical form of JDER
+     * @param historicalJDERLimitedCache use the historical form of JDER with
+     * limited cache
      * @param usesEncounteredRatio uses the encountered ratio
      * @param contacts list containing all the contacts from the trace
      */
-    public Jaccard(int id, int nodes, Context context, boolean[] socialNetwork, int dataMemorySize, int exchangeHistorySize,
-            long seed, long traceStart, long traceEnd, int cacheMemorySize, boolean historicalJaccard,
-            boolean historicalJaccardLimitedCache, boolean usesEncounteredRatio, Trace contacts) {
+    public JDER(int id, int nodes, Context context, boolean[] socialNetwork, int dataMemorySize, int exchangeHistorySize,
+            long seed, long traceStart, long traceEnd, int cacheMemorySize, boolean historicalJDER,
+            boolean historicalJDERLimitedCache, boolean usesEncounteredRatio, Trace contacts) {
         super(id, nodes, context, socialNetwork, dataMemorySize, exchangeHistorySize, seed, traceStart, traceEnd);
 
-        if (Jaccard.cacheMemorySize == null) {
-            Jaccard.cacheMemorySize = cacheMemorySize;
+        if (JDER.cacheMemorySize == null) {
+            JDER.cacheMemorySize = cacheMemorySize;
         }
 
         this.cacheMemory = new ArrayList<>(Collections.nCopies(cacheMemorySize, new EncounterInfo(-1)));
         this.cacheMemoryPosition = 0;
-        this.historicalJaccard = historicalJaccard;
-        this.historicalJaccardLimitedCache = historicalJaccardLimitedCache;
+        this.historicalJDER = historicalJDER;
+        this.historicalJDERLimitedCache = historicalJDERLimitedCache;
         this.usesEncounteredRatio = usesEncounteredRatio;
 
-        if (Jaccard.contacts == null) {
-            Jaccard.contacts = contacts;
+        if (JDER.contacts == null) {
+            JDER.contacts = contacts;
         }
 
         this.random = new Random(seed);
@@ -97,29 +102,26 @@ public class Jaccard extends Node {
 
     @Override
     public String getName() {
-        return "Jaccard";
+        return "JDER";
     }
 
     @Override
     protected void onDataExchange(Node encounteredNode, long contactDuration, long currentTime) {
-        if (!(encounteredNode instanceof Jaccard)) {
+        if (!(encounteredNode instanceof JDER)) {
             return;
         }
 
-        Jaccard jaccardEncounteredNode = (Jaccard) encounteredNode;
-        int remainingMessages = deliverDirectMessages(jaccardEncounteredNode, false, contactDuration, currentTime, false);
+        JDER jderEncounteredNode = (JDER) encounteredNode;
+        int remainingMessages = deliverDirectMessages(jderEncounteredNode, false, contactDuration, currentTime, false);
         int totalMessages = 0;
 
-        cacheMemory.set(cacheMemoryPosition, new EncounterInfo(jaccardEncounteredNode.id));
+        cacheMemory.set(cacheMemoryPosition, new EncounterInfo(jderEncounteredNode.id));
         cacheMemoryPosition = (cacheMemoryPosition + 1) % cacheMemorySize;
 
         double jaccardDistance;
 
-        if (!historicalJaccard) {
-            /*
-             * get all contacts that are happening at the current moment, in
-             * order to know the current neighbors
-             */
+        if (!historicalJDER) {
+            // get all contacts that are happening at the current moment, in order to know the current neighbors
             List<Contact> currentContacts = new ArrayList<>();
 
             for (int i = 0; i < contacts.getContactsCount(); i++) {
@@ -141,7 +143,7 @@ public class Jaccard extends Node {
             // get the encountered node's neighbors at this moment
             List<Integer> encounteredNodeNeighbors = new ArrayList<>();
             for (Contact contact : currentContacts) {
-                if (contact.getObserver() == jaccardEncounteredNode.id) {
+                if (contact.getObserver() == jderEncounteredNode.id) {
                     if (!encounteredNodeNeighbors.contains(contact.getObserved())) {
                         encounteredNodeNeighbors.add(contact.getObserved());
                     }
@@ -160,23 +162,23 @@ public class Jaccard extends Node {
 
             jaccardDistance = 1.0 - (double) commonNodes / (double) (nodeNeighbors.size() + encounteredNodeNeighbors.size() - commonNodes);
             currentContacts.clear();
-        } else if (historicalJaccard && !historicalJaccardLimitedCache) {
+        } else if (historicalJDER && !historicalJDERLimitedCache) {
             // compute the Jaccard distance between the current and the encountered node
             int commonNodes = 0;
             Iterator it = encounteredNodes.entrySet().iterator();
             while (it.hasNext()) {
                 Map.Entry<Integer, ContactInfo> pairs = (Map.Entry) it.next();
-                if (jaccardEncounteredNode.encounteredNodes.get(pairs.getKey()) != null) {
+                if (jderEncounteredNode.encounteredNodes.get(pairs.getKey()) != null) {
                     commonNodes++;
                 }
             }
 
-            jaccardDistance = 1.0 - (double) commonNodes / (double) (encounteredNodes.size() + jaccardEncounteredNode.encounteredNodes.size() - commonNodes);
+            jaccardDistance = 1.0 - (double) commonNodes / (double) (encounteredNodes.size() + jderEncounteredNode.encounteredNodes.size() - commonNodes);
         } else {
             // compute the Jaccard distance between the current and the encountered node
             int commonNodes = 0;
             for (EncounterInfo encNode : cacheMemory) {
-                for (EncounterInfo encEncNode : jaccardEncounteredNode.cacheMemory) {
+                for (EncounterInfo encEncNode : jderEncounteredNode.cacheMemory) {
                     if (encNode.node != -1 && encNode.node == encEncNode.node) {
                         commonNodes++;
                     }
@@ -190,7 +192,7 @@ public class Jaccard extends Node {
                     nodeSize++;
                 }
             }
-            for (EncounterInfo encNode : jaccardEncounteredNode.cacheMemory) {
+            for (EncounterInfo encNode : jderEncounteredNode.cacheMemory) {
                 if (encNode.node != -1) {
                     encounteredNodeSize++;
                 }
@@ -200,10 +202,11 @@ public class Jaccard extends Node {
         }
 
         if (usesEncounteredRatio) {
+            // compute encounter ratio
             double encounteredRatio = 0.0;
             double factor = 0.0;
             for (int i = 0; i < cacheMemory.size(); i++) {
-                if (cacheMemory.get(i).node == jaccardEncounteredNode.id) {
+                if (cacheMemory.get(i).node == jderEncounteredNode.id) {
                     encounteredRatio++;
                 }
                 if (cacheMemory.get(i).node != -1) {
@@ -212,8 +215,9 @@ public class Jaccard extends Node {
             }
             encounteredRatio /= factor;
 
-
-            for (Message message : jaccardEncounteredNode.dataMemory) {
+            // use encounter ratio and Jaccard distance to decide which messages
+            // from the encountered node's data memory should be downloaded
+            for (Message message : jderEncounteredNode.dataMemory) {
                 if (totalMessages >= remainingMessages) {
                     break;
                 }
@@ -222,21 +226,23 @@ public class Jaccard extends Node {
                 if (value <= jaccardDistance) {
                     if (random.nextDouble() > encounteredRatio) {
                         if (encounteredNodes.get(message.getDestination()) != null) {
-                            insertMessage(message, jaccardEncounteredNode, currentTime, false, false);
+                            insertMessage(message, jderEncounteredNode, currentTime, false, false);
                             totalMessages++;
 
                             break;
                         }
 
                         if (random.nextDouble() <= 0.33) {
-                            insertMessage(message, jaccardEncounteredNode, currentTime, false, false);
+                            insertMessage(message, jderEncounteredNode, currentTime, false, false);
                             totalMessages++;
                         }
                     }
                 }
             }
 
-            for (Message message : jaccardEncounteredNode.ownMessages) {
+            // use encounter ratio and Jaccard distance to decide which messages
+            // generated by the encountered node should be downloaded
+            for (Message message : jderEncounteredNode.ownMessages) {
                 if (totalMessages >= remainingMessages) {
                     break;
                 }
@@ -245,40 +251,44 @@ public class Jaccard extends Node {
                 if (value <= jaccardDistance) {
                     if (random.nextDouble() > encounteredRatio) {
                         if (encounteredNodes.get(message.getDestination()) != null) {
-                            insertMessage(message, jaccardEncounteredNode, currentTime, false, false);
+                            insertMessage(message, jderEncounteredNode, currentTime, false, false);
                             totalMessages++;
 
                             break;
                         }
 
                         if (random.nextDouble() <= 0.33) {
-                            insertMessage(message, jaccardEncounteredNode, currentTime, false, false);
+                            insertMessage(message, jderEncounteredNode, currentTime, false, false);
                             totalMessages++;
                         }
                     }
                 }
             }
         } else {
-            for (Message message : jaccardEncounteredNode.dataMemory) {
+            // use Jaccard distance to decide which messages from the
+            // encountered node's data memory should be downloaded
+            for (Message message : jderEncounteredNode.dataMemory) {
                 if (totalMessages >= remainingMessages) {
                     break;
                 }
 
                 double value = random.nextDouble();
                 if (value <= jaccardDistance) {
-                    insertMessage(message, jaccardEncounteredNode, currentTime, false, false);
+                    insertMessage(message, jderEncounteredNode, currentTime, false, false);
                     totalMessages++;
                 }
             }
 
-            for (Message message : jaccardEncounteredNode.ownMessages) {
+            // use Jaccard distance to decide which messages generated
+            // by the encountered node should be downloaded
+            for (Message message : jderEncounteredNode.ownMessages) {
                 if (totalMessages >= remainingMessages) {
                     break;
                 }
 
                 double value = random.nextDouble();
                 if (value <= jaccardDistance) {
-                    insertMessage(message, jaccardEncounteredNode, currentTime, false, false);
+                    insertMessage(message, jderEncounteredNode, currentTime, false, false);
                     totalMessages++;
                 }
             }
@@ -286,8 +296,8 @@ public class Jaccard extends Node {
     }
 
     /**
-     * Class used for storing information about node encounters in a
-     * Jaccard-based opportunistic network.
+     * Class used for storing information about node encounters in a JDER-based
+     * opportunistic network.
      */
     private static class EncounterInfo {
 

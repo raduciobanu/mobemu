@@ -7,7 +7,12 @@ package mobemu.algorithms;
 import mobemu.node.*;
 
 /**
- * Class for a {@code SENSE} node.
+ * Class for a SENSE node.
+ *
+ * Radu-Ioan Ciobanu, Ciprian Dobre, Mihai Dascalu, Stefan Trausan-Matu, and
+ * Valentin Cristea. SENSE: A collaborative selfish node detection and incentive
+ * mechanism for opportunistic networks. Journal of Network and Computer
+ * Applications, 41:240-249, May 2014.
  *
  * @author Radu
  */
@@ -64,17 +69,19 @@ public class SENSE extends Node {
                 return;
             }
 
+            // verify that we are in the Spray phase of Spray-and-Wait
             if (message.getCopies(senseEncounteredNode.id) > 1 && message.getDestination() != id) {
 
                 message.setCopies(senseEncounteredNode.id, message.getCopies(senseEncounteredNode.id) / 2);
                 message.setCopies(id, message.getCopies(id) + message.getCopies(senseEncounteredNode.id));
 
                 if (altruismAnalysis) {
-
+                    // if the node is not altruistic towards the given message, it will not download it
                     if (computePerceivedAltruism(message, senseEncounteredNode) < Altruism.getTrustThreshold()
                             && !socialNetwork[senseEncounteredNode.id]) {
                         message.setCopies(id, message.getCopies(id) - message.getCopies(senseEncounteredNode.id));
 
+                        // increase perceived altruism value
                         if (socialNetwork[message.getSource()]) {
                             senseEncounteredNode.altruism.increaseLocal();
                         } else {
@@ -96,17 +103,19 @@ public class SENSE extends Node {
                 return;
             }
 
+            // verify that we are in the Spray phase of Spray-and-Wait
             if (message.getCopies(senseEncounteredNode.id) > 1 && message.getDestination() != id) {
 
                 message.setCopies(senseEncounteredNode.id, message.getCopies(senseEncounteredNode.id) / 2);
                 message.setCopies(id, message.getCopies(id) + message.getCopies(senseEncounteredNode.id));
 
                 if (altruismAnalysis) {
-
+                    // if the node is not altruistic towards the given message, it will not download it
                     if (computePerceivedAltruism(message, senseEncounteredNode) < Altruism.getTrustThreshold()
                             && !socialNetwork[senseEncounteredNode.id]) {
                         message.setCopies(id, message.getCopies(id) - message.getCopies(senseEncounteredNode.id));
 
+                        // increase perceived altruism value
                         if (socialNetwork[message.getSource()]) {
                             senseEncounteredNode.altruism.increaseLocal();
                         } else {

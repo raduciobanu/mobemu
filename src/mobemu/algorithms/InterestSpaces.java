@@ -8,10 +8,15 @@ import java.util.*;
 import mobemu.node.*;
 
 /**
+ * Class for an Interest Spaces node.
+ *
+ * Radu-Ioan Ciobanu, Radu-Corneliu Marin, Ciprian Dobre, Florin Pop. Interest
+ * Spaces: A unified interest-based dissemination framework for opportunistic
+ * networks. Journal of Systems Architecture, 2016.
  *
  * @author Radu
  */
-public class InterestSpace extends Node {
+public class InterestSpaces extends Node {
 
     /**
      * Normalization value for friendship.
@@ -89,10 +94,14 @@ public class InterestSpace extends Node {
      * @param altruism {@code true} if altruism computations are performed, {@code false}
      * otherwise
      * @param nodes array of all the nodes in the network
+     * @param socialNetworkThreshold social network threshold
+     * @param interestThreshold interests threshold
+     * @param contactsThreshold contacts threshold
+     * @param algorithm dissemination algorithm to be used with Interest Spaces
      */
-    public InterestSpace(int id, Context context, boolean[] socialNetwork, int dataMemorySize, int exchangeHistorySize,
+    public InterestSpaces(int id, Context context, boolean[] socialNetwork, int dataMemorySize, int exchangeHistorySize,
             long seed, long traceStart, long traceEnd, boolean altruism, Node[] nodes, double socialNetworkThreshold,
-            double interestThreshold, int contactsThreshold, InterestSpaceAlgorithm algorithm) {
+            double interestThreshold, int contactsThreshold, InterestSpacesAlgorithm algorithm) {
         super(id, nodes.length, context, socialNetwork, dataMemorySize, exchangeHistorySize, seed, traceStart, traceEnd);
 
         this.altruismAnalysis = altruism;
@@ -114,8 +123,8 @@ public class InterestSpace extends Node {
         this.timeWindow = Long.MAX_VALUE;
         this.currentTimeWindow = timeWindow;
 
-        if (InterestSpace.nodes == null) {
-            InterestSpace.nodes = nodes;
+        if (InterestSpaces.nodes == null) {
+            InterestSpaces.nodes = nodes;
         }
 
         switch (algorithm) {
@@ -148,6 +157,10 @@ public class InterestSpace extends Node {
      * @param altruism {@code true} if altruism computations are performed, {@code false}
      * otherwise
      * @param nodes array of all the nodes in the network
+     * @param socialNetworkThreshold social network threshold
+     * @param interestThreshold interests threshold
+     * @param contactsThreshold contacts threshold
+     * @param algorithm dissemination algorithm to be used with Interest Spaces
      * @param aggregationW1 aggregation weight for the node similarity component
      * @param aggregationW2 aggregation weight for the node friendship component
      * @param aggregationW3 aggregation weight for the node connectivity
@@ -158,9 +171,9 @@ public class InterestSpace extends Node {
      * @param cacheW3 cache weight for the interested friends ratio component
      * @param timeWindow duration of the time window
      */
-    public InterestSpace(int id, Context context, boolean[] socialNetwork, int dataMemorySize, int exchangeHistorySize,
+    public InterestSpaces(int id, Context context, boolean[] socialNetwork, int dataMemorySize, int exchangeHistorySize,
             long seed, long traceStart, long traceEnd, boolean altruism, Node[] nodes, double socialNetworkThreshold,
-            double interestThreshold, int contactsThreshold, InterestSpaceAlgorithm algorithm,
+            double interestThreshold, int contactsThreshold, InterestSpacesAlgorithm algorithm,
             double aggregationW1, double aggregationW2, double aggregationW3, double aggregationW4,
             double cacheW1, double cacheW2, double cacheW3, long timeWindow) {
         this(id, context, socialNetwork, dataMemorySize, exchangeHistorySize, seed, traceStart, traceEnd, altruism,
@@ -181,16 +194,16 @@ public class InterestSpace extends Node {
 
     @Override
     public String getName() {
-        return "Interest Space";
+        return "Interest Spaces";
     }
 
     @Override
     protected void preDataExchange(Node encounteredNode, long currentTime) {
-        if (!(encounteredNode instanceof InterestSpace)) {
+        if (!(encounteredNode instanceof InterestSpaces)) {
             return;
         }
 
-        InterestSpace interestSpaceEncounteredNode = (InterestSpace) encounteredNode;
+        InterestSpaces interestSpaceEncounteredNode = (InterestSpaces) encounteredNode;
 
         if (algorithm != null) {
             algorithm.preExchangeData(interestSpaceEncounteredNode, currentTime);
@@ -215,7 +228,7 @@ public class InterestSpace extends Node {
         this.encounteredNodes = nodeNewMap;
         interestSpaceEncounteredNode.encounteredNodes = encounteredNewMap;
 
-        // aggregate Interest Space contacts
+        // aggregate Interest Spaces contacts
         nodeNewMap = aggregateInterestSpaceContacts(interestSpaceEncounteredNode, aggregationWeightNode);
         encounteredNewMap = interestSpaceEncounteredNode.aggregateInterestSpaceContacts(this, aggregationWeightEncountered);
         this.encounteredNodesInterestSpace = nodeNewMap;
@@ -236,12 +249,12 @@ public class InterestSpace extends Node {
 
     @Override
     protected void onDataExchange(Node encounteredNode, long contactDuration, long currentTime) {
-        if (!(encounteredNode instanceof InterestSpace)) {
+        if (!(encounteredNode instanceof InterestSpaces)) {
             return;
         }
 
         if (algorithm != null) {
-            algorithm.exchangeData((InterestSpace) encounteredNode, contactDuration, currentTime);
+            algorithm.exchangeData((InterestSpaces) encounteredNode, contactDuration, currentTime);
         }
     }
 
@@ -307,7 +320,7 @@ public class InterestSpace extends Node {
      * @param currentTime current trace time
      * @return the aggregation weight between the two nodes
      */
-    private double computeAggregationWeight(InterestSpace encounteredNode, int contacts, long currentTime) {
+    private double computeAggregationWeight(InterestSpaces encounteredNode, int contacts, long currentTime) {
         // 1) similarity (number of common neighbors between individuals on social networks)
         double nodeSimilarity = getCommonNeighbors(encounteredNode);
         if (maxSimilarity < nodeSimilarity) {
@@ -345,7 +358,7 @@ public class InterestSpace extends Node {
      *
      * @return hash map of new contact info for node
      */
-    private HashMap<Integer, ContactInfo> aggregateContacts(InterestSpace encounteredNode, double weight) {
+    private HashMap<Integer, ContactInfo> aggregateContacts(InterestSpaces encounteredNode, double weight) {
         HashMap<Integer, ContactInfo> result = new HashMap<>();
 
         Iterator it = encounteredNodes.entrySet().iterator();
@@ -386,15 +399,15 @@ public class InterestSpace extends Node {
     }
 
     /**
-     * Aggregates the number of Interest Space contacts at a given node, when it
-     * comes into contact with another node.
+     * Aggregates the number of Interest Spaces contacts at a given node, when
+     * it comes into contact with another node.
      *
      * @param encounteredNode encountered node
      * @param weight aggregation weight
      *
      * @return hash map of new contact info for node
      */
-    private HashMap<Integer, ContactInfo> aggregateInterestSpaceContacts(InterestSpace encounteredNode, double weight) {
+    private HashMap<Integer, ContactInfo> aggregateInterestSpaceContacts(InterestSpaces encounteredNode, double weight) {
         HashMap<Integer, ContactInfo> result = new HashMap<>();
 
         Iterator it = encounteredNodesInterestSpace.entrySet().iterator();
@@ -443,7 +456,7 @@ public class InterestSpace extends Node {
      *
      * @return new social network array
      */
-    private boolean[] aggregateSocialNetwork(InterestSpace encounteredNode, double weight) {
+    private boolean[] aggregateSocialNetwork(InterestSpaces encounteredNode, double weight) {
         boolean[] result = new boolean[socialNetwork.length];
 
         for (int i = 0; i < result.length; i++) {
@@ -466,7 +479,7 @@ public class InterestSpace extends Node {
      *
      * @return aggregated interests
      */
-    private Context aggregateInterests(InterestSpace encounteredNode, double weight) {
+    private Context aggregateInterests(InterestSpaces encounteredNode, double weight) {
         Context result = new Context(id);
         result.addTopicSet(interestSpaceContext.getTopics());
 
@@ -478,21 +491,21 @@ public class InterestSpace extends Node {
     }
 
     /**
-     * Type of dissemination algorithm to be used with Interest Space.
+     * Type of dissemination algorithm to be used with Interest Spaces.
      */
-    public enum InterestSpaceAlgorithm {
+    public enum InterestSpacesAlgorithm {
 
         ONSIDE, CacheDecision
     }
 
     /**
-     * Interface for a dissemination algorithm to be used with Interest Space.
+     * Interface for a dissemination algorithm to be used with Interest Spaces.
      */
     private abstract class Algorithm {
 
-        abstract void exchangeData(InterestSpace encounteredNode, long contactDuration, long currentTime);
+        abstract void exchangeData(InterestSpaces encounteredNode, long contactDuration, long currentTime);
 
-        abstract void preExchangeData(InterestSpace encounteredNode, long currentTime);
+        abstract void preExchangeData(InterestSpaces encounteredNode, long currentTime);
 
         /**
          * Checks the altruism of this node towards a message, from the
@@ -503,7 +516,7 @@ public class InterestSpace extends Node {
          * @return {@code true} if the message is to be transferred, {@code false}
          * otherwise
          */
-        protected boolean checkAltruism(InterestSpace encounteredNode, Message message) {
+        protected boolean checkAltruism(InterestSpaces encounteredNode, Message message) {
             double perceivedAltruism = 0.0;
             double total = 0.0;
 
@@ -532,9 +545,11 @@ public class InterestSpace extends Node {
         }
     }
 
+    /**
+     * Class for the Interest Spaces cache selection algorithm.
+     */
     private class CacheDecisionAlgorithm extends Algorithm {
 
-        // TODO(Radu): what to do when a node no is no longer a cache for a given tag?
         /**
          * Probabilities that this node is a cache for a tag.
          */
@@ -599,7 +614,7 @@ public class InterestSpace extends Node {
          * @return {@code true} if the message should be downloaded, {@code false}
          * otherwise
          */
-        private boolean shouldDownload(InterestSpace encounteredNode, Message message) {
+        private boolean shouldDownload(InterestSpaces encounteredNode, Message message) {
             if (!(encounteredNode.algorithm instanceof CacheDecisionAlgorithm)) {
                 return false;
             }
@@ -639,7 +654,7 @@ public class InterestSpace extends Node {
         }
 
         @Override
-        public void exchangeData(InterestSpace encounteredNode, long contactDuration, long currentTime) {
+        public void exchangeData(InterestSpaces encounteredNode, long contactDuration, long currentTime) {
             int remainingMessages = deliverDirectMessages(encounteredNode, altruismAnalysis, contactDuration, currentTime, true);
             int totalMessages = 0;
 
@@ -701,7 +716,7 @@ public class InterestSpace extends Node {
         }
 
         @Override
-        public void preExchangeData(InterestSpace encounteredNode, long currentTime) {
+        public void preExchangeData(InterestSpaces encounteredNode, long currentTime) {
             Map<Integer, Integer> interestsEncountered = new HashMap<>();
             int totalInterestsEncountered = 0;
 
@@ -716,11 +731,11 @@ public class InterestSpace extends Node {
             while (it.hasNext()) {
                 Map.Entry<Integer, ContactInfo> pairs = (Map.Entry) it.next();
 
-                if (!(nodes[pairs.getKey()] instanceof InterestSpace)) {
+                if (!(nodes[pairs.getKey()] instanceof InterestSpaces)) {
                     continue;
                 }
 
-                InterestSpace seenNode = (InterestSpace) nodes[pairs.getKey()];
+                InterestSpaces seenNode = (InterestSpaces) nodes[pairs.getKey()];
                 ContactInfo nodeInfo = pairs.getValue();
 
                 totalContacts += nodeInfo.getContacts();
@@ -811,20 +826,16 @@ public class InterestSpace extends Node {
             }
 
             // sort messages in my memory by cache probability (so that, when I
-            //have to drop some of them, I drop the ones with lower probabilities)
+            // have to drop some of them, I drop the ones with lower probabilities)
             Collections.sort(dataMemory, new CacheProbabilityComparator(cacheProbabilities));
 
-            /*
-             * look at all tags (that nodes are interested in) that I have seen,
-             * and perform a ratio of the amount of encounters vs. all tags take
-             * into account if the tags I've seen are wanted by friends of mine
-             * take into account if the tags I've seen are also tags I'm
-             * interested in take into account if the tags I've seen belong to
-             * nodes that I've encountered often take into account if the tags
-             * I've seen are similar to what encountered nodes offer altruism?
-             * result should be a value between 0 and 1, and should be composed
-             * with the previous one
-             */
+            // look at all tags (that nodes are interested in) that I have seen,
+            // and perform a ratio of the amount of encounters vs. all tags
+            // - take into account if the tags I've seen are wanted by friends of mine
+            // - take into account if the tags I've seen are also tags I'm interested in
+            // - take into account if the tags I've seen belong to nodes that I've encountered often
+            // - take into account if the tags I've seen are similar to what encountered nodes
+            // result should be a value between 0 and 1, and should be composed with the previous one
         }
 
         /**
@@ -867,7 +878,7 @@ public class InterestSpace extends Node {
     }
 
     /**
-     * Class for ONSIDE algorithm in Interest Space.
+     * Class for ONSIDE algorithm in Interest Spaces.
      */
     private class ONSIDEAlgorithm extends Algorithm {
 
@@ -910,7 +921,7 @@ public class InterestSpace extends Node {
         }
 
         @Override
-        public void exchangeData(InterestSpace encounteredNode, long contactDuration, long currentTime) {
+        public void exchangeData(InterestSpaces encounteredNode, long contactDuration, long currentTime) {
             int remainingMessages = deliverDirectMessages(encounteredNode, altruismAnalysis, contactDuration, currentTime, true);
             int totalMessages = 0;
 
@@ -1037,7 +1048,7 @@ public class InterestSpace extends Node {
         }
 
         @Override
-        public void preExchangeData(InterestSpace encounteredNode, long currentTime) {
+        public void preExchangeData(InterestSpaces encounteredNode, long currentTime) {
         }
     }
 }

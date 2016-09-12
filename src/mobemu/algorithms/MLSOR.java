@@ -7,8 +7,12 @@ package mobemu.algorithms;
 import mobemu.node.*;
 
 /**
- * Class for an ML-SOR node (algorithm originally proposed by Crowcroft and
- * Yoneki)
+ * Class for a dissemination-based ML-SOR node.
+ *
+ * Annalisa Socievole, Eiko Yoneki, Floriano De Rango, and Jon Crowcroft.
+ * Opportunistic message routing using multi-layer social networks. In
+ * Proceedings of the 2nd ACM Workshop on High Performance Mobile Opportunistic
+ * Systems, HP-MOSys '13, pages 39-46, New York, NY, USA, 2013. ACM.
  *
  * @author Radu
  */
@@ -24,7 +28,7 @@ public class MLSOR extends Node {
     private static Node[] nodes = null;
 
     /**
-     * Instantiates an {@code ML-SOR} object.
+     * Instantiates an {@code MLSOR} object.
      *
      * @param id ID of the node
      * @param context the context of this node
@@ -135,55 +139,56 @@ public class MLSOR extends Node {
      */
     private boolean shouldDownload(Message message, MLSOR encounteredNode, long currentTime) {
         /*
-         * compute CS(node, encountered) as: C(node) / (C(node) + C(encountered)
+         * compute CS(node, encountered) as: C(node) / (C(node) +
+         * C(encountered))
          */
-        double thisCs = getCentrality(false) + encounteredNode.getCentrality(false);
-        thisCs = (thisCs == 0) ? 0 : (getCentrality(false) / thisCs);
-        double encounteredCs = getCentrality(false) + encounteredNode.getCentrality(false);
-        encounteredCs = (encounteredCs == 0) ? 0 : (encounteredNode.getCentrality(false) / encounteredCs);
+        double thisCS = getCentrality(false) + encounteredNode.getCentrality(false);
+        thisCS = (thisCS == 0) ? 0 : (getCentrality(false) / thisCS);
+        double encounteredCS = getCentrality(false) + encounteredNode.getCentrality(false);
+        encounteredCS = (encounteredCS == 0) ? 0 : (encounteredNode.getCentrality(false) / encounteredCS);
 
         /*
          * compute TSS(node, encountered, source) as: TS(node, source) /
          * (TS(node, source) + TS(encountered, source))
          */
-        int ts1 = socialNetwork[message.getSource()] ? 1 : 0;
-        int ts2 = encounteredNode.socialNetwork[message.getSource()] ? 1 : 0;
-        double thisTss = ts1 + ts2;
-        thisTss = (thisTss == 0) ? 0 : (ts1 / thisTss);
-        double encounteredTss = ts1 + ts2;
-        encounteredTss = (encounteredTss == 0) ? 0 : (ts2 / encounteredTss);
+        int TS1 = socialNetwork[message.getSource()] ? 1 : 0;
+        int TS2 = encounteredNode.socialNetwork[message.getSource()] ? 1 : 0;
+        double thisTSS = TS1 + TS2;
+        thisTSS = (thisTSS == 0) ? 0 : (TS1 / thisTSS);
+        double encounteredTSS = TS1 + TS2;
+        encounteredTSS = (encounteredTSS == 0) ? 0 : (TS2 / encounteredTSS);
 
         /*
          * compute LPS(node, encountered, source) as: LP(node, source) /
          * (LP(node, source) + LP(encountered, source))
          */
-        double lp1 = (double) context.getCommonTopics(nodes[message.getSource()].getContext(), currentTime);
+        double LP1 = (double) context.getCommonTopics(nodes[message.getSource()].getContext(), currentTime);
         if (context.getNumberOfTopics(currentTime) == 0 && nodes[message.getSource()].getContext().getNumberOfTopics(currentTime) == 0) {
-            lp1 = 0.0;
+            LP1 = 0.0;
         } else {
-            lp1 = lp1 / (context.getNumberOfTopics(currentTime) + nodes[message.getSource()].getContext().getNumberOfTopics(currentTime) - lp1);
+            LP1 = LP1 / (context.getNumberOfTopics(currentTime) + nodes[message.getSource()].getContext().getNumberOfTopics(currentTime) - LP1);
         }
 
-        double lp2 = (double) encounteredNode.context.getCommonTopics(nodes[message.getSource()].getContext(), currentTime);
+        double LP2 = (double) encounteredNode.context.getCommonTopics(nodes[message.getSource()].getContext(), currentTime);
         if (encounteredNode.context.getNumberOfTopics(currentTime) == 0 && nodes[message.getSource()].getContext().getNumberOfTopics(currentTime) == 0) {
-            lp2 = 0.0;
+            LP2 = 0.0;
         } else {
-            lp2 = lp2 / (encounteredNode.context.getNumberOfTopics(currentTime) + nodes[message.getSource()].getContext().getNumberOfTopics(currentTime) - lp2);
+            LP2 = LP2 / (encounteredNode.context.getNumberOfTopics(currentTime) + nodes[message.getSource()].getContext().getNumberOfTopics(currentTime) - LP2);
         }
 
-        double thisLps = lp1 + lp2;
-        thisLps = (thisLps == 0) ? 0 : (lp1 / thisLps);
-        double encounteredLps = lp1 + lp2;
-        encounteredLps = (encounteredLps == 0) ? 0 : (lp2 / encounteredLps);
+        double thisLPS = LP1 + LP2;
+        thisLPS = (thisLPS == 0) ? 0 : (LP1 / thisLPS);
+        double encounteredLPS = LP1 + LP2;
+        encounteredLPS = (encounteredLPS == 0) ? 0 : (LP2 / encounteredLPS);
 
         /*
          * compute MLS(node, encountered, source) as: CS(node, encountered) * (1
          * + TSS(node, encountered, source) + LPS(node, encountered, source))
          */
-        double thisMls = thisCs * (1 + thisTss + thisLps);
-        double encounteredMls = encounteredCs * (1 + encounteredTss + encounteredLps);
+        double thisMLS = thisCS * (1 + thisTSS + thisLPS);
+        double encounteredMLS = encounteredCS * (1 + encounteredTSS + encounteredLPS);
 
-        return thisMls >= encounteredMls;
+        return thisMLS >= encounteredMLS;
     }
 
     /**

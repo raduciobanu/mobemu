@@ -11,7 +11,7 @@ package mobemu.node;
  */
 public class Network {
 
-    private double transferSpeed; // node transfer speed (in messages per time unit)
+    private double transferSpeed; // node transfer speed (in messages per tick)
     public static final double UNLIMITED_TRANSFER_SPEED = Double.MAX_VALUE;
 
     /**
@@ -24,7 +24,7 @@ public class Network {
     }
 
     /**
-     * Instantiates a {@code Network} object.
+     * Instantiates a {@code Network} object with unlimited transfer speed.
      */
     public Network() {
         this.transferSpeed = UNLIMITED_TRANSFER_SPEED;

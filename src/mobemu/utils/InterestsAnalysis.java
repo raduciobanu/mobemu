@@ -72,14 +72,11 @@ public class InterestsAnalysis {
      * between node pairs.
      */
     public void analyzeContactsCount() {
-        for (Map.Entry<Integer, CountHelper> entry :
-                interestsPerContactsCount.entrySet()) {
+        for (Map.Entry<Integer, CountHelper> entry : interestsPerContactsCount.entrySet()) {
             int key = entry.getKey();
-            double value = (double) entry.getValue().value
-                    / entry.getValue().count;
+            double value = (double) entry.getValue().value / entry.getValue().count;
             System.out.println(key + "," + value);
         }
-
     }
 
     /**

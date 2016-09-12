@@ -11,7 +11,11 @@ import java.util.Map;
 import mobemu.node.*;
 
 /**
- * Class for an {@code ONSIDE} node.
+ * Class for an ONSIDE node.
+ *
+ * Radu-Ioan Ciobanu, Radu-Corneliu Marin, Ciprian Dobre, and Valentin Cristea.
+ * Interest-awareness in data dissemination for opportunistic networks. Ad Hoc
+ * Networks, 25:330-345, 2015.
  *
  * @author Radu
  */
@@ -30,8 +34,8 @@ public class ONSIDE extends Node {
      */
     private boolean altruismAnalysis;
     /**
-     * Common interests required between two nodes, in order for them to
-     * exchange data.
+     * Minimum number of common interests required between two nodes, in order
+     * for them to exchange data.
      */
     private int commonInterests;
     /**
@@ -39,7 +43,7 @@ public class ONSIDE extends Node {
      */
     private static Node[] nodes = null;
     /**
-     * Type of sort to be performed on the messages at each data
+     * Type of sort to be performed on the messages at each data exchange.
      */
     private ONSIDESort sort = ONSIDESort.None;
 
@@ -292,7 +296,7 @@ public class ONSIDE extends Node {
     }
 
     /**
-     * Class that sorts message by increasing timestamp.
+     * Class that sorts messages by increasing timestamp.
      */
     static class IncreasingTimestampComparator implements Comparator<Message> {
 
@@ -309,7 +313,7 @@ public class ONSIDE extends Node {
     }
 
     /**
-     * Class that sorts message by decreasing timestamp.
+     * Class that sorts messages by decreasing timestamp.
      */
     static class DecreasingTimestampComparator implements Comparator<Message> {
 

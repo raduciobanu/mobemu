@@ -17,7 +17,8 @@ import java.util.logging.Logger;
  * entitled "Users Mobility Models for Opportunistic Networks: the Role of
  * Physical Locations" (Chiara Boldrini, Marco Conti, Andrea Passarella), which
  * is in turn based on the model described in "Designing Mobility Models based
- * on Social Network Theory" (Mirco Musolesi and Cecilia Mascolo).
+ * on Social Network Theory" (Mirco Musolesi and Cecilia Mascolo). The license
+ * file (HCMM_license.txt) can be found in the "licenses" folder.
  *
  * @author Radu
  */
@@ -98,25 +99,13 @@ public abstract class HCMM {
      */
     protected boolean printOut = false;
     /**
-     * XML generation
-     */
-    protected boolean generateXML = false;
-    /**
      * Girvan-Newman clustering algorithm
      */
     protected boolean girvanNewman = false;
     /**
-     * co-location traces
-     */
-    protected boolean colocationTraces = true;
-    /**
      * communities traces
      */
     protected boolean communitiesTraces = true;
-    /**
-     * adjacency file
-     */
-    protected String adjacencyFile = "communities.idat";
     /**
      * deterministic on/off
      */
@@ -130,10 +119,9 @@ public abstract class HCMM {
      */
     protected float drift;
     /**
-     * debug variables
+     * first run of the algorithm
      */
     protected boolean firstTime = true;
-    protected double timeFirstReconfiguration;
     /*
      * probability of remaining in a non-home cell
      */
@@ -171,14 +159,10 @@ public abstract class HCMM {
     }
 
     /**
-     * Constructor for a {@code HCMM} object.
+     * Constructor for a {@code HCMM} object with seed 0.
      */
     public HCMM() {
         this(0);
-    }
-
-    public void setGenerateXML(boolean generateXML) {
-        this.generateXML = generateXML;
     }
 
     public void setNumHosts(int numHosts) {
@@ -253,16 +237,8 @@ public abstract class HCMM {
         this.girvanNewman = girvanNewman;
     }
 
-    public void setColocationTraces(boolean colocationTraces) {
-        this.colocationTraces = colocationTraces;
-    }
-
     public void setCommunitiesTraces(boolean communitiesTraces) {
         this.communitiesTraces = communitiesTraces;
-    }
-
-    public void setAdjacencyFile(String adjacencyFile) {
-        this.adjacencyFile = adjacencyFile;
     }
 
     public void setDeterministic(boolean deterministic) {
@@ -1260,7 +1236,6 @@ public abstract class HCMM {
                         System.out.println(" ====== DONE FOR ALL =======");
                     }
 
-                    timeFirstReconfiguration = simTime;
                     firstTime = false;
 
                     // trace generation

@@ -18,27 +18,27 @@ import mobemu.trace.Parser;
 import mobemu.trace.Trace;
 
 /**
- * NCCU parser.
+ * NCCU trace parser (http://www.cs.nccu.edu.tw/~d10003/).
  *
  * @author Radu
  */
 public class NCCU implements Parser {
 
+    // maximum range (in metres) of desired communication protocol (default Bluetooth)
+    public static double maxRange = 10;
     // trace length as specified in the paper "NCCU Trace: Social-Network-Aware
     // Mobility Trace" by Tzu-Chieh Tsai and Ho-Hsiang Chan
     private static int traceLength = 3764;
-
-    // maximum range (in metres) of desired communication protocol (default Bluetooth)
-    public static double maxRange = 10;
-
     // maximum time allowed between two samples to be considered as part of the same contact
     private static final long SAMPLE_RANGE = 600 * MILLIS_PER_SECOND;
-
     private Trace trace;
     private Map<Integer, Context> context;
     private boolean[][] socialNetwork;
     private static int size = 115;
 
+    /**
+     * Constructs an {@link NCCU} object.
+     */
     public NCCU() {
         parseNCCU("traces" + File.separator + "nccu" + File.separator + "nccu.dat");
     }
@@ -101,6 +101,10 @@ public class NCCU implements Parser {
                         }
 
                         trace.addContact(contact);
+
+                        // also add reverse contact
+                        trace.addContact(new Contact(contact.getObserved(), contact.getObserver(),
+                                contact.getStart(), contact.getEnd()));
                     }
                 }
             } catch (IOException ex) {
@@ -118,7 +122,7 @@ public class NCCU implements Parser {
     /**
      * Parses an NCCU trace in the original formal.
      *
-     * @param path locations of the trace files
+     * @param path location of the trace files
      */
     private void parseNCCUOriginal(String path) {
         trace = new Trace("NCCU");

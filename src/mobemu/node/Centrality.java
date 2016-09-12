@@ -129,6 +129,9 @@ public class Centrality {
         }
     }
 
+    /**
+     * Helper class for a centrality type.
+     */
     public static enum CentralityValue {
 
         CURRENT, PREVIOUS, CUMULATED

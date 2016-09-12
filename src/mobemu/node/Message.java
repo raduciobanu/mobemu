@@ -13,15 +13,15 @@ import java.util.*;
  */
 public class Message implements Comparable<Message> {
 
-    protected int id;
+    protected int id; // message ID
     protected int source; // ID of source node
-    protected int destination; // ID of destination node or -1 if transmission is pub/sub
+    protected int destination; // ID of destination node or -1 if transmission is publish/subscribe (i.e. dissemination)
     protected String message; // message content
     protected long timestamp; // time when the message was generated
     protected Context tags; // tags of this message
     protected double utility = 1.0; // utility of this message
     protected MessageStats stats; // message statistics
-    protected static int messageCount = 0;
+    protected static int messageCount = 0; // total number of messages generated
     public static final int DISSEMINATION_ID = -1;
 
     /**
@@ -264,9 +264,11 @@ public class Message implements Comparable<Message> {
     }
 
     /**
-     * Generate the time a message should be sent based on a given random value.
+     * Generate the time a message should be sent based on a given random value,
+     * with the highest generation probability in the interval where most
+     * contacts are likely to happen.
      *
-     * @param value value between 0 and 1 to be used as interval select
+     * @param value value between 0 and 1 to be used as interval selection
      * probability
      * @return a date when a new message should be generated
      */
@@ -296,7 +298,13 @@ public class Message implements Comparable<Message> {
     }
 
     /**
-     * Generates messages to be sent in the network.
+     * Generates messages to be sent in the network. If dissemination is
+     * selected, messages are tagged with a random topic from the areas of
+     * interest of the generating node (i.e. a node can only mark messages with
+     * tags it is interested in). If routing is selected, the message's
+     * destination is selected using a Zipf distribution, with the highest
+     * probability being reserved for nodes in the social and discovered network
+     * of the generating node, and the lowest probability for unkown nodes.
      *
      * @param nodes array of nodes
      * @param messageCount number of messages to be generated
@@ -332,6 +340,7 @@ public class Message implements Comparable<Message> {
             return result;
         }
 
+        // for routing, use a Zipf distribution
         for (int i = 0; i < nodeCount; i++) {
             List<Integer> socialNetworkNodes = new ArrayList<>();
             List<Integer> kcliqueNodes = new ArrayList<>();

@@ -42,6 +42,15 @@ public class ExchangeHistory implements Comparable<ExchangeHistory> {
     public int getNodeSeen() {
         return nodeSeen;
     }
+    
+    /**
+     * Gets the current node.
+     *
+     * @return the ID of the current node
+     */
+    public int getNode() {
+        return node;
+    }
 
     /**
      * Gets the message.

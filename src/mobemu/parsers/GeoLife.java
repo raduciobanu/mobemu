@@ -15,7 +15,8 @@ import mobemu.trace.Parser;
 import mobemu.trace.Trace;
 
 /**
- * GeoLife parser.
+ * GeoLife trace parser
+ * (https://www.microsoft.com/en-us/download/details.aspx?id=52367).
  *
  * @author Radu
  */
@@ -26,6 +27,9 @@ public class GeoLife implements Parser {
     private boolean[][] socialNetwork;
     private static final int GEOLIFE_RANGE = 30; // range for the GeoLife devices (in meters)
 
+    /**
+     * Constructs a {@link GeoLife} object.
+     */
     public GeoLife() {
         parseGeolife("traces" + File.separator + "geolife-trajectories1.3", null, true, 182, 50);
     }
@@ -58,7 +62,7 @@ public class GeoLife implements Parser {
      * @param startsWith first characters of the currently parsed subsection of
      * the trace
      * @param contacts {@code true} if the function parses only contacts
-     * (pre-parsed data), {@code false}
+     * (pre-parsed data), {@code false} if it parses the original file
      * @param devices the number of participating devices
      * @param contactsLimit the limit of contacts for which a node is kept
      * @return a list of {@link Contact} objects generated from the trace
@@ -182,7 +186,10 @@ public class GeoLife implements Parser {
     }
 
     /**
-     * Fully parses the GeoLife trace.
+     * Fully parses the GeoLife trace (note: the actual files are no long in the
+     * MobEmu folder, since they were to large to be kept, but they can be found
+     * at the following link:
+     * https://www.microsoft.com/en-us/download/details.aspx?id=52367).
      *
      * @param folder location of the trace
      * @param startsWith first characters of the currently parsed subsection of

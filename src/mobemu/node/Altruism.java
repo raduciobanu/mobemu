@@ -96,7 +96,8 @@ public class Altruism {
 
     /**
      * Gets the perceived behavior constant (i.e. amount that is added or
-     * subtracted when a node seem to become more or less altruistic).
+     * subtracted to another node's perception of a node when it seems to become
+     * more or less altruistic).
      *
      * @return the behavior constant
      */
@@ -124,7 +125,7 @@ public class Altruism {
     }
 
     /**
-     * Increases the global altruism value.
+     * Increases the global altruism value with the behavior constant.
      *
      * @return new global altruism value
      */
@@ -193,7 +194,7 @@ public class Altruism {
 
     /**
      * Gets the trust threshold (nodes with trust values over this threshold are
-     * considered altruistic)/
+     * considered altruistic)
      *
      * @return trust threshold
      */
