@@ -192,11 +192,7 @@ public class HCMM extends mobemu.utils.HCMM implements Parser {
     private void computeSocialNetwork() {
         for (int i = 0; i < socialNetwork.length; i++) {
             for (int j = 0; j < socialNetwork[i].length; j++) {
-                if (areInTheSameGroup(i, j, groups, numberOfGroups, numberOfMembers)) {
-                    socialNetwork[i][j] = true;
-                } else {
-                    socialNetwork[i][j] = false;
-                }
+                socialNetwork[i][j] = areInTheSameGroup(i, j, groups, numberOfGroups, numberOfMembers);
             }
         }
     }

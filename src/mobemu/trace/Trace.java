@@ -124,6 +124,7 @@ public class Trace {
     /**
      * Gets the contact of this trace at the given index.
      *
+     * @param id index in the contacts list
      * @return the contact at the given index, or {@code null} if the index is
      * out of bounds
      */

@@ -483,6 +483,7 @@ public abstract class Node {
      * Generates a message in the node's own memory.
      *
      * @param message the message to be generated
+     * @return generated message
      */
     public Message generateMessage(Message message) {
         ownMessages.add(message);
@@ -971,11 +972,7 @@ public abstract class Node {
             altruismValue = node.altruism.getGlobal();
         }
 
-        if (probability > altruismValue) {
-            return true;
-        }
-
-        return false;
+        return probability > altruismValue;
     }
 
     /**

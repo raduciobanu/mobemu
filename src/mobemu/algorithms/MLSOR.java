@@ -221,10 +221,6 @@ public class MLSOR extends Node {
 
         perceivedAltruism /= total;
 
-        if (total == 0.0 || perceivedAltruism >= Altruism.getTrustThreshold()) {
-            return true;
-        } else {
-            return false;
-        }
+        return total == 0.0 || perceivedAltruism >= Altruism.getTrustThreshold();
     }
 }

@@ -460,11 +460,7 @@ public class InterestSpaces extends Node {
         boolean[] result = new boolean[socialNetwork.length];
 
         for (int i = 0; i < result.length; i++) {
-            if (socialNetwork[i] || weight * (encounteredNode.socialNetwork[i] ? 1.0 : 0.0) > socialNetworkThreshold) {
-                result[i] = true;
-            } else {
-                result[i] = false;
-            }
+            result[i] = socialNetwork[i] || weight * (encounteredNode.socialNetwork[i] ? 1.0 : 0.0) > socialNetworkThreshold;
         }
 
         return result;
@@ -537,11 +533,7 @@ public class InterestSpaces extends Node {
 
             perceivedAltruism /= total;
 
-            if (total == 0.0 || perceivedAltruism >= Altruism.getTrustThreshold()) {
-                return true;
-            } else {
-                return false;
-            }
+            return total == 0.0 || perceivedAltruism >= Altruism.getTrustThreshold();
         }
     }
 
@@ -645,12 +637,8 @@ public class InterestSpaces extends Node {
                 }
             }
 
-            if (value <= maxCacheProbability || maxCacheProbability >= downloadThreshold
-                    || (maxEncounterProbability != Long.MIN_VALUE && (maxCacheProbability - maxEncounterProbability > 0.5))) {
-                return true;
-            }
-
-            return false;
+            return value <= maxCacheProbability || maxCacheProbability >= downloadThreshold
+                    || (maxEncounterProbability != Long.MIN_VALUE && (maxCacheProbability - maxEncounterProbability > 0.5));
         }
 
         @Override
@@ -1013,11 +1001,7 @@ public class InterestSpaces extends Node {
             }
             commonInterestsPercentage /= total;
 
-            if (commonInterestsPercentage > encounteredInterestsThreshold) {
-                return true;
-            }
-
-            return false;
+            return commonInterestsPercentage > encounteredInterestsThreshold;
         }
 
         /**

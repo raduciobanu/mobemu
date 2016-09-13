@@ -43,7 +43,7 @@ public class MessageStats {
      */
     public int getCopies(int id) {
         Integer result = copies.get(id);
-        return result == null ? 0 : result.intValue();
+        return result == null ? 0 : result;
     }
 
     /**

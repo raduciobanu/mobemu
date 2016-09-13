@@ -125,7 +125,7 @@ public class Context {
     /**
      * Checks whether a given topic is present in the context at a given time.
      *
-     * @param topicID ID of the topic to be searched
+     * @param topic ID of the topic to be searched
      * @param time current time
      * @return {@code true} if the topic is in the context at the given time, {@code false}
      * otherwise

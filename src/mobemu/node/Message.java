@@ -313,6 +313,7 @@ public class Message implements Comparable<Message> {
      * @param dissemination {@code true} if the generated messages are for
      * dissemination, {@code false} if they are for routing
      * @param random random number generator
+     * @return list of messages generated
      */
     public static List<Message> generateMessages(Node[] nodes, int messageCount, int messageCopies, long tick, boolean dissemination, Random random) {
         int nodeCount = nodes.length;

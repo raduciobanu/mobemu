@@ -232,11 +232,7 @@ public class ONSIDE extends Node {
 
         perceivedAltruism /= total;
 
-        if (total == 0.0 || perceivedAltruism >= Altruism.getTrustThreshold()) {
-            return true;
-        } else {
-            return false;
-        }
+        return total == 0.0 || perceivedAltruism >= Altruism.getTrustThreshold();
     }
 
     /**
@@ -262,11 +258,7 @@ public class ONSIDE extends Node {
         }
         commonInterestsPercentage /= total;
 
-        if (commonInterestsPercentage > encounteredInterestsThreshold) {
-            return true;
-        }
-
-        return false;
+        return commonInterestsPercentage > encounteredInterestsThreshold;
     }
 
     /**

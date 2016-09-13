@@ -40,7 +40,7 @@ public class Trust {
                 TrustMessage trustMessage = (TrustMessage) message;
                 for (Map.Entry<Integer, Integer> entry : trustMessage.deliveredModified.entrySet()) {
                     total++;
-                    if (entry.getValue().intValue() == 0) {
+                    if (entry.getValue() == 0) {
                         correct++;
                     }
                 }
@@ -176,8 +176,8 @@ public class Trust {
          * @param currentCarrier new node that has the message
          * @param modify specifies whether the current node modifies the message
          * (-1 if it doesn't, a positive value if it does)
-         * @return {@code true} if a correct message info was found, {@code false}
-         * otherwise
+         * @return {@code true} if a correct message info was found,
+         * {@code false} otherwise
          */
         public boolean addToPath(int previousCarrier, int currentCarrier, int modify) {
             TrustMessageInfo messageInfo = getInfo(previousCarrier);
@@ -318,6 +318,9 @@ public class Trust {
 
         /**
          * Checks whether this message has reached its destination.
+         *
+         * @return {@code true} if the message has reached its destination,
+         * {@code false} otherwise
          */
         public boolean hasReachedDestination() {
             return reachedDestination;

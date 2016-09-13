@@ -17,6 +17,7 @@ public class Stats {
      * Computes the overall hit rate for a given list of messages.
      *
      * @param messages list of messages to compute the hit rate for
+     * @param nodes array of trace nodes
      * @param dissemination {@code true} if the messages were used for
      * disseminating data, {@code false} if they were employed for forwarding
      * @return the hit rate for the given list of messages
@@ -59,6 +60,7 @@ public class Stats {
      * Computes the overall delivery cost for a given list of messages.
      *
      * @param messages list of messages to compute the delivery cost for
+     * @param nodes array of trace nodes
      * @param dissemination {@code true} if the messages were used for
      * disseminating data, {@code false} if they were employed for forwarding
      * @return the delivery cost for the given list of messages
@@ -99,6 +101,7 @@ public class Stats {
      * Computes the overall delivery latency for a given list of messages.
      *
      * @param messages list of messages to compute the delivery latency for
+     * @param nodes array of trace nodes
      * @param dissemination {@code true} if the messages were used for
      * disseminating data, {@code false} if they were employed for forwarding
      * @return the delivery latency (in seconds) for the given list of messages
@@ -139,6 +142,7 @@ public class Stats {
      * Computes the overall hop count for a given list of messages.
      *
      * @param messages list of messages to compute the hop count for
+     * @param nodes array of trace nodes
      * @param dissemination {@code true} if the messages were used for
      * disseminating data, {@code false} if they were employed for forwarding
      * @return the hop count for the given list of messages

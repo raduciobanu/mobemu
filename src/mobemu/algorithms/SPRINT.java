@@ -400,12 +400,8 @@ public class SPRINT extends Node {
             perceivedAltruism /= down;
         }
 
-        if (perceivedAltruism < Altruism.getTrustThreshold()
-                && !(inSocialNetwork(encounteredNode.id) || inLocalCommunity(encounteredNode.id))) {
-            return false;
-        }
-
-        return true;
+        return !(perceivedAltruism < Altruism.getTrustThreshold()
+                && !(inSocialNetwork(encounteredNode.id) || inLocalCommunity(encounteredNode.id)));
     }
 
     /**
