@@ -157,7 +157,7 @@ public class UPB implements Parser {
                 String[] parts = line.split(",|\\s+");
 
                 for (int j = 0; j < parts.length; j++) {
-                    socialNetwork[i][j] = Integer.parseInt(parts[j]) < 1 ? false : true;
+                    socialNetwork[i][j] = Integer.parseInt(parts[j]) >= 1;
                 }
             }
         } catch (IOException | NumberFormatException e) {

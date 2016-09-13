@@ -229,7 +229,9 @@ public class NCCU implements Parser {
                 System.err.println("NCCU Parser exception: " + e.getMessage());
             } finally {
                 try {
-                    fstream.close();
+                    if (fstream != null) {
+                        fstream.close();
+                    }
                 } catch (IOException e) {
                     System.err.println("NCCU Parser exception: " + e.getMessage());
                 }

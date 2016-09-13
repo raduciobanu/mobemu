@@ -69,6 +69,7 @@ public class ContactInfo {
     /**
      * Increases the contact duration.
      *
+     * @param amount value that the contact duration is increased with
      * @return the new value for the contact duration
      */
     public long increaseDuration(long amount) {

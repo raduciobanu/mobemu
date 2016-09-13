@@ -19,8 +19,8 @@ public class Altruism {
     private static double perceivedBehaviorConstant; // amount that is added or subtracted when a node seems to become more or less altruistic
     private static double behaviorConstant; // amount that is added or subtracted when a node becomes more or less altruistic
     private static double trustThreshold; // nodes with trust values over this threshold are considered altruistic
-    private static final int altruismUnknown = 50; // default initial altruism value for non-community nodes
-    private static final int altruismCommunity = 100; // default initial altruism value for community nodes
+    private static final int ALTRUISM_UNKNOWN = 50; // default initial altruism value for non-community nodes
+    private static final int ALTRUISM_COMMUNITY = 100; // default initial altruism value for community nodes
 
     /**
      * Instantiates an {@link Altruism} object.
@@ -53,7 +53,7 @@ public class Altruism {
      * @param isConnected array of booleans for socially-connected nodes
      */
     public Altruism(double local, double global, boolean[] isConnected) {
-        this(local, global, isConnected, altruismUnknown, altruismCommunity);
+        this(local, global, isConnected, ALTRUISM_UNKNOWN, ALTRUISM_COMMUNITY);
     }
 
     /**

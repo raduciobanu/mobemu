@@ -26,7 +26,7 @@ public class NOP extends Node {
      * history
      * @param seed the seed for the random number generators
      * @param traceStart timestamp of the start of the trace
-     * @param traceEndtimestamp of the end of the trace
+     * @param traceEnd timestamp of the end of the trace
      */
     public NOP(int id, int nodes, Context context, boolean[] socialNetwork, int dataMemorySize,
             int exchangeHistorySize, long seed, long traceStart, long traceEnd) {

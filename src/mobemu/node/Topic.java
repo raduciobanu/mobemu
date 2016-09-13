@@ -50,11 +50,7 @@ public class Topic {
         if (obj instanceof Topic) {
             Topic other = (Topic) obj;
 
-            if (other.topic != topic) {
-                return false;
-            }
-
-            return true;
+            return other.topic == topic;
         }
 
         return false;

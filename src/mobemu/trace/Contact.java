@@ -59,11 +59,7 @@ public class Contact implements Comparable<Contact> {
      * @return {@code true} if there is a contact, {@code false} otherwise
      */
     public boolean hasContactAt(int time) {
-        if (start <= time && time <= end) {
-            return true;
-        }
-
-        return false;
+        return start <= time && time <= end;
     }
 
     /**
