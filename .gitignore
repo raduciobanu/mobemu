@@ -1,5 +1,4 @@
 build/
 nbproject/
 /dist/
-*.txt
 nbbuild.xml

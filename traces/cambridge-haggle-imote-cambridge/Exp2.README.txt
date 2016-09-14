@@ -1,0 +1,27 @@
+This file contains information on Experiment 2
+
+Location: Computer Lab, University of Cambridge
+
+Date: End of January 2005
+
+Duration: 
+	  Devices distributed on Tuesday, January 25th, 2005 at 14:00am
+	  Devices collected on Monday, January 31st, 2005 in the afternoon
+	  (most of the iMotes last around 5days)
+
+Participants: 
+19 graduate students from the System Research Group.
+
+Collected datas: 
+- Some of the iMotes did not deliver any useful data, as a consequence
+of accidental hardware reset. Contacts with one of them were discarded
+from the traces of other iMotes to avoid any consequence on the
+experimental results.
+
+- In total only 12 iMotes could be used to produce this trace, others were
+suffering from hardward resets. The contacts with these nodes were
+discarded from the complete   
+
+- Details of ID number:
+	ID 1-12 are corresponding to iMotes (Class 1)
+	ID 13-223 corresponds to external devices (Class 2)

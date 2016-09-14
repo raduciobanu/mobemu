@@ -1,0 +1,26 @@
+This file contains information on Experiment 1
+
+================================
+Location: Intel Research Cambridge Corporate Laboratory
+Date: January 2005,
+
+Duration: 
+	  Devices distributed on Thursday, January 6, at 11:30am
+	  Devices collected on Tuesday, January 11, in the afternoon 
+	  (most of the traces last only for three days).
+
+================================
+Participants: 
+16 admin staff, researchers, interns, and admin staff.
+1 iMote was left in the kitchen, as a stationary node, during the
+experiment. 
+
+================================
+Collected datas: 
+- Data from only 9 iMotes could be collected properly. The others suffered	
+from too much reset.  	
+	
+Addresses ID:
+	ID 1 is the stationary node.
+	ID 2-9 are corresponding to mobile iMotes
+	ID 10-128 corresponds to external devices

@@ -1,0 +1,24 @@
+This file contains information on Experiment 3
+
+Location: Conference IEEE Infocom in Grand Hyatt Miami
+
+Date: March 2005
+
+Duration: 
+	  Devices distributed on March 7th, 2005 between lunch time and 5pm.
+	  Devices collected on March 10th, 2005 in the afternoon.
+
+Participants: 
+50 students, attending the student workshop.
+
+Collected datas: 
+- 2 iMotes were lost, and 7 did not deliver useful data, as a consequence
+of accidental hardware reset. Contacts with any of these were discarded
+from the traces of other iMotes to avoid any consequence on the
+experimental results.
+
+- The first six hours were discarded, as people were attending the same workshop during the first afternoon. 
+
+- Details of ID number:
+	ID 1-41 are corresponding to iMotes (Class 1)
+	ID 42-274 corresponds to external devices (Class 2)
