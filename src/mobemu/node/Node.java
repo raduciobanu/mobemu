@@ -158,7 +158,7 @@ public abstract class Node {
         this.network = new Network();
         this.context = context;
     }
-    
+
     /**
      * Runs an opportunistic algorithm.
      *
@@ -196,6 +196,10 @@ public abstract class Node {
                 for (Node node : nodes) {
                     node.updateBatteryLevel();
                 }
+            }
+
+            for (Node node : nodes) {
+                node.onTick(tick, sampleTime);
             }
 
             currentDay.setTimeInMillis(tick);
@@ -758,6 +762,16 @@ public abstract class Node {
      * @param currentTime time of the contact
      */
     protected void preDataExchange(Node encounteredNode, long currentTime) {
+    }
+
+    /**
+     * Function called at every tick in the trace. Useful for implementing logic
+     * that has nothing to do with contacts with other nodes.
+     *
+     * @param currentTime current trace time
+     * @param sampleTime trace sample time
+     */
+    protected void onTick(long currentTime, long sampleTime) {
     }
 
     /**
