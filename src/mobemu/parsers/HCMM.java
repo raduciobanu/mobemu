@@ -135,6 +135,24 @@ public class HCMM extends mobemu.utils.HCMM implements Parser {
     }
 
     /**
+     * Adds the contacts in progress to the list of contacts.
+     *
+     * @param simulationTime duration of HCMM simulation
+     */
+    private void addContactsInProgress(long simulationTime) {
+        for (Contact contact : contactsInProgress) {
+            long endTime = simulationTime * MILLIS_PER_SECOND;
+
+            if (endTime > end) {
+                end = endTime;
+            }
+
+            contact.setEnd(endTime);
+            trace.addContact(contact);
+        }
+    }
+
+    /**
      * Configures and runs the simulator.
      *
      * @param devices number of devices
@@ -181,8 +199,10 @@ public class HCMM extends mobemu.utils.HCMM implements Parser {
 
         move();
 
-        trace.setStartTime(start);
-        trace.setEndTime(end);
+        addContactsInProgress(simulationTime);
+
+        trace.setStartTime(start == Long.MAX_VALUE ? 0 : start);
+        trace.setEndTime(end == Long.MIN_VALUE ? simulationTime * MILLIS_PER_SECOND : end);
         trace.setSampleTime(MILLIS_PER_SECOND);
     }
 

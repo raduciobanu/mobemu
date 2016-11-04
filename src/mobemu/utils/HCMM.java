@@ -957,8 +957,8 @@ public abstract class HCMM {
         int initialNumberOfGroups = numberOfGroups;
 
         // variables for saving the home cell information
-        int[] homeX = new int[numberOfGroups];
-        int[] homeY = new int[numberOfGroups];
+        int[] homeX = new int[numHosts];
+        int[] homeY = new int[numHosts];
 
         initializeData();
 
