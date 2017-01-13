@@ -4,6 +4,7 @@
  */
 package mobemu.node;
 
+import java.io.PrintWriter;
 import java.util.*;
 import mobemu.trace.Contact;
 import mobemu.trace.Trace;
@@ -188,7 +189,9 @@ public abstract class Node {
 
         List<Message> messages = new ArrayList<>();
 
-        for (long tick = startTime; tick < endTime; tick += sampleTime) {
+
+        PrintWriter writer = Stats.openFile();
+        for (long tick = startTime; tick < endTime; tick += 10 * sampleTime) {
             int count = 0;
 
             // update battery level
@@ -242,7 +245,9 @@ public abstract class Node {
             }
 
             contactCount = trace.getContactsCount();
+            Stats.printLocalCommunities(nodes, tick, startTime, writer);
         }
+        Stats.closeFile(writer);
 
         return messages;
     }

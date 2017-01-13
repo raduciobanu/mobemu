@@ -510,7 +510,7 @@ public class SPRINT extends Node {
             day.set(Calendar.MINUTE, 0);
             day.set(Calendar.SECOND, 0);
 
-            int currentDay = (int) (currentTime - traceStartReset) / MILLIS_IN_DAY;
+            int currentDay = (int) ((currentTime - traceStartReset) / MILLIS_IN_DAY);
             int currentWeekday = currentDay % 7;
 
             // knowing the hour and the day, compute the max likelihood value for previous weekdays (if any)

@@ -4,6 +4,9 @@
  */
 package mobemu.node;
 
+import java.io.FileNotFoundException;
+import java.io.PrintWriter;
+import java.io.UnsupportedEncodingException;
 import java.util.List;
 
 /**
@@ -177,5 +180,52 @@ public class Stats {
         }
 
         return hopCount;
+    }
+
+
+    public static PrintWriter openFile(){
+        PrintWriter writer = null;
+
+        try {
+            writer = new PrintWriter("communities.txt", "UTF-8");
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        } catch (UnsupportedEncodingException e) {
+            e.printStackTrace();
+        }
+
+        return writer;
+    }
+
+    public static void closeFile(PrintWriter writer){
+        writer.close();
+    }
+
+    /**
+     * Print the local communities for all nodes in order to learn about their differences
+     */
+    public static void printLocalCommunities(Node[] nodes, long tick, long startTime, PrintWriter writer){
+        if((tick - startTime) % 100000 != 0)
+            return;
+
+        if(writer == null)
+            return;
+
+        boolean newLine = false;
+        for (Node node : nodes){
+            if(node.getLocalCommunity().size() <= 1)
+                continue;
+
+            String line = "{" + node.getId() + "}" + node.getLocalCommunity() + " -- ";
+            writer.print(line);
+//            System.out.print(line);
+            newLine = true;
+        }
+
+        if(newLine){
+            writer.println();
+//            System.out.println();
+        }
+
     }
 }

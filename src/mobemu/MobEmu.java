@@ -6,11 +6,18 @@ package mobemu;
 
 import java.util.*;
 import mobemu.algorithms.Epidemic;
+import mobemu.algorithms.SPRINT;
 import mobemu.node.Message;
 import mobemu.node.Node;
 import mobemu.node.Stats;
+import mobemu.parsers.Sigcomm;
 import mobemu.parsers.UPB;
 import mobemu.trace.Parser;
+import mobemu.utils.Constants;
+
+import static mobemu.utils.Constants.cacheMemorySize;
+import static mobemu.utils.Constants.dataMemorySize;
+import static mobemu.utils.Constants.exchangeHistorySize;
 
 /**
  * Main class for MobEmu.
@@ -20,7 +27,8 @@ import mobemu.trace.Parser;
 public class MobEmu {
 
     public static void main(String[] args) {
-        Parser parser = new UPB(UPB.UpbTrace.UPB2011);
+        Parser parser = new UPB(UPB.UpbTrace.UPB2012);
+//        Parser parser = new Sigcomm();
 
         // print some trace statistics
         double duration = (double) (parser.getTraceData().getEndTime() - parser.getTraceData().getStartTime()) / (Parser.MILLIS_PER_MINUTE * 60);
@@ -36,6 +44,10 @@ public class MobEmu {
         for (int i = 0; i < nodes.length; i++) {
             nodes[i] = new Epidemic(i, nodes.length, parser.getContextData().get(i), parser.getSocialNetwork()[i],
                     10000, 100, seed, parser.getTraceData().getStartTime(), parser.getTraceData().getEndTime(), dissemination, false);
+                        nodes[i] = new SPRINT(i, parser.getContextData().get(i), parser.getSocialNetwork()[i],
+                                dataMemorySize, exchangeHistorySize, seed, parser.getTraceData().getStartTime(),
+                                parser.getTraceData().getEndTime(), false, nodes, cacheMemorySize);
+
         }
 
         // run the trace
