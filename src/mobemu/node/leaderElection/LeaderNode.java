@@ -5,7 +5,6 @@ import mobemu.node.Context;
 import mobemu.node.Node;
 import mobemu.node.leaderElection.dto.LeaderCandidacy;
 import mobemu.node.leaderElection.dto.LeaderHeartBeat;
-import sun.plugin2.message.HeartbeatMessage;
 
 import java.util.ArrayList;
 import java.util.List;
