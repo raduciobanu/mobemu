@@ -36,6 +36,7 @@ public class CommunityLeaderNode extends LeaderNode {
         super(id, nodes, context, socialNetwork, dataMemorySize, exchangeHistorySize, seed, traceStart, traceEnd);
 
         leaderCommunity = new ArrayList<>();
+        leaderCommunity.add(id);
     }
 
     @Override
@@ -43,15 +44,24 @@ public class CommunityLeaderNode extends LeaderNode {
         if(!(encounteredNode instanceof CommunityLeaderNode)){
             return;
         }
+        CommunityLeaderNode encounteredLeaderNode = (CommunityLeaderNode)encounteredNode;
 
-        super.addToLocalCommunity(encounteredNode);
+        super.addToLocalCommunity(encounteredLeaderNode);
 
         //if current node is in the local community of encountered node => both nodes are in the localCommunity of each other
         //add the nodes in the LeaderCommunity of each other
-        if(encounteredNode.inLocalCommunity(id)){
-            addToLeaderCommunity(encounteredNode);
-            ((CommunityLeaderNode) encounteredNode).addToLeaderCommunity(this);
+        if(encounteredLeaderNode.inLocalCommunity(id)){
+            requestMembershipPermissionForNode(encounteredLeaderNode);
         }
+    }
+
+    private void requestMembershipPermissionForNode(CommunityLeaderNode encounteredLeaderNode){
+        if(leaderCommunity.size() == 1){
+            addToLeaderCommunity(encounteredLeaderNode);
+            encounteredLeaderNode.addToLeaderCommunity(this);
+            return;
+        }
+
 
     }
 

@@ -1,12 +1,11 @@
 package mobemu.node.leader.directLeaderElection;
 
-import mobemu.algorithms.SPRINT;
 import mobemu.node.Context;
 import mobemu.node.Node;
 import mobemu.node.leader.LeaderNode;
 import mobemu.node.leader.directLeaderElection.dto.LeaderCandidacy;
 import mobemu.node.leader.directLeaderElection.dto.LeaderCommunity;
-import mobemu.node.leader.directLeaderElection.dto.LeaderMessage;
+import mobemu.node.leader.directLeaderElection.dto.DirectLeaderMessage;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -23,9 +22,9 @@ public class DirectLeaderElectionNode extends LeaderNode {
      */
     protected List<LeaderCandidacy> candidacies;
 
-    protected List<LeaderMessage> heartBeats;
+    protected List<DirectLeaderMessage> heartBeats;
 
-    protected List<LeaderMessage> ownHeartBeats;
+    protected List<DirectLeaderMessage> ownHeartBeats;
 
     protected LeaderCommunity leaderCommunity;
 
@@ -149,12 +148,12 @@ public class DirectLeaderElectionNode extends LeaderNode {
     }
 
     public void generateHeartBeat(long currentTime){
-        ownHeartBeats.add(LeaderMessage.CreateRequest(id, leaderNodeId, currentTime));
+        ownHeartBeats.add(DirectLeaderMessage.CreateRequest(id, leaderNodeId, currentTime));
     }
 
     private void changeLeader(int newLeaderId, long currentTime){
         //generate ChangedLeader message for the old leader
-        ownHeartBeats.add(LeaderMessage.CreateChangedLeader(id, leaderNodeId, currentTime));
+        ownHeartBeats.add(DirectLeaderMessage.CreateChangedLeader(id, leaderNodeId, currentTime));
 
         leaderNodeId = newLeaderId;
 
@@ -165,7 +164,7 @@ public class DirectLeaderElectionNode extends LeaderNode {
     }
 
 
-    private void checkHeartBeat(LeaderMessage heartBeat, long currentTime){
+    private void checkHeartBeat(DirectLeaderMessage heartBeat, long currentTime){
         if(heartBeat.getDestinationId() == id){
             deliverHeartBeat(heartBeat, currentTime);
             return;
@@ -177,19 +176,19 @@ public class DirectLeaderElectionNode extends LeaderNode {
         heartBeats.add(heartBeat);
     }
 
-    protected void exchangeHeartBeats(List<LeaderMessage> encounteredHeartBeats,
-                                      List<LeaderMessage> encounteredOwnHeartBeats, long currentTime){
+    protected void exchangeHeartBeats(List<DirectLeaderMessage> encounteredHeartBeats,
+                                      List<DirectLeaderMessage> encounteredOwnHeartBeats, long currentTime){
 
-        for(LeaderMessage heartBeat : encounteredHeartBeats){
+        for(DirectLeaderMessage heartBeat : encounteredHeartBeats){
             checkHeartBeat(heartBeat, currentTime);
         }
 
-        for(LeaderMessage heartBeat : encounteredOwnHeartBeats){
+        for(DirectLeaderMessage heartBeat : encounteredOwnHeartBeats){
             checkHeartBeat(heartBeat, currentTime);
         }
     }
 
-    protected void deliverHeartBeat(LeaderMessage heartBeat, long currentTime){
+    protected void deliverHeartBeat(DirectLeaderMessage heartBeat, long currentTime){
 
         /**
          * if the heartbeat is a request, then the current node is considered a leader by the source of the heartbeat
@@ -199,7 +198,7 @@ public class DirectLeaderElectionNode extends LeaderNode {
             if(!leaderCommunity.containsNode(sourceId)){
                 leaderCommunity.addNode(sourceId, currentTime);
 
-                ownHeartBeats.add(LeaderMessage.CreateResponse(id, sourceId, currentTime));
+                ownHeartBeats.add(DirectLeaderMessage.CreateResponse(id, sourceId, currentTime));
             }
         }
         else if(heartBeat.isResponse())
