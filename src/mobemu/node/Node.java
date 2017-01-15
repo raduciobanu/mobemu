@@ -7,7 +7,7 @@ package mobemu.node;
 import java.io.PrintWriter;
 import java.util.*;
 
-import mobemu.node.directLeaderElection.LeaderStats;
+import mobemu.node.leader.directLeaderElection.LeaderStats;
 import mobemu.trace.Contact;
 import mobemu.trace.Trace;
 

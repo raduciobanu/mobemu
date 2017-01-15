@@ -1,4 +1,4 @@
-package mobemu.node.directLeaderElection.dto;
+package mobemu.node.leader.directLeaderElection.dto;
 
 import java.util.HashMap;
 import java.util.Map;

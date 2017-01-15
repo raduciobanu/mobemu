@@ -1,4 +1,4 @@
-package mobemu.node.directLeaderElection.dto.enums;
+package mobemu.node.leader.directLeaderElection.dto.enums;
 
 /**
  * Created by radu on 1/14/2017.

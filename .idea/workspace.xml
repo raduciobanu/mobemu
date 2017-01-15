@@ -22,100 +22,110 @@
   </component>
   <component name="FileEditorManager">
     <leaf SIDE_TABS_SIZE_LIMIT_KEY="450">
-      <file leaf-file-name="MobEmu.java" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/src/mobemu/MobEmu.java">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="296">
-              <caret line="64" column="0" lean-forward="false" selection-start-line="64" selection-start-column="0" selection-end-line="64" selection-end-column="0" />
-              <folding>
-                <element signature="imports" expanded="true" />
-              </folding>
-            </state>
-          </provider>
-        </entry>
-      </file>
       <file leaf-file-name="Node.java" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/src/mobemu/node/Node.java">
           <provider selected="true" editor-type-id="text-editor">
             <state relative-caret-position="134">
               <caret line="660" column="46" lean-forward="false" selection-start-line="660" selection-start-column="46" selection-end-line="660" selection-end-column="46" />
               <folding>
-                <element signature="e#12158#12159#0" expanded="true" />
-                <element signature="e#12188#12189#0" expanded="true" />
-                <element signature="e#12342#12343#0" expanded="true" />
-                <element signature="e#12382#12383#0" expanded="true" />
-                <element signature="e#12543#12544#0" expanded="true" />
-                <element signature="e#12580#12581#0" expanded="true" />
+                <element signature="e#12165#12166#0" expanded="true" />
+                <element signature="e#12195#12196#0" expanded="true" />
+                <element signature="e#12349#12350#0" expanded="true" />
+                <element signature="e#12389#12390#0" expanded="true" />
+                <element signature="e#12550#12551#0" expanded="true" />
+                <element signature="e#12587#12588#0" expanded="true" />
               </folding>
             </state>
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="Constants.java" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/src/mobemu/utils/Constants.java">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="350">
-              <caret line="14" column="1" lean-forward="true" selection-start-line="14" selection-start-column="1" selection-end-line="14" selection-end-column="1" />
-              <folding />
-            </state>
-          </provider>
-        </entry>
-      </file>
       <file leaf-file-name="LeaderStats.java" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/src/mobemu/node/directLeaderElection/LeaderStats.java">
+        <entry file="file://$PROJECT_DIR$/src/mobemu/node/leader/directLeaderElection/LeaderStats.java">
           <provider selected="true" editor-type-id="text-editor">
             <state relative-caret-position="771">
               <caret line="82" column="0" lean-forward="false" selection-start-line="82" selection-start-column="0" selection-end-line="82" selection-end-column="0" />
               <folding>
                 <element signature="imports" expanded="true" />
-                <element signature="e#732#733#0" expanded="true" />
-                <element signature="e#762#763#0" expanded="true" />
+                <element signature="e#739#740#0" expanded="true" />
+                <element signature="e#769#770#0" expanded="true" />
               </folding>
             </state>
           </provider>
         </entry>
       </file>
       <file leaf-file-name="CommunityLeaderNode.java" pinned="false" current-in-tab="true">
-        <entry file="file://$PROJECT_DIR$/src/mobemu/node/communityDetection/CommunityLeaderNode.java">
+        <entry file="file://$PROJECT_DIR$/src/mobemu/node/leader/communityBasedLeaderElection/CommunityLeaderNode.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="300">
-              <caret line="12" column="32" lean-forward="false" selection-start-line="12" selection-start-column="13" selection-end-line="12" selection-end-column="32" />
+            <state relative-caret-position="127">
+              <caret line="56" column="0" lean-forward="false" selection-start-line="56" selection-start-column="0" selection-end-line="56" selection-end-column="0" />
               <folding>
                 <element signature="imports" expanded="true" />
-                <element signature="e#2314#2315#0" expanded="true" />
-                <element signature="e#2341#2342#0" expanded="true" />
               </folding>
             </state>
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="DirectLiderElectionNode.java" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/src/mobemu/node/directLeaderElection/DirectLiderElectionNode.java">
+      <file leaf-file-name="LeaderNode.java" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/src/mobemu/node/leader/LeaderNode.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="346">
-              <caret line="23" column="0" lean-forward="false" selection-start-line="23" selection-start-column="0" selection-end-line="23" selection-end-column="0" />
+            <state relative-caret-position="800">
+              <caret line="52" column="0" lean-forward="false" selection-start-line="52" selection-start-column="0" selection-end-line="52" selection-end-column="0" />
               <folding>
                 <element signature="imports" expanded="true" />
-                <element signature="e#2655#2656#0" expanded="true" />
-                <element signature="e#2690#2691#0" expanded="true" />
-                <element signature="e#2805#2806#0" expanded="true" />
-                <element signature="e#2841#2842#0" expanded="true" />
+                <element signature="e#1467#1468#0" expanded="true" />
+                <element signature="e#1502#1503#0" expanded="true" />
+                <element signature="e#1619#1620#0" expanded="true" />
+                <element signature="e#1646#1647#0" expanded="true" />
               </folding>
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="DirectLeaderElectionNode.java" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/src/mobemu/node/leader/directLeaderElection/DirectLeaderElectionNode.java">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="475">
+              <caret line="73" column="0" lean-forward="false" selection-start-line="73" selection-start-column="2" selection-end-line="73" selection-end-column="78" />
+              <folding>
+                <element signature="imports" expanded="true" />
+                <element signature="e#2180#2181#0" expanded="true" />
+                <element signature="e#2216#2217#0" expanded="true" />
+              </folding>
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="Altruism.java" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/src/mobemu/node/Altruism.java">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="186">
+              <caret line="11" column="13" lean-forward="false" selection-start-line="11" selection-start-column="13" selection-end-line="11" selection-end-column="13" />
+              <folding />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="Centrality.java" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/src/mobemu/node/Centrality.java">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="186">
+              <caret line="11" column="13" lean-forward="false" selection-start-line="11" selection-start-column="13" selection-end-line="11" selection-end-column="13" />
+              <folding />
             </state>
           </provider>
         </entry>
       </file>
       <file leaf-file-name="LeaderCommunity.java" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/src/mobemu/node/directLeaderElection/dto/LeaderCommunity.java">
+        <entry file="file://$PROJECT_DIR$/src/mobemu/node/leader/directLeaderElection/dto/LeaderCommunity.java">
           <provider selected="true" editor-type-id="text-editor">
             <state relative-caret-position="450">
               <caret line="18" column="7" lean-forward="false" selection-start-line="18" selection-start-column="7" selection-end-line="18" selection-end-column="7" />
               <folding>
                 <element signature="imports" expanded="true" />
-                <element signature="e#322#323#0" expanded="true" />
-                <element signature="e#365#366#0" expanded="true" />
-                <element signature="e#633#634#0" expanded="true" />
-                <element signature="e#685#686#0" expanded="true" />
+                <element signature="e#329#330#0" expanded="true" />
+                <element signature="e#372#373#0" expanded="true" />
+                <element signature="e#640#641#0" expanded="true" />
+                <element signature="e#692#693#0" expanded="true" />
               </folding>
             </state>
           </provider>
@@ -132,7 +142,7 @@
         </entry>
       </file>
       <file leaf-file-name="LeaderCandidacy.java" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/src/mobemu/node/directLeaderElection/dto/LeaderCandidacy.java">
+        <entry file="file://$PROJECT_DIR$/src/mobemu/node/leader/directLeaderElection/dto/LeaderCandidacy.java">
           <provider selected="true" editor-type-id="text-editor">
             <state relative-caret-position="350">
               <caret line="14" column="0" lean-forward="false" selection-start-line="14" selection-start-column="0" selection-end-line="14" selection-end-column="0" />
@@ -189,8 +199,12 @@
         <option value="$PROJECT_DIR$/src/mobemu/node/leaderElection/LeaderStats.java" />
         <option value="$PROJECT_DIR$/src/mobemu/utils/Constants.java" />
         <option value="$PROJECT_DIR$/src/mobemu/node/Node.java" />
-        <option value="$PROJECT_DIR$/src/mobemu/node/communityDetection/CommunityLeaderNode.java" />
         <option value="$PROJECT_DIR$/src/mobemu/node/leaderElection/DirectLiderElectionNode.java" />
+        <option value="$PROJECT_DIR$/src/mobemu/node/communityDetection/CommunityLeaderNode.java" />
+        <option value="$PROJECT_DIR$/src/mobemu/node/leader/communityDetection/CommunityLeaderNode.java" />
+        <option value="$PROJECT_DIR$/src/mobemu/node/leader/LeaderNode.java" />
+        <option value="$PROJECT_DIR$/src/mobemu/node/leader/directLeaderElection/DirectLeaderElectionNode.java" />
+        <option value="$PROJECT_DIR$/src/mobemu/node/leader/communityBasedLeaderElection/CommunityLeaderNode.java" />
       </list>
     </option>
   </component>
@@ -427,6 +441,36 @@
               <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
             </PATH_ELEMENT>
             <PATH_ELEMENT>
+              <option name="myItemId" value="leader" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+          </PATH>
+          <PATH>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="mobemu" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.ProjectViewProjectNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="mobemu" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="src" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="mobemu" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="node" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="leader" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
               <option name="myItemId" value="directLeaderElection" />
               <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
             </PATH_ELEMENT>
@@ -453,7 +497,11 @@
               <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
             </PATH_ELEMENT>
             <PATH_ELEMENT>
-              <option name="myItemId" value="communityDetection" />
+              <option name="myItemId" value="leader" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="communityBasedLeaderElection" />
               <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
             </PATH_ELEMENT>
           </PATH>
@@ -838,12 +886,12 @@
       <workItem from="1484230174102" duration="2489000" />
       <workItem from="1484234367294" duration="7480000" />
       <workItem from="1484308756580" duration="10997000" />
-      <workItem from="1484385874495" duration="20968000" />
+      <workItem from="1484385874495" duration="21920000" />
     </task>
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="48517000" />
+    <option name="totallyTimeSpent" value="49469000" />
   </component>
   <component name="ToolWindowManager">
     <frame x="1911" y="-9" width="1938" height="1048" extended-state="6" />
@@ -921,79 +969,6 @@
     <option name="FILTER_TARGETS" value="false" />
   </component>
   <component name="editorHistoryManager">
-    <entry file="file://$PROJECT_DIR$/src/mobemu/node/Message.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="7100">
-          <caret line="325" column="53" lean-forward="false" selection-start-line="325" selection-start-column="53" selection-end-line="325" selection-end-column="53" />
-          <folding>
-            <element signature="e#0#13000#0" expanded="false" />
-            <element signature="e#2537#2538#0" expanded="false" />
-            <element signature="e#2562#2563#0" expanded="false" />
-            <element signature="e#2685#2686#0" expanded="false" />
-            <element signature="e#2714#2715#0" expanded="false" />
-            <element signature="e#2852#2853#0" expanded="false" />
-            <element signature="e#2886#2887#0" expanded="false" />
-            <element signature="e#3035#3036#0" expanded="false" />
-            <element signature="e#3062#3063#0" expanded="false" />
-            <element signature="e#3197#3198#0" expanded="false" />
-            <element signature="e#3227#3228#0" expanded="false" />
-            <element signature="e#3390#3391#0" expanded="false" />
-            <element signature="e#3422#3423#0" expanded="false" />
-            <element signature="e#3557#3558#0" expanded="false" />
-            <element signature="e#3587#3588#0" expanded="false" />
-            <element signature="e#3722#3723#0" expanded="false" />
-            <element signature="e#3750#3751#0" expanded="false" />
-            <element signature="e#3960#3961#0" expanded="false" />
-            <element signature="e#4003#4004#0" expanded="false" />
-            <element signature="e#4200#4201#0" expanded="false" />
-            <element signature="e#4244#4245#0" expanded="false" />
-            <element signature="e#4433#4434#0" expanded="false" />
-            <element signature="e#4475#4476#0" expanded="false" />
-            <element signature="e#4692#4693#0" expanded="false" />
-            <element signature="e#4734#4735#0" expanded="false" />
-            <element signature="e#5040#5041#0" expanded="false" />
-            <element signature="e#5094#5095#0" expanded="false" />
-            <element signature="e#5357#5358#0" expanded="false" />
-            <element signature="e#5420#5421#0" expanded="false" />
-            <element signature="e#5623#5624#0" expanded="false" />
-            <element signature="e#5672#5673#0" expanded="false" />
-            <element signature="e#5953#5954#0" expanded="false" />
-            <element signature="e#6001#6002#0" expanded="false" />
-            <element signature="e#6199#6200#0" expanded="false" />
-            <element signature="e#6241#6242#0" expanded="false" />
-            <element signature="e#6453#6454#0" expanded="false" />
-            <element signature="e#6489#6490#0" expanded="false" />
-            <element signature="e#6642#6643#0" expanded="false" />
-            <element signature="e#6680#6681#0" expanded="false" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/mobemu/node/Node.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="0">
-          <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
-          <folding>
-            <element signature="e#12158#12159#0" expanded="true" />
-            <element signature="e#12188#12189#0" expanded="true" />
-            <element signature="e#12342#12343#0" expanded="true" />
-            <element signature="e#12382#12383#0" expanded="true" />
-            <element signature="e#12543#12544#0" expanded="true" />
-            <element signature="e#12580#12581#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/mobemu/MobEmu.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="2000">
-          <caret line="91" column="22" lean-forward="false" selection-start-line="91" selection-start-column="12" selection-end-line="91" selection-end-column="22" />
-          <folding>
-            <element signature="imports" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/src/mobemu/algorithms/SocialTrust.java">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="0">
@@ -1089,12 +1064,12 @@
         <state relative-caret-position="10375">
           <caret line="440" column="7" lean-forward="false" selection-start-line="440" selection-start-column="7" selection-end-line="440" selection-end-column="7" />
           <folding>
-            <element signature="e#12158#12159#0" expanded="true" />
-            <element signature="e#12188#12189#0" expanded="true" />
-            <element signature="e#12342#12343#0" expanded="true" />
-            <element signature="e#12382#12383#0" expanded="true" />
-            <element signature="e#12543#12544#0" expanded="true" />
-            <element signature="e#12580#12581#0" expanded="true" />
+            <element signature="e#12165#12166#0" expanded="true" />
+            <element signature="e#12195#12196#0" expanded="true" />
+            <element signature="e#12349#12350#0" expanded="true" />
+            <element signature="e#12389#12390#0" expanded="true" />
+            <element signature="e#12550#12551#0" expanded="true" />
+            <element signature="e#12587#12588#0" expanded="true" />
           </folding>
         </state>
       </provider>
@@ -1196,12 +1171,12 @@
         <state relative-caret-position="10375">
           <caret line="440" column="7" lean-forward="false" selection-start-line="440" selection-start-column="7" selection-end-line="440" selection-end-column="7" />
           <folding>
-            <element signature="e#12158#12159#0" expanded="true" />
-            <element signature="e#12188#12189#0" expanded="true" />
-            <element signature="e#12342#12343#0" expanded="true" />
-            <element signature="e#12382#12383#0" expanded="true" />
-            <element signature="e#12543#12544#0" expanded="true" />
-            <element signature="e#12580#12581#0" expanded="true" />
+            <element signature="e#12165#12166#0" expanded="true" />
+            <element signature="e#12195#12196#0" expanded="true" />
+            <element signature="e#12349#12350#0" expanded="true" />
+            <element signature="e#12389#12390#0" expanded="true" />
+            <element signature="e#12550#12551#0" expanded="true" />
+            <element signature="e#12587#12588#0" expanded="true" />
           </folding>
         </state>
       </provider>
@@ -1303,12 +1278,12 @@
         <state relative-caret-position="10375">
           <caret line="440" column="7" lean-forward="false" selection-start-line="440" selection-start-column="7" selection-end-line="440" selection-end-column="7" />
           <folding>
-            <element signature="e#12158#12159#0" expanded="true" />
-            <element signature="e#12188#12189#0" expanded="true" />
-            <element signature="e#12342#12343#0" expanded="true" />
-            <element signature="e#12382#12383#0" expanded="true" />
-            <element signature="e#12543#12544#0" expanded="true" />
-            <element signature="e#12580#12581#0" expanded="true" />
+            <element signature="e#12165#12166#0" expanded="true" />
+            <element signature="e#12195#12196#0" expanded="true" />
+            <element signature="e#12349#12350#0" expanded="true" />
+            <element signature="e#12389#12390#0" expanded="true" />
+            <element signature="e#12550#12551#0" expanded="true" />
+            <element signature="e#12587#12588#0" expanded="true" />
           </folding>
         </state>
       </provider>
@@ -1410,12 +1385,12 @@
         <state relative-caret-position="10375">
           <caret line="440" column="7" lean-forward="false" selection-start-line="440" selection-start-column="7" selection-end-line="440" selection-end-column="7" />
           <folding>
-            <element signature="e#12158#12159#0" expanded="true" />
-            <element signature="e#12188#12189#0" expanded="true" />
-            <element signature="e#12342#12343#0" expanded="true" />
-            <element signature="e#12382#12383#0" expanded="true" />
-            <element signature="e#12543#12544#0" expanded="true" />
-            <element signature="e#12580#12581#0" expanded="true" />
+            <element signature="e#12165#12166#0" expanded="true" />
+            <element signature="e#12195#12196#0" expanded="true" />
+            <element signature="e#12349#12350#0" expanded="true" />
+            <element signature="e#12389#12390#0" expanded="true" />
+            <element signature="e#12550#12551#0" expanded="true" />
+            <element signature="e#12587#12588#0" expanded="true" />
           </folding>
         </state>
       </provider>
@@ -1533,7 +1508,7 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/src/mobemu/node/directLeaderElection/dto/enums/LeaderMessageType.java">
+    <entry file="file://$PROJECT_DIR$/src/mobemu/node/leader/directLeaderElection/dto/enums/LeaderMessageType.java">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="200">
           <caret line="8" column="17" lean-forward="false" selection-start-line="8" selection-start-column="4" selection-end-line="8" selection-end-column="17" />
@@ -1557,17 +1532,17 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/src/mobemu/node/directLeaderElection/dto/LeaderMessage.java">
+    <entry file="file://$PROJECT_DIR$/src/mobemu/node/leader/directLeaderElection/dto/LeaderMessage.java">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="-1258">
           <caret line="7" column="13" lean-forward="false" selection-start-line="7" selection-start-column="13" selection-end-line="7" selection-end-column="13" />
           <folding>
-            <element signature="e#2169#2170#0" expanded="true" />
-            <element signature="e#2233#2234#0" expanded="true" />
-            <element signature="e#2272#2273#0" expanded="true" />
-            <element signature="e#2341#2342#0" expanded="true" />
-            <element signature="e#2375#2376#0" expanded="true" />
-            <element signature="e#2407#2408#0" expanded="true" />
+            <element signature="e#2183#2184#0" expanded="true" />
+            <element signature="e#2247#2248#0" expanded="true" />
+            <element signature="e#2286#2287#0" expanded="true" />
+            <element signature="e#2355#2356#0" expanded="true" />
+            <element signature="e#2389#2390#0" expanded="true" />
+            <element signature="e#2421#2422#0" expanded="true" />
           </folding>
         </state>
       </provider>
@@ -1585,38 +1560,38 @@
     <entry file="file://$PROJECT_DIR$/src/mobemu/utils/Constants.java">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="350">
-          <caret line="14" column="1" lean-forward="true" selection-start-line="14" selection-start-column="1" selection-end-line="14" selection-end-column="1" />
+          <caret line="14" column="1" lean-forward="false" selection-start-line="14" selection-start-column="1" selection-end-line="14" selection-end-column="1" />
           <folding />
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/src/mobemu/node/directLeaderElection/LeaderStats.java">
+    <entry file="file://$PROJECT_DIR$/src/mobemu/node/leader/directLeaderElection/LeaderStats.java">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="771">
           <caret line="82" column="0" lean-forward="false" selection-start-line="82" selection-start-column="0" selection-end-line="82" selection-end-column="0" />
           <folding>
             <element signature="imports" expanded="true" />
-            <element signature="e#732#733#0" expanded="true" />
-            <element signature="e#762#763#0" expanded="true" />
+            <element signature="e#739#740#0" expanded="true" />
+            <element signature="e#769#770#0" expanded="true" />
           </folding>
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/src/mobemu/node/directLeaderElection/dto/LeaderCommunity.java">
+    <entry file="file://$PROJECT_DIR$/src/mobemu/node/leader/directLeaderElection/dto/LeaderCommunity.java">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="450">
           <caret line="18" column="7" lean-forward="false" selection-start-line="18" selection-start-column="7" selection-end-line="18" selection-end-column="7" />
           <folding>
             <element signature="imports" expanded="true" />
-            <element signature="e#322#323#0" expanded="true" />
-            <element signature="e#365#366#0" expanded="true" />
-            <element signature="e#633#634#0" expanded="true" />
-            <element signature="e#685#686#0" expanded="true" />
+            <element signature="e#329#330#0" expanded="true" />
+            <element signature="e#372#373#0" expanded="true" />
+            <element signature="e#640#641#0" expanded="true" />
+            <element signature="e#692#693#0" expanded="true" />
           </folding>
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/src/mobemu/node/directLeaderElection/dto/LeaderCandidacy.java">
+    <entry file="file://$PROJECT_DIR$/src/mobemu/node/leader/directLeaderElection/dto/LeaderCandidacy.java">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="350">
           <caret line="14" column="0" lean-forward="false" selection-start-line="14" selection-start-column="0" selection-end-line="14" selection-end-column="0" />
@@ -1629,35 +1604,21 @@
         <state relative-caret-position="134">
           <caret line="660" column="46" lean-forward="false" selection-start-line="660" selection-start-column="46" selection-end-line="660" selection-end-column="46" />
           <folding>
-            <element signature="e#12158#12159#0" expanded="true" />
-            <element signature="e#12188#12189#0" expanded="true" />
-            <element signature="e#12342#12343#0" expanded="true" />
-            <element signature="e#12382#12383#0" expanded="true" />
-            <element signature="e#12543#12544#0" expanded="true" />
-            <element signature="e#12580#12581#0" expanded="true" />
+            <element signature="e#12165#12166#0" expanded="true" />
+            <element signature="e#12195#12196#0" expanded="true" />
+            <element signature="e#12349#12350#0" expanded="true" />
+            <element signature="e#12389#12390#0" expanded="true" />
+            <element signature="e#12550#12551#0" expanded="true" />
+            <element signature="e#12587#12588#0" expanded="true" />
           </folding>
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/src/mobemu/node/directLeaderElection/DirectLiderElectionNode.java">
+    <entry file="file://$PROJECT_DIR$/src/mobemu/node/leader/directLeaderElection/DirectLeaderElectionNode.java">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="125">
           <caret line="5" column="36" lean-forward="false" selection-start-line="5" selection-start-column="13" selection-end-line="5" selection-end-column="36" />
           <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/mobemu/node/directLeaderElection/DirectLiderElectionNode.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="346">
-          <caret line="23" column="0" lean-forward="false" selection-start-line="23" selection-start-column="0" selection-end-line="23" selection-end-column="0" />
-          <folding>
-            <element signature="imports" expanded="true" />
-            <element signature="e#2655#2656#0" expanded="true" />
-            <element signature="e#2690#2691#0" expanded="true" />
-            <element signature="e#2805#2806#0" expanded="true" />
-            <element signature="e#2841#2842#0" expanded="true" />
-          </folding>
         </state>
       </provider>
     </entry>
@@ -1677,14 +1638,54 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/src/mobemu/node/communityDetection/CommunityLeaderNode.java">
+    <entry file="file://$PROJECT_DIR$/src/mobemu/node/Altruism.java">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="300">
-          <caret line="12" column="32" lean-forward="false" selection-start-line="12" selection-start-column="13" selection-end-line="12" selection-end-column="32" />
+        <state relative-caret-position="186">
+          <caret line="11" column="13" lean-forward="false" selection-start-line="11" selection-start-column="13" selection-end-line="11" selection-end-column="13" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/mobemu/node/Centrality.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="186">
+          <caret line="11" column="13" lean-forward="false" selection-start-line="11" selection-start-column="13" selection-end-line="11" selection-end-column="13" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/mobemu/node/leader/LeaderNode.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="800">
+          <caret line="52" column="0" lean-forward="false" selection-start-line="52" selection-start-column="0" selection-end-line="52" selection-end-column="0" />
           <folding>
             <element signature="imports" expanded="true" />
-            <element signature="e#2314#2315#0" expanded="true" />
-            <element signature="e#2341#2342#0" expanded="true" />
+            <element signature="e#1467#1468#0" expanded="true" />
+            <element signature="e#1502#1503#0" expanded="true" />
+            <element signature="e#1619#1620#0" expanded="true" />
+            <element signature="e#1646#1647#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/mobemu/node/leader/directLeaderElection/DirectLeaderElectionNode.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="475">
+          <caret line="73" column="0" lean-forward="false" selection-start-line="73" selection-start-column="2" selection-end-line="73" selection-end-column="78" />
+          <folding>
+            <element signature="imports" expanded="true" />
+            <element signature="e#2180#2181#0" expanded="true" />
+            <element signature="e#2216#2217#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/mobemu/node/leader/communityBasedLeaderElection/CommunityLeaderNode.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="127">
+          <caret line="56" column="0" lean-forward="false" selection-start-line="56" selection-start-column="0" selection-end-line="56" selection-end-column="0" />
+          <folding>
+            <element signature="imports" expanded="true" />
           </folding>
         </state>
       </provider>

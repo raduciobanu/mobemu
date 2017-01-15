@@ -1,4 +1,4 @@
-package mobemu.node.directLeaderElection;
+package mobemu.node.leader.directLeaderElection;
 
 import mobemu.node.Node;
 
@@ -63,7 +63,7 @@ public class LeaderStats {
     public static void generateHeartBeats(Node[] nodes, long tick, long startTime){
         if((tick - startTime) % heartBeatGenerationTime == 0){
             for(Node node: nodes){
-                DirectLiderElectionNode leaderNode = (DirectLiderElectionNode) node;
+                DirectLeaderElectionNode leaderNode = (DirectLeaderElectionNode) node;
 
                 leaderNode.generateHeartBeat(tick);
             }
@@ -75,7 +75,7 @@ public class LeaderStats {
         int number = 0;
 
         for (Node node : nodes){
-            DirectLiderElectionNode leaderNode = (DirectLiderElectionNode) node;
+            DirectLeaderElectionNode leaderNode = (DirectLeaderElectionNode) node;
             for(long responseTime : leaderNode.getResponseTimes()){
                 //skip scenarios when the node is its own leader
                 if(responseTime == 0)

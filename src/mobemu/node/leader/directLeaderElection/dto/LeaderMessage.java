@@ -1,6 +1,6 @@
-package mobemu.node.directLeaderElection.dto;
+package mobemu.node.leader.directLeaderElection.dto;
 
-import mobemu.node.directLeaderElection.dto.enums.LeaderMessageType;
+import mobemu.node.leader.directLeaderElection.dto.enums.LeaderMessageType;
 
 /**
  * Created by radu on 1/13/2017.

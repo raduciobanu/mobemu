@@ -1,8 +1,8 @@
-package mobemu.node.communityDetection;
+package mobemu.node.leader.communityBasedLeaderElection;
 
-import mobemu.algorithms.SPRINT;
 import mobemu.node.Context;
 import mobemu.node.Node;
+import mobemu.node.leader.LeaderNode;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -10,7 +10,7 @@ import java.util.List;
 /**
  * Created by radu on 1/15/2017.
  */
-public class CommunityLeaderNode extends Node {
+public class CommunityLeaderNode extends LeaderNode {
 
     /**
      *  the community of the current node
@@ -60,14 +60,9 @@ public class CommunityLeaderNode extends Node {
             leaderCommunity.add(encounteredNode.getId());
     }
 
-
-    @Override
-    public String getName() {
-        return null;
-    }
-
     @Override
     protected void onDataExchange(Node encounteredNode, long contactDuration, long currentTime) {
 
     }
+
 }

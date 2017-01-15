@@ -1,11 +1,12 @@
-package mobemu.node.directLeaderElection;
+package mobemu.node.leader.directLeaderElection;
 
 import mobemu.algorithms.SPRINT;
 import mobemu.node.Context;
 import mobemu.node.Node;
-import mobemu.node.directLeaderElection.dto.LeaderCandidacy;
-import mobemu.node.directLeaderElection.dto.LeaderCommunity;
-import mobemu.node.directLeaderElection.dto.LeaderMessage;
+import mobemu.node.leader.LeaderNode;
+import mobemu.node.leader.directLeaderElection.dto.LeaderCandidacy;
+import mobemu.node.leader.directLeaderElection.dto.LeaderCommunity;
+import mobemu.node.leader.directLeaderElection.dto.LeaderMessage;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -15,17 +16,7 @@ import static mobemu.utils.Constants.communityMaxHop;
 /**
  * Created by radu on 1/13/2017.
  */
-public class DirectLiderElectionNode extends SPRINT {
-
-    /**
-     * The id of the Leader (for current node's point of view)
-     */
-    protected int leaderNodeId;
-
-    /**
-     * The score computed for the current leader
-     */
-    protected double leaderScore;
+public class DirectLeaderElectionNode extends LeaderNode {
 
     /**
      * List of leader candidacies from other nodes
@@ -41,39 +32,27 @@ public class DirectLiderElectionNode extends SPRINT {
     protected List<Long> responseTimes;
 
     /**
-     * Instantiates an {@code ONSIDE} object.
+     * Constructor for the {@link Node} class.
      *
      * @param id                  ID of the node
+     * @param nodes               total number of existing nodes
      * @param context             the context of this node
      * @param socialNetwork       the social network as seen by this node
      * @param dataMemorySize      the maximum allowed size of the data memory
      * @param exchangeHistorySize the maximum allowed size of the exchange
      *                            history
-     * @param seed                the seed for the random number generators if routing is used
+     * @param seed                the seed for the random number generators
      * @param traceStart          timestamp of the start of the trace
      * @param traceEnd            timestamp of the end of the trace
-     * @param altruism            {@code true} if altruism computations are performed, {@code false}
-     *                            otherwise
-     * @param nodes               array of all the nodes in the network
-     * @param cacheMemorySize     size of the cache holding the most recent
      */
-    public DirectLiderElectionNode(int id, Context context, boolean[] socialNetwork, int dataMemorySize, int exchangeHistorySize, long seed, long traceStart, long traceEnd, boolean altruism, Node[] nodes, int cacheMemorySize) {
-        super(id, context, socialNetwork, dataMemorySize, exchangeHistorySize, seed, traceStart, traceEnd, altruism, nodes, cacheMemorySize);
+    public DirectLeaderElectionNode(int id, int nodes, Context context, boolean[] socialNetwork, int dataMemorySize, int exchangeHistorySize, long seed, long traceStart, long traceEnd) {
+        super(id, nodes, context, socialNetwork, dataMemorySize, exchangeHistorySize, seed, traceStart, traceEnd);
 
-        leaderNodeId = id;
         candidacies = new ArrayList<>();
         heartBeats = new ArrayList<>();
         ownHeartBeats = new ArrayList<>();
         leaderCommunity = new LeaderCommunity();
         responseTimes = new ArrayList<>();
-    }
-
-    public int getLeaderNodeId() {
-        return leaderNodeId;
-    }
-
-    public double getLeaderScore() {
-        return leaderScore;
     }
 
     public List<Long> getResponseTimes(){
@@ -82,17 +61,17 @@ public class DirectLiderElectionNode extends SPRINT {
 
     @Override
     protected void onDataExchange(Node encounteredNode, long contactDuration, long currentTime) {
-        if (!(encounteredNode instanceof DirectLiderElectionNode)) {
+        if (!(encounteredNode instanceof DirectLeaderElectionNode)) {
             return;
         }
 
         generateCandidacy(currentTime);
 
-        DirectLiderElectionNode encounteredLeaderNode = (DirectLiderElectionNode) encounteredNode;
+        DirectLeaderElectionNode encounteredLeaderNode = (DirectLeaderElectionNode) encounteredNode;
         exchangeCandidacies(encounteredLeaderNode.candidacies, currentTime);
         exchangeHeartBeats(encounteredLeaderNode.heartBeats, encounteredLeaderNode.ownHeartBeats, currentTime);
 
-        super.onDataExchange(encounteredNode, contactDuration, currentTime);
+//        super.onDataExchange(encounteredNode, contactDuration, currentTime);
 
     }
 
