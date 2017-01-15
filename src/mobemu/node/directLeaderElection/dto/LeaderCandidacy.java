@@ -1,4 +1,4 @@
-package mobemu.node.leaderElection.dto;
+package mobemu.node.directLeaderElection.dto;
 
 import java.util.List;
 

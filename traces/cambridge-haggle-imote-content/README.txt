@@ -1,4 +1,4 @@
-Description of the public data traces of iMotes experiment deployment in
+ï»¿Description of the public data traces of iMotes experiment deployment in
 Cambridge.
 
 ========================
@@ -13,7 +13,7 @@ return to accept the following terms:
 Please reference the following:
  
  @InProceedings{cam-leguay06,
- author = {Jérémie Leguay and Anders Lindgren and James Scott and Timur Friedman and Jon Crowcroft},
+ author = {JÃ©rÃ©mie Leguay and Anders Lindgren and James Scott and Timur Friedman and Jon Crowcroft},
  title = {Opportunistic Content Distribution in an Urban Setting},
  booktitle = {Proc. {ACM SIGCOMM} 2006 - Workshop on Challenged Networks ({CHANTS})},
  month = {September}
@@ -221,7 +221,7 @@ Globally, the ID have been attributed in the following fashion:
 To ease the understanding of data while keeping a sufficent privacy level, 
 we provide here an idea of the kind of locations where fixed iMotes were deployed:
 
-Pubs: 41, 45, 46, 47, 50 Shop windows: 37, 39, 42, 43, 44, 48, 49, 53Popular supermarket: 38Central point in the commercial center n°1: 52Central point in the commercial center n°2: 40
+Pubs: 41, 45, 46, 47, 50 Shop windows: 37, 39, 42, 43, 44, 48, 49, 53Popular supermarket: 38Central point in the commercial center nÂ°1: 52Central point in the commercial center nÂ°2: 40
 College porter's lodge: 51Computer lab reception:	54
 
 

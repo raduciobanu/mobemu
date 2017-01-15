@@ -6,14 +6,12 @@ package mobemu;
 
 import java.util.*;
 import mobemu.algorithms.Epidemic;
-import mobemu.algorithms.SPRINT;
 import mobemu.node.Message;
 import mobemu.node.Node;
 import mobemu.node.Stats;
-import mobemu.parsers.Sigcomm;
+import mobemu.node.directLeaderElection.DirectLiderElectionNode;
 import mobemu.parsers.UPB;
 import mobemu.trace.Parser;
-import mobemu.utils.Constants;
 
 import static mobemu.utils.Constants.cacheMemorySize;
 import static mobemu.utils.Constants.dataMemorySize;
@@ -44,9 +42,12 @@ public class MobEmu {
         for (int i = 0; i < nodes.length; i++) {
             nodes[i] = new Epidemic(i, nodes.length, parser.getContextData().get(i), parser.getSocialNetwork()[i],
                     10000, 100, seed, parser.getTraceData().getStartTime(), parser.getTraceData().getEndTime(), dissemination, false);
-                        nodes[i] = new SPRINT(i, parser.getContextData().get(i), parser.getSocialNetwork()[i],
-                                dataMemorySize, exchangeHistorySize, seed, parser.getTraceData().getStartTime(),
-                                parser.getTraceData().getEndTime(), false, nodes, cacheMemorySize);
+//                        nodes[i] = new SPRINT(i, parser.getContextData().get(i), parser.getSocialNetwork()[i],
+//                                dataMemorySize, exchangeHistorySize, seed, parser.getTraceData().getStartTime(),
+//                                parser.getTraceData().getEndTime(), false, nodes, cacheMemorySize);
+            nodes[i] = new DirectLiderElectionNode(i, parser.getContextData().get(i), parser.getSocialNetwork()[i],
+                    dataMemorySize, exchangeHistorySize, seed, parser.getTraceData().getStartTime(),
+                    parser.getTraceData().getEndTime(), false, nodes, cacheMemorySize);
 
         }
 
@@ -60,5 +61,7 @@ public class MobEmu {
         System.out.println("" + Stats.computeDeliveryCost(messages, nodes, dissemination));
         System.out.println("" + Stats.computeDeliveryLatency(messages, nodes, dissemination));
         System.out.println("" + Stats.computeHopCount(messages, nodes, dissemination));
+
+
     }
 }

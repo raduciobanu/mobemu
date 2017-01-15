@@ -6,6 +6,8 @@ package mobemu.node;
 
 import java.io.PrintWriter;
 import java.util.*;
+
+import mobemu.node.directLeaderElection.LeaderStats;
 import mobemu.trace.Contact;
 import mobemu.trace.Trace;
 
@@ -190,7 +192,8 @@ public abstract class Node {
         List<Message> messages = new ArrayList<>();
 
 
-        PrintWriter writer = Stats.openFile();
+//        PrintWriter writer = LeaderStats.openFile("communities.txt");
+        PrintWriter writer = LeaderStats.openFile("responseTimes.txt");
         for (long tick = startTime; tick < endTime; tick += 10 * sampleTime) {
             int count = 0;
 
@@ -245,9 +248,11 @@ public abstract class Node {
             }
 
             contactCount = trace.getContactsCount();
-            Stats.printLocalCommunities(nodes, tick, startTime, writer);
+//            LeaderStats.printLocalCommunities(nodes, tick, startTime, writer);
+            LeaderStats.generateHeartBeats(nodes, tick, startTime);
         }
-        Stats.closeFile(writer);
+        LeaderStats.computeAverageHeartBeatResponseTime(nodes, writer);
+        LeaderStats.closeFile(writer);
 
         return messages;
     }
@@ -447,7 +452,7 @@ public abstract class Node {
             updateContactDuration(encounteredNode.id, sampleTime, tick);
 
             // when the threshold has been exceeded, insert vi in F0 and C0
-            checkThreshold(encounteredNode.id);
+            checkThreshold(encounteredNode);
         }
 
         updateCentrality(timeDelta);
@@ -585,9 +590,10 @@ public abstract class Node {
      * Checks if the K-clique contact duration threshold has been exceeded and
      * adds the encountered node to the local community if it has.
      *
-     * @param id ID of the encountered node
+     * @param encounteredNode the encountered node
      */
-    protected void checkThreshold(int id) {
+    protected void checkThreshold(Node encounteredNode) {
+        int id = encounteredNode.getId();
         ContactInfo node = encounteredNodes.get(id);
 
         if (node != null) {
@@ -598,7 +604,7 @@ public abstract class Node {
                 }
 
                 if (!inLocalCommunity(id)) {
-                    localCommunity.add(id);
+                    addToLocalCommunity(encounteredNode);
                 }
             }
         }
@@ -620,7 +626,7 @@ public abstract class Node {
         }
 
         if (count >= communityThreshold - 1) {
-            localCommunity.add(encounteredNode.id);
+            addToLocalCommunity(encounteredNode);
         }
     }
 
@@ -646,6 +652,13 @@ public abstract class Node {
                 }
             }
         }
+    }
+
+
+
+    protected void addToLocalCommunity(Node encounteredNode){
+        int encounteredNodeId = encounteredNode.id;
+        localCommunity.add(encounteredNodeId);
     }
 
     /**
