@@ -3,8 +3,8 @@ package mobemu.node.leader.directLeaderElection;
 import mobemu.node.Context;
 import mobemu.node.Node;
 import mobemu.node.leader.LeaderNode;
+import mobemu.node.leader.directLeaderElection.dto.CommunityByLeader;
 import mobemu.node.leader.directLeaderElection.dto.LeaderCandidacy;
-import mobemu.node.leader.directLeaderElection.dto.LeaderCommunity;
 import mobemu.node.leader.directLeaderElection.dto.DirectLeaderMessage;
 
 import java.util.ArrayList;
@@ -26,7 +26,7 @@ public class DirectLeaderElectionNode extends LeaderNode {
 
     protected List<DirectLeaderMessage> ownHeartBeats;
 
-    protected LeaderCommunity leaderCommunity;
+    protected CommunityByLeader communityByLeader;
 
     protected List<Long> responseTimes;
 
@@ -50,7 +50,7 @@ public class DirectLeaderElectionNode extends LeaderNode {
         candidacies = new ArrayList<>();
         heartBeats = new ArrayList<>();
         ownHeartBeats = new ArrayList<>();
-        leaderCommunity = new LeaderCommunity();
+        communityByLeader = new CommunityByLeader();
         responseTimes = new ArrayList<>();
     }
 
@@ -195,8 +195,8 @@ public class DirectLeaderElectionNode extends LeaderNode {
          */
         int sourceId = heartBeat.getSourceId();
         if(heartBeat.isRequest()){
-            if(!leaderCommunity.containsNode(sourceId)){
-                leaderCommunity.addNode(sourceId, currentTime);
+            if(!communityByLeader.containsNode(sourceId)){
+                communityByLeader.addNode(sourceId, currentTime);
 
                 ownHeartBeats.add(DirectLeaderMessage.CreateResponse(id, sourceId, currentTime));
             }
@@ -208,7 +208,7 @@ public class DirectLeaderElectionNode extends LeaderNode {
 //            System.out.println("Response Received after " + responseTime + "s!");
         }
         else{
-            leaderCommunity.removeNode(sourceId, currentTime);
+            communityByLeader.removeNode(sourceId, currentTime);
         }
     }
 }

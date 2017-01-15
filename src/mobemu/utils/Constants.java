@@ -11,5 +11,5 @@ public class Constants {
 
     public static int communityMaxHop = 2;
     public static int heartBeatGenerationTime = 1000* 60*60*3;
-
+    public static double leaderCommunityThreshold = 0.5;
 }

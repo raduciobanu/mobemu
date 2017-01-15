@@ -5,5 +5,7 @@ package mobemu.node.leader.communityBasedLeaderElection.dto;
  */
 public enum CommunityMessageType {
     Request,
-    Response
+    Response,
+    AddedNode,
+    LeaderProposal
 }

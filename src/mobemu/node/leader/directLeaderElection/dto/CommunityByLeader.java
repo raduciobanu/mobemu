@@ -6,13 +6,13 @@ import java.util.Map;
 /**
  * Created by radu on 1/14/2017.
  */
-public class LeaderCommunity {
+public class CommunityByLeader {
     /**
      * Dictionary of nodes and the timestamp of membership request
      */
     private Map<Integer, Long> community;
 
-    public LeaderCommunity(){
+    public CommunityByLeader(){
         community = new HashMap<>();
     }
 
