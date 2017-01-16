@@ -9,6 +9,7 @@ import mobemu.algorithms.Epidemic;
 import mobemu.node.Message;
 import mobemu.node.Node;
 import mobemu.node.Stats;
+import mobemu.node.leader.communityBasedLeaderElection.CommunityLeaderNode;
 import mobemu.node.leader.directLeaderElection.DirectLeaderElectionNode;
 import mobemu.parsers.UPB;
 import mobemu.trace.Parser;
@@ -45,7 +46,11 @@ public class MobEmu {
 //                        nodes[i] = new SPRINT(i, parser.getContextData().get(i), parser.getSocialNetwork()[i],
 //                                dataMemorySize, exchangeHistorySize, seed, parser.getTraceData().getStartTime(),
 //                                parser.getTraceData().getEndTime(), false, nodes, cacheMemorySize);
-            nodes[i] = new DirectLeaderElectionNode(i, parser.getContextData().get(i), parser.getSocialNetwork()[i],
+//            nodes[i] = new DirectLeaderElectionNode(i, parser.getContextData().get(i), parser.getSocialNetwork()[i],
+//                    dataMemorySize, exchangeHistorySize, seed, parser.getTraceData().getStartTime(),
+//                    parser.getTraceData().getEndTime(), false, nodes, cacheMemorySize);
+
+            nodes[i] = new CommunityLeaderNode(i, parser.getContextData().get(i), parser.getSocialNetwork()[i],
                     dataMemorySize, exchangeHistorySize, seed, parser.getTraceData().getStartTime(),
                     parser.getTraceData().getEndTime(), false, nodes, cacheMemorySize);
 

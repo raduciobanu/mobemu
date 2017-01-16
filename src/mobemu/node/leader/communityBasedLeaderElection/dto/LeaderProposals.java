@@ -51,6 +51,28 @@ public class LeaderProposals {
     }
 
     /**
+     * Checks if there is any proposal with the given arguments
+     * @param targetId the id of the target
+     * @param sourceId the id of the source
+     * @param score the score
+     * @return
+     */
+    public boolean contains(int targetId, int sourceId, double score){
+        if(!proposals.containsKey(targetId)){
+            return false;
+        }
+
+        Map<Integer, Double> proposalsForNode = proposals.get(targetId);
+        if(!proposalsForNode.containsKey(sourceId)){
+            return false;
+        }
+
+        double existingScore = proposalsForNode.get(sourceId);
+
+        return existingScore == score;
+    }
+
+    /**
      * Iterates through the dictionary of proposals
      * Computes the average score for each node
      * Returns the node with highest average score

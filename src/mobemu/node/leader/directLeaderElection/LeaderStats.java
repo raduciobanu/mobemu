@@ -1,6 +1,8 @@
 package mobemu.node.leader.directLeaderElection;
 
 import mobemu.node.Node;
+import mobemu.node.leader.LeaderNode;
+import mobemu.node.leader.communityBasedLeaderElection.CommunityLeaderNode;
 
 import java.io.FileNotFoundException;
 import java.io.PrintWriter;
@@ -63,7 +65,7 @@ public class LeaderStats {
     public static void generateHeartBeats(Node[] nodes, long tick, long startTime){
         if((tick - startTime) % heartBeatGenerationTime == 0){
             for(Node node: nodes){
-                DirectLeaderElectionNode leaderNode = (DirectLeaderElectionNode) node;
+                LeaderNode leaderNode = (LeaderNode) node;
 
                 leaderNode.generateHeartBeat(tick);
             }
@@ -75,11 +77,11 @@ public class LeaderStats {
         int number = 0;
 
         for (Node node : nodes){
-            DirectLeaderElectionNode leaderNode = (DirectLeaderElectionNode) node;
+            LeaderNode leaderNode = (LeaderNode) node;
             for(long responseTime : leaderNode.getResponseTimes()){
                 //skip scenarios when the node is its own leader
-                if(responseTime == 0)
-                    continue;
+//                if(responseTime == 0)
+//                    continue;
 
                 sum += responseTime;
                 number++;
@@ -88,6 +90,15 @@ public class LeaderStats {
             }
         }
 
-        System.out.println(sum/(number * 1000));
+        System.out.println("Average responseTime: " + sum/(number * 1000));
+    }
+
+    public static void printLeaderCommunities(Node[] nodes){
+        System.out.println("LeaderCommunities:");
+        for(Node node:nodes){
+            CommunityLeaderNode leaderNode = (CommunityLeaderNode)node;
+
+            System.out.println(leaderNode.getId() + " -- " + leaderNode.getLeaderCommunity().getNodes());
+        }
     }
 }

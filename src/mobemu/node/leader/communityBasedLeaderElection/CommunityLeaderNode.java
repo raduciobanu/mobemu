@@ -69,10 +69,10 @@ public class CommunityLeaderNode extends LeaderNode {
      * @param traceStart          timestamp of the start of the trace
      * @param traceEnd            timestamp of the end of the trace
      */
-    public CommunityLeaderNode(int id, int nodes, Context context, boolean[] socialNetwork, int dataMemorySize,
-                               int exchangeHistorySize, long seed, long traceStart, long traceEnd) {
-        super(id, nodes, context, socialNetwork, dataMemorySize, exchangeHistorySize, seed, traceStart, traceEnd);
+    public CommunityLeaderNode(int id, Context context, boolean[] socialNetwork, int dataMemorySize, int exchangeHistorySize, long seed, long traceStart, long traceEnd, boolean altruism, Node[] nodes, int cacheMemorySize) {
+        super(id, context, socialNetwork, dataMemorySize, exchangeHistorySize, seed, traceStart, traceEnd, altruism, nodes, cacheMemorySize);
 
+        this.leaderNodeId = -1;
         this.leaderCommunity = new LeaderCommunity();
         this.leaderCommunity.addNode(this, traceStart);
 
@@ -81,6 +81,10 @@ public class CommunityLeaderNode extends LeaderNode {
         this.requestsSent = new HashMap<>();
         this.receivedResponses = new HashMap<>();
         this.leaderProposals = new LeaderProposals();
+    }
+
+    public LeaderCommunity getLeaderCommunity() {
+        return leaderCommunity;
     }
 
     @Override
@@ -135,6 +139,9 @@ public class CommunityLeaderNode extends LeaderNode {
         for(int nodeId: leaderCommunity.getNodes()){
             double score = leaderCommunity.get(nodeId) * altruism.getPerceived(nodeId);
 
+            if(leaderProposals.contains(nodeId, id, score))
+                continue;
+
             if(score > maxScore){
                 maxScore = score;
                 leaderId = nodeId;
@@ -145,8 +152,10 @@ public class CommunityLeaderNode extends LeaderNode {
         if(leaderId != -1){
             for(int nodeId: leaderCommunity.getNodes()) {
                 double centrality = leaderCommunity.get(nodeId);
+                leaderProposals.addProposal(leaderId, id, maxScore);
                 ownCommunityMessages.add(CommunityMessage.CreateLeaderProposal(id, nodeId, leaderId, centrality,
                         currentTime));
+
             }
         }
     }
@@ -196,7 +205,7 @@ public class CommunityLeaderNode extends LeaderNode {
             leaderProposals.addProposal(targetId, sourceId, score);
 
 
-            if(leaderProposals.size() > leaderProposalsThreshold * leaderCommunity.size()){
+            if(Double.compare(leaderProposals.size(), leaderProposalsThreshold * leaderCommunity.size()) > 0){
                 int newLeaderId = leaderProposals.getLeader();
 
                 if(newLeaderId != leaderNodeId){
@@ -242,15 +251,25 @@ public class CommunityLeaderNode extends LeaderNode {
         }
     }
 
-    private void updatesCentralities(CommunityLeaderNode encounteredNode){
-        leaderCommunity.update(encounteredNode.leaderCommunity);
+    private void updatesCentralities(CommunityLeaderNode encounteredNode, long currentTime){
+        boolean centralityChanged = leaderCommunity.update(encounteredNode.leaderCommunity);
+        if(centralityChanged){
+            proposeLeader(currentTime);
+        }
     }
 
     @Override
     protected void onDataExchange(Node encounteredNode, long contactDuration, long currentTime) {
         CommunityLeaderNode leaderNode = (CommunityLeaderNode) encounteredNode;
-        updatesCentralities(leaderNode);
+        updatesCentralities(leaderNode, currentTime);
         exchangeCommunityMessages(leaderNode, currentTime);
+
+        super.onDataExchange(encounteredNode, contactDuration, currentTime);
+    }
+
+    @Override
+    public String getName() {
+        return this.getClass().getName();
     }
 
 }

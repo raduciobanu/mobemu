@@ -22,13 +22,7 @@ public class DirectLeaderElectionNode extends LeaderNode {
      */
     protected List<LeaderCandidacy> candidacies;
 
-    protected List<DirectLeaderMessage> heartBeats;
-
-    protected List<DirectLeaderMessage> ownHeartBeats;
-
     protected CommunityByLeader communityByLeader;
-
-    protected List<Long> responseTimes;
 
     /**
      * Constructor for the {@link Node} class.
@@ -44,18 +38,11 @@ public class DirectLeaderElectionNode extends LeaderNode {
      * @param traceStart          timestamp of the start of the trace
      * @param traceEnd            timestamp of the end of the trace
      */
-    public DirectLeaderElectionNode(int id, int nodes, Context context, boolean[] socialNetwork, int dataMemorySize, int exchangeHistorySize, long seed, long traceStart, long traceEnd) {
-        super(id, nodes, context, socialNetwork, dataMemorySize, exchangeHistorySize, seed, traceStart, traceEnd);
+    public DirectLeaderElectionNode(int id, Context context, boolean[] socialNetwork, int dataMemorySize, int exchangeHistorySize, long seed, long traceStart, long traceEnd, boolean altruism, Node[] nodes, int cacheMemorySize) {
+        super(id, context, socialNetwork, dataMemorySize, exchangeHistorySize, seed, traceStart, traceEnd, altruism, nodes, cacheMemorySize);
 
         candidacies = new ArrayList<>();
-        heartBeats = new ArrayList<>();
-        ownHeartBeats = new ArrayList<>();
         communityByLeader = new CommunityByLeader();
-        responseTimes = new ArrayList<>();
-    }
-
-    public List<Long> getResponseTimes(){
-        return responseTimes;
     }
 
     @Override
@@ -68,10 +55,8 @@ public class DirectLeaderElectionNode extends LeaderNode {
 
         DirectLeaderElectionNode encounteredLeaderNode = (DirectLeaderElectionNode) encounteredNode;
         exchangeCandidacies(encounteredLeaderNode.candidacies, currentTime);
-        exchangeHeartBeats(encounteredLeaderNode.heartBeats, encounteredLeaderNode.ownHeartBeats, currentTime);
 
-//        super.onDataExchange(encounteredNode, contactDuration, currentTime);
-
+        super.onDataExchange(encounteredNode, contactDuration, currentTime);
     }
 
     public LeaderCandidacy generateCandidacy(long currentTime){
@@ -139,55 +124,16 @@ public class DirectLeaderElectionNode extends LeaderNode {
             }
         }
 
+
         double candidateScore = candidacy.getCentrality() * altruism.getPerceived(candidacy.getNodeId());
-        if (candidateScore > leaderScore) {
+        if (Double.compare(candidateScore,leaderScore) > 0) {
             leaderScore = candidateScore;
 
             changeLeader(candidacy.getNodeId(), currentTime);
         }
     }
 
-    public void generateHeartBeat(long currentTime){
-        ownHeartBeats.add(DirectLeaderMessage.CreateRequest(id, leaderNodeId, currentTime));
-    }
-
-    private void changeLeader(int newLeaderId, long currentTime){
-        //generate ChangedLeader message for the old leader
-        ownHeartBeats.add(DirectLeaderMessage.CreateChangedLeader(id, leaderNodeId, currentTime));
-
-        leaderNodeId = newLeaderId;
-
-        //generate Request of membership for the new leader
-        generateHeartBeat(currentTime);
-        //            System.out.println("Node " + id + " changed leader to " + leaderNodeId + " with score " + leaderScore
-//            + ". Centrality = " + centrality + ", Trust = " + trust);
-    }
-
-
-    private void checkHeartBeat(DirectLeaderMessage heartBeat, long currentTime){
-        if(heartBeat.getDestinationId() == id){
-            deliverHeartBeat(heartBeat, currentTime);
-            return;
-        }
-
-        if(heartBeats.contains(heartBeat) || ownHeartBeats.contains(heartBeat))
-            return;
-
-        heartBeats.add(heartBeat);
-    }
-
-    protected void exchangeHeartBeats(List<DirectLeaderMessage> encounteredHeartBeats,
-                                      List<DirectLeaderMessage> encounteredOwnHeartBeats, long currentTime){
-
-        for(DirectLeaderMessage heartBeat : encounteredHeartBeats){
-            checkHeartBeat(heartBeat, currentTime);
-        }
-
-        for(DirectLeaderMessage heartBeat : encounteredOwnHeartBeats){
-            checkHeartBeat(heartBeat, currentTime);
-        }
-    }
-
+    @Override
     protected void deliverHeartBeat(DirectLeaderMessage heartBeat, long currentTime){
 
         /**
@@ -197,18 +143,32 @@ public class DirectLeaderElectionNode extends LeaderNode {
         if(heartBeat.isRequest()){
             if(!communityByLeader.containsNode(sourceId)){
                 communityByLeader.addNode(sourceId, currentTime);
-
-                ownHeartBeats.add(DirectLeaderMessage.CreateResponse(id, sourceId, currentTime));
             }
         }
-        else if(heartBeat.isResponse())
-        {
-            long responseTime = currentTime - heartBeat.getTimestamp();
-            responseTimes.add(responseTime);
-//            System.out.println("Response Received after " + responseTime + "s!");
-        }
-        else{
+        else if(heartBeat.isChangedLeader()){
             communityByLeader.removeNode(sourceId, currentTime);
         }
+
+        super.deliverHeartBeat(heartBeat, currentTime);
     }
+
+    private void changeLeader(int newLeaderId, long currentTime){
+        if(leaderNodeId != id){
+            //generate ChangedLeader message for the old leader
+            ownHeartBeats.add(DirectLeaderMessage.CreateChangedLeader(id, leaderNodeId, currentTime));
+        }
+
+        leaderNodeId = newLeaderId;
+
+        //generate Request of membership for the new leader
+        generateHeartBeat(currentTime);
+        //            System.out.println("Node " + id + " changed leader to " + leaderNodeId + " with score " + leaderScore
+//            + ". Centrality = " + centrality + ", Trust = " + trust);
+    }
+
+    @Override
+    public String getName() {
+        return this.getClass().getName();
+    }
+
 }
