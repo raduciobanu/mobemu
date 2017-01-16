@@ -74,7 +74,8 @@ public class LeaderStats {
 
     public static void computeAverageHeartBeatResponseTime(Node[] nodes, PrintWriter writer){
         long sum = 0;
-        int number = 0;
+        long number = 0;
+        long millisInAnHour= 1000 * 3600;
 
         for (Node node : nodes){
             LeaderNode leaderNode = (LeaderNode) node;
@@ -86,11 +87,11 @@ public class LeaderStats {
                 sum += responseTime;
                 number++;
 
-                writer.println(responseTime / 1000);
+                writer.println(responseTime / millisInAnHour);
             }
         }
 
-        System.out.println("Average responseTime: " + sum/(number * 1000));
+        System.out.println("Average responseTime: " + sum/(number * millisInAnHour));
     }
 
     public static void printLeaderCommunities(Node[] nodes){

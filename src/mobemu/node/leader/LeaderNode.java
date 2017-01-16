@@ -143,6 +143,9 @@ public abstract class LeaderNode extends SPRINT {
 
     @Override
     protected void onDataExchange(Node encounteredNode, long contactDuration, long currentTime) {
+        if(this.equals(encounteredNode))
+            return;
+
         LeaderNode encounteredLeaderNode = (LeaderNode) encounteredNode;
         exchangeHeartBeats(encounteredLeaderNode.heartBeats, encounteredLeaderNode.ownHeartBeats, currentTime);
 

@@ -46,13 +46,13 @@ public class MobEmu {
 //                        nodes[i] = new SPRINT(i, parser.getContextData().get(i), parser.getSocialNetwork()[i],
 //                                dataMemorySize, exchangeHistorySize, seed, parser.getTraceData().getStartTime(),
 //                                parser.getTraceData().getEndTime(), false, nodes, cacheMemorySize);
-//            nodes[i] = new DirectLeaderElectionNode(i, parser.getContextData().get(i), parser.getSocialNetwork()[i],
-//                    dataMemorySize, exchangeHistorySize, seed, parser.getTraceData().getStartTime(),
-//                    parser.getTraceData().getEndTime(), false, nodes, cacheMemorySize);
-
-            nodes[i] = new CommunityLeaderNode(i, parser.getContextData().get(i), parser.getSocialNetwork()[i],
+            nodes[i] = new DirectLeaderElectionNode(i, parser.getContextData().get(i), parser.getSocialNetwork()[i],
                     dataMemorySize, exchangeHistorySize, seed, parser.getTraceData().getStartTime(),
                     parser.getTraceData().getEndTime(), false, nodes, cacheMemorySize);
+
+//            nodes[i] = new CommunityLeaderNode(i, parser.getContextData().get(i), parser.getSocialNetwork()[i],
+//                    dataMemorySize, exchangeHistorySize, seed, parser.getTraceData().getStartTime(),
+//                    parser.getTraceData().getEndTime(), false, nodes, cacheMemorySize);
 
         }
 

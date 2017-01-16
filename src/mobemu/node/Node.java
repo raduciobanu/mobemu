@@ -251,7 +251,7 @@ public abstract class Node {
 //            LeaderStats.printLocalCommunities(nodes, tick, startTime, writer);
             LeaderStats.generateHeartBeats(nodes, tick, startTime);
         }
-        LeaderStats.printLeaderCommunities(nodes);
+//        LeaderStats.printLeaderCommunities(nodes);
         LeaderStats.computeAverageHeartBeatResponseTime(nodes, writer);
         LeaderStats.closeFile(writer);
 
