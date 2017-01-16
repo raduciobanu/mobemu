@@ -452,7 +452,7 @@ public abstract class Node {
             updateContactDuration(encounteredNode.id, sampleTime, tick);
 
             // when the threshold has been exceeded, insert vi in F0 and C0
-            checkThreshold(encounteredNode);
+            checkThreshold(encounteredNode, tick);
         }
 
         updateCentrality(timeDelta);
@@ -476,7 +476,7 @@ public abstract class Node {
 
             // step 5 of the K-clique algorithm
             if (!inLocalCommunity(encounteredNode.id)) {
-                updateLocalCommunity(encounteredNode);
+                updateLocalCommunity(encounteredNode, tick);
             }
 
             // step 6 of the K-clique algorithm
@@ -592,7 +592,7 @@ public abstract class Node {
      *
      * @param encounteredNode the encountered node
      */
-    protected void checkThreshold(Node encounteredNode) {
+    protected void checkThreshold(Node encounteredNode, long currentTime) {
         int id = encounteredNode.getId();
         ContactInfo node = encounteredNodes.get(id);
 
@@ -604,7 +604,7 @@ public abstract class Node {
                 }
 
                 if (!inLocalCommunity(id)) {
-                    addToLocalCommunity(encounteredNode);
+                    addToLocalCommunity(encounteredNode, currentTime);
                 }
             }
         }
@@ -615,7 +615,7 @@ public abstract class Node {
      *
      * @param encounteredNode encountered node
      */
-    protected void updateLocalCommunity(Node encounteredNode) {
+    protected void updateLocalCommunity(Node encounteredNode, long currentTime) {
 
         int count = 0;
 
@@ -626,7 +626,7 @@ public abstract class Node {
         }
 
         if (count >= communityThreshold - 1) {
-            addToLocalCommunity(encounteredNode);
+            addToLocalCommunity(encounteredNode, currentTime);
         }
     }
 
@@ -656,7 +656,7 @@ public abstract class Node {
 
 
 
-    protected void addToLocalCommunity(Node encounteredNode){
+    protected void addToLocalCommunity(Node encounteredNode, long currentTime){
         int encounteredNodeId = encounteredNode.id;
         localCommunity.add(encounteredNodeId);
     }

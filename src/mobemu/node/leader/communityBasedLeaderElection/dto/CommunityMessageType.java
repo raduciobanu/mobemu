@@ -7,5 +7,6 @@ public enum CommunityMessageType {
     Request,
     Response,
     AddedNode,
-    LeaderProposal
+    LeaderProposal,
+    LeaderElected
 }

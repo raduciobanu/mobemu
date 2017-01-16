@@ -19,6 +19,11 @@ public class CommunityMessage extends LeaderMessage{
     private int targetId;
 
     /**
+     * The score of the target for a leaderProposal
+     */
+    private double score;
+
+    /**
      * Creates a new community message
      * @param sourceId the id of the source
      * @param destinationId the id of the destination
@@ -51,9 +56,18 @@ public class CommunityMessage extends LeaderMessage{
         return leaderMessage;
     }
 
-    public static CommunityMessage CreateLeaderProposal(int sourceId, int destinationId, int targetId, long timestamp){
+    public static CommunityMessage CreateLeaderProposal(int sourceId, int destinationId, int targetId, double score,
+                                                        long timestamp){
         CommunityMessage leaderMessage = new CommunityMessage(sourceId, destinationId, targetId, timestamp);
         leaderMessage.messageType = CommunityMessageType.LeaderProposal;
+        leaderMessage.score = score;
+
+        return leaderMessage;
+    }
+
+    public static CommunityMessage CreateLeaderElected(int sourceId, int destinationId, int targetId, long timestamp){
+        CommunityMessage leaderMessage = new CommunityMessage(sourceId, destinationId, targetId, timestamp);
+        leaderMessage.messageType = CommunityMessageType.LeaderElected;
 
         return leaderMessage;
     }
@@ -70,7 +84,19 @@ public class CommunityMessage extends LeaderMessage{
         return messageType == CommunityMessageType.AddedNode;
     }
 
+    public boolean isLeaderProposal(){
+        return messageType == CommunityMessageType.LeaderProposal;
+    }
+
+    public boolean isLeaderElected(){
+        return messageType == CommunityMessageType.LeaderElected;
+    }
+
     public int getTargetId() {
-        return targetId;
+        return this.targetId;
+    }
+
+    public double getScore(){
+        return this.score;
     }
 }
