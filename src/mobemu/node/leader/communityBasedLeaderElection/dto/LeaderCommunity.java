@@ -24,7 +24,7 @@ public class LeaderCommunity {
     }
 
     public void addNode(Node node, long currentTime){
-        leaderCommunity.put(node.getId(), new AbstractMap.SimpleEntry<>(node.getCentrality(true), currentTime));
+        leaderCommunity.put(node.getId(), new AbstractMap.SimpleEntry<>(node.getNormalizedCentrality(false), currentTime));
     }
 
     public int size(){

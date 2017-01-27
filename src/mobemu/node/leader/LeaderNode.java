@@ -4,11 +4,11 @@ import mobemu.algorithms.SPRINT;
 import mobemu.node.Context;
 import mobemu.node.Node;
 import mobemu.node.leader.directLeaderElection.dto.DirectLeaderMessage;
+import mobemu.node.leader.directLeaderElection.dto.HeartbeatResponse;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 
-import static mobemu.utils.Constants.heartBeatGenerationTime;
+import static mobemu.utils.Constants.*;
 
 /**
  * Created by radu on 1/15/2017.
@@ -29,7 +29,7 @@ public abstract class LeaderNode extends SPRINT {
 
     protected List<DirectLeaderMessage> ownHeartBeats;
 
-    protected List<Long> responseTimes;
+    protected List<HeartbeatResponse> responseTimes;
 
     protected List<DirectLeaderMessage> heartBeatsForCurrentNode;
 
@@ -61,7 +61,6 @@ public abstract class LeaderNode extends SPRINT {
         heartBeatsForCurrentNode = new ArrayList<>();
     }
 
-
     public int getLeaderNodeId() {
         return leaderNodeId;
     }
@@ -70,8 +69,59 @@ public abstract class LeaderNode extends SPRINT {
         return leaderScore;
     }
 
-    public List<Long> getResponseTimes(){
+    public List<HeartbeatResponse> getResponseTimes(){
         return responseTimes;
+    }
+
+    public boolean isNormalized(double value){
+        return value >= 0 && value <= 1;
+    }
+
+    public double computeLeaderScore(double centrality, double trust, double latencyValue, double probabilityOfMeeting){
+        if(!isNormalized(centrality) || !isNormalized(trust) || !isNormalized(latencyValue)
+                || !isNormalized(probabilityOfMeeting))
+            System.out.println("VALUES NOT NORMALIZED!!!!!");
+
+        return centralityWeight * centrality + trustWeight * trust + latencyWeight * latencyValue
+                + probabilityWeight * probabilityOfMeeting;
+    }
+
+    public double computeLeaderScore(double centrality, double trust, double probabilityOfMeeting){
+        if(!isNormalized(centrality) || !isNormalized(trust) || !isNormalized(probabilityOfMeeting))
+            System.out.println("VALUES NOT NORMALIZED!!!!!");
+
+
+        return centralityWeight * centrality + trustWeight * trust + probabilityWeight * probabilityOfMeeting;
+    }
+
+    protected double getProbabilityOfMeetingNode(LeaderNode node, int encounteredNodeId, long currentTime){
+        Calendar today = Calendar.getInstance();
+        today.setTimeInMillis(currentTime);
+        int hourNow = today.get(Calendar.HOUR_OF_DAY);
+        today.set(Calendar.HOUR_OF_DAY, 0);
+        today.set(Calendar.MINUTE, 0);
+        today.set(Calendar.SECOND, 0);
+        int dayNow = today.get(Calendar.DAY_OF_MONTH);
+
+        ArrayList<ArrayList<Probability>> futureEncounters = computeFutureEncounters(node, currentTime, hourNow, dayNow);
+
+        if(futureEncounters == null)
+            return -1.0;
+
+        double sumProbabilities = 0.0;
+        for (int hour = 0; hour < futureEncounters.size(); hour++){
+            ArrayList<Probability> encountersInAnHour = futureEncounters.get(hour);
+
+            for (Probability probability: encountersInAnHour){
+                if(probability.getId() == encounteredNodeId){
+                    sumProbabilities += probability.getProbability();
+                }
+            }
+        }
+
+        double averageProbability = 10 * (sumProbabilities/HOURS_IN_DAY);
+
+        return averageProbability * 10 > 1? 1: averageProbability;
     }
 
     private boolean checkOwnHeartBeats(long currentTime){
@@ -85,7 +135,7 @@ public abstract class LeaderNode extends SPRINT {
     }
 
     public void generateHeartBeat(long currentTime){
-        if(leaderNodeId == -1)
+        if(leaderNodeId == -1 || leaderNodeId == this.id)
             return;
 
         if(checkOwnHeartBeats(currentTime)){
@@ -94,46 +144,57 @@ public abstract class LeaderNode extends SPRINT {
 
     }
 
-    protected void deliverHeartBeat(DirectLeaderMessage heartBeat, long currentTime){
+    protected void deliverHeartBeat(DirectLeaderMessage heartBeat, long currentTime, int encounteredNodeId){
         int sourceId = heartBeat.getSourceId();
         long heartBeatTimestamp = heartBeat.getTimestamp();
+
+        heartBeat.transfer(encounteredNodeId, this.id);
+
         if(heartBeat.isRequest()){
             if(!heartBeatsForCurrentNode.contains(heartBeat)){
                 heartBeatsForCurrentNode.add(heartBeat);
-                ownHeartBeats.add(DirectLeaderMessage.CreateResponse(id, sourceId, heartBeatTimestamp));
+                ownHeartBeats.add(DirectLeaderMessage.CreateResponse(this.id, sourceId, heartBeatTimestamp,
+                        heartBeat.getHopCount(this.id)));
             }
         }
         else if(heartBeat.isResponse())
         {
+            int responseSourceId = heartBeat.getSourceId();
+            if(responseSourceId != leaderNodeId){
+                return;
+            }
+
             long responseTime = currentTime - heartBeatTimestamp;
-            responseTimes.add(responseTime);
+            responseTimes.add(new HeartbeatResponse(responseTime, heartBeat.getHopCount(this.id)));
 //            System.out.println("Response Received after " + responseTime + "s!");
         }
     }
 
-    private void checkHeartBeat(DirectLeaderMessage heartBeat, long currentTime,
+    private void checkHeartBeat(DirectLeaderMessage heartBeat, long currentTime, int encounteredNodeId,
                                 List<DirectLeaderMessage> heartBeatsToAdd){
         if(heartBeat.getDestinationId() == id){
-            deliverHeartBeat(heartBeat, currentTime);
+            deliverHeartBeat(heartBeat, currentTime, encounteredNodeId);
             return;
         }
 
         if(heartBeats.contains(heartBeat) || ownHeartBeats.contains(heartBeat))
             return;
 
+//        heartBeatsToAdd.add(heartBeat.copy());
+        heartBeat.transfer(encounteredNodeId, this.id);
         heartBeatsToAdd.add(heartBeat);
     }
 
-    protected void exchangeHeartBeats(List<DirectLeaderMessage> encounteredHeartBeats,
+    protected void exchangeHeartBeats(int encounteredNodeId, List<DirectLeaderMessage> encounteredHeartBeats,
                                       List<DirectLeaderMessage> encounteredOwnHeartBeats, long currentTime){
 
         List<DirectLeaderMessage> heartBeatsToAdd = new ArrayList<>();
         for(DirectLeaderMessage heartBeat : encounteredHeartBeats){
-            checkHeartBeat(heartBeat, currentTime, heartBeatsToAdd);
+            checkHeartBeat(heartBeat, currentTime, encounteredNodeId, heartBeatsToAdd);
         }
 
         for(DirectLeaderMessage heartBeat : encounteredOwnHeartBeats){
-            checkHeartBeat(heartBeat, currentTime, heartBeatsToAdd);
+            checkHeartBeat(heartBeat, currentTime, encounteredNodeId, heartBeatsToAdd);
         }
 
         for(DirectLeaderMessage heartBeat: heartBeatsToAdd){
@@ -147,7 +208,8 @@ public abstract class LeaderNode extends SPRINT {
             return;
 
         LeaderNode encounteredLeaderNode = (LeaderNode) encounteredNode;
-        exchangeHeartBeats(encounteredLeaderNode.heartBeats, encounteredLeaderNode.ownHeartBeats, currentTime);
+        exchangeHeartBeats(encounteredNode.getId(), encounteredLeaderNode.heartBeats,
+                encounteredLeaderNode.ownHeartBeats, currentTime);
 
         super.onDataExchange(encounteredNode, contactDuration, currentTime);
     }

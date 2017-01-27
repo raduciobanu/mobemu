@@ -17,6 +17,10 @@ public class Centrality {
     private static double lastThreshold;
     private static int timeWindow;
 
+    private static double MAX_CURRENT;
+    private static double MAX_PREVIOUS;
+    private static double MAX_CUMULATED;
+
     /**
      * Instantiates a {@code Centrality} object.
      */
@@ -75,12 +79,21 @@ public class Centrality {
         switch (type) {
             case CUMULATED:
                 cumulated = value;
+                if(cumulated > MAX_CUMULATED){
+                    MAX_CUMULATED = cumulated;
+                }
                 break;
             case CURRENT:
                 current = value;
+                if(current > MAX_CURRENT){
+                    MAX_CURRENT = current;
+                }
                 break;
             case PREVIOUS:
                 previous = value;
+                if(previous > MAX_PREVIOUS){
+                    MAX_PREVIOUS = previous;
+                }
                 break;
             default:
                 break;
@@ -97,12 +110,21 @@ public class Centrality {
         switch (type) {
             case CUMULATED:
                 cumulated++;
+                if(cumulated > MAX_CUMULATED){
+                    MAX_CUMULATED = cumulated;
+                }
                 break;
             case CURRENT:
                 current++;
+                if(current > MAX_CURRENT){
+                    MAX_CURRENT = current;
+                }
                 break;
             case PREVIOUS:
                 previous++;
+                if(previous > MAX_PREVIOUS){
+                    MAX_PREVIOUS = previous;
+                }
                 break;
             default:
                 break;
@@ -124,6 +146,34 @@ public class Centrality {
                 return current;
             case PREVIOUS:
                 return previous;
+            default:
+                return Double.MAX_VALUE;
+        }
+    }
+
+    /**
+     * Get the normalized value for the given centrality type (cumulated, current,
+     * previous).
+     * @param type type of centrality to be returned
+     * @return normalized current value of the desired centrality (between 0 and 1)
+     */
+    public double getNormalizedValue(CentralityValue type){
+        switch (type) {
+            case CUMULATED:
+                if(MAX_CUMULATED == 0d)
+                    return cumulated;
+
+                return cumulated / MAX_CUMULATED;
+            case CURRENT:
+                if(MAX_CURRENT == 0d)
+                    return current ;
+
+                return current / MAX_CURRENT;
+            case PREVIOUS:
+                if(MAX_PREVIOUS == 0d)
+                    return previous;
+
+                return previous / MAX_PREVIOUS;
             default:
                 return Double.MAX_VALUE;
         }

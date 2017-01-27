@@ -7,6 +7,7 @@ import mobemu.node.leader.communityBasedLeaderElection.dto.CommunityMessage;
 import mobemu.node.leader.communityBasedLeaderElection.dto.LeaderCommunity;
 import mobemu.node.leader.communityBasedLeaderElection.dto.LeaderProposals;
 
+import java.text.DecimalFormat;
 import java.util.*;
 
 import static mobemu.utils.Constants.leaderCommunityThreshold;
@@ -111,6 +112,7 @@ public class CommunityLeaderNode extends LeaderNode {
         if(leaderCommunity.size() == 1){
             addToLeaderCommunity(encounteredLeaderNode, currentTime);
             encounteredLeaderNode.addToLeaderCommunity(this, currentTime);
+//            proposeLeader(currentTime);
             return;
         }
 
@@ -119,7 +121,7 @@ public class CommunityLeaderNode extends LeaderNode {
             ownCommunityMessages.add(request);
         }
 
-        requestsSent.put(encounteredNodeId, encounteredLeaderNode.getCentrality(true));
+        requestsSent.put(encounteredNodeId, encounteredLeaderNode.getNormalizedCentrality(true));
 
         receivedResponses.put(encounteredNodeId, new ArrayList<>());
     }
@@ -129,15 +131,32 @@ public class CommunityLeaderNode extends LeaderNode {
             leaderCommunity.addNode(encounteredNode, currentTime);
     }
 
-    protected void generateCommunityResponse(int destinationId, int targetId, long currentTime){
-        ownCommunityMessages.add(CommunityMessage.CreateResponse(id, destinationId, targetId, currentTime));
+    protected void generateCommunityResponse(int destinationId, int targetId, long currentTime, int hopCount){
+        double probabilityOfMeeting = getProbabilityOfMeetingNode(this, targetId, currentTime);
+        if(probabilityOfMeeting > 0.0){
+            System.out.println(this.id + " will meet " + targetId + " with a probability of "
+                    + probabilityOfMeeting);
+        }
+
+        if(inLocalCommunity(targetId) || inSocialNetwork(targetId)) {
+            ownCommunityMessages.add(CommunityMessage.CreateResponse(id, destinationId, targetId, currentTime, hopCount));
+        }
     }
 
     protected void proposeLeader(long currentTime){
         double maxScore = 0.0;
         int leaderId = -1;
         for(int nodeId: leaderCommunity.getNodes()){
-            double score = leaderCommunity.get(nodeId) * altruism.getPerceived(nodeId);
+            double centrality = leaderCommunity.get(nodeId);
+            double trust = altruism.getNormalizedPerceived(nodeId);
+            double probabilityOfMeeting = getProbabilityOfMeetingNode(this, nodeId, currentTime);
+
+//            DecimalFormat df = new DecimalFormat("#.###");
+//            String formattedCentrality = df.format(centrality);
+//            System.out.println("Id: " + nodeId + ", Trust: " + trust + ", Centrality: " + formattedCentrality
+//                    + ", Probability: " + probabilityOfMeeting);
+
+            double score = computeLeaderScore(centrality, trust, probabilityOfMeeting);
 
             if(leaderProposals.contains(nodeId, id, score))
                 continue;
@@ -162,14 +181,13 @@ public class CommunityLeaderNode extends LeaderNode {
 
     protected void checkLeaderCommunityThreshold(int targetId, long currentTime){
         List<Integer> nodesThatConfirmed = receivedResponses.get(targetId);
-        if(nodesThatConfirmed.size() > leaderCommunityThreshold * leaderCommunity.size()){
+        if(nodesThatConfirmed.size() > leaderCommunityThreshold * leaderCommunity.size() - 1){
             double targetCentrality = requestsSent.get(targetId);
 
             leaderCommunity.add(targetId, targetCentrality, currentTime);
 
             for(int nodeId : leaderCommunity.getNodes()){
-                ownCommunityMessages.add(CommunityMessage.CreateAddedNode(id, nodeId, targetId, currentTime));
-
+                ownCommunityMessages.add(CommunityMessage.CreateAddedNode(id, nodeId, targetId, targetCentrality, currentTime));
                 proposeLeader(currentTime);
             }
         }
@@ -180,13 +198,13 @@ public class CommunityLeaderNode extends LeaderNode {
         this.leaderElectionTimestamp = currentTime;
     }
 
-    protected void deliverCommunityMessage(CommunityMessage message, long currentTime){
+    protected void deliverCommunityMessage(CommunityMessage message, long currentTime, int encounteredNodeId){
         int targetId = message.getTargetId();
         int sourceId = message.getSourceId();
+
+        message.transfer(encounteredNodeId, this.id);
         if(message.isRequest()){
-            if(inLocalCommunity(targetId)){
-                generateCommunityResponse(sourceId, targetId, currentTime);
-            }
+            generateCommunityResponse(sourceId, targetId, currentTime, message.getHopCount(this.id));
         }
         else if(message.isResponse()){
             List<Integer> nodesThatConfirmed = receivedResponses.get(targetId);
@@ -197,7 +215,7 @@ public class CommunityLeaderNode extends LeaderNode {
             }
         }
         else if(message.isAddedNode()){
-            double targetCentrality = requestsSent.get(targetId);
+            double targetCentrality = message.getTargetCentrality();
             leaderCommunity.add(targetId, targetCentrality, currentTime);
         }
         else if(message.isLeaderProposal()){
@@ -205,10 +223,10 @@ public class CommunityLeaderNode extends LeaderNode {
             leaderProposals.addProposal(targetId, sourceId, score);
 
 
-            if(Double.compare(leaderProposals.size(), leaderProposalsThreshold * leaderCommunity.size()) > 0){
+            if(Double.compare(leaderProposals.size(), leaderProposalsThreshold * leaderCommunity.size() - 1) > 0){
                 int newLeaderId = leaderProposals.getLeader();
 
-                if(newLeaderId != leaderNodeId){
+                if(newLeaderId != leaderNodeId && newLeaderId != -1){
                     //send LeaderElected message to all nodes from leaderCommunity
                     for (int nodeId : leaderCommunity.getNodes()){
                         ownCommunityMessages.add(CommunityMessage.CreateLeaderElected(this.id, nodeId, targetId,
@@ -229,9 +247,9 @@ public class CommunityLeaderNode extends LeaderNode {
 
     }
 
-    protected void checkCommunityMessage(CommunityMessage message, long currentTime){
+    protected void checkCommunityMessage(CommunityMessage message, long currentTime, int encounteredNodeId){
         if(message.getDestinationId() == this.id){
-            deliverCommunityMessage(message, currentTime);
+            deliverCommunityMessage(message, currentTime, encounteredNodeId);
             return;
         }
 
@@ -241,13 +259,13 @@ public class CommunityLeaderNode extends LeaderNode {
         communityMessages.add(message);
     }
 
-    protected void exchangeCommunityMessages(CommunityLeaderNode leaderNode, long currentTime){
+    protected void exchangeCommunityMessages(CommunityLeaderNode leaderNode, long currentTime, int encounteredNodeId){
         for(CommunityMessage message: leaderNode.communityMessages){
-            checkCommunityMessage(message, currentTime);
+            checkCommunityMessage(message, currentTime, encounteredNodeId);
         }
 
         for(CommunityMessage message: leaderNode.ownCommunityMessages){
-            checkCommunityMessage(message, currentTime);
+            checkCommunityMessage(message, currentTime, encounteredNodeId);
         }
     }
 
@@ -262,7 +280,13 @@ public class CommunityLeaderNode extends LeaderNode {
     protected void onDataExchange(Node encounteredNode, long contactDuration, long currentTime) {
         CommunityLeaderNode leaderNode = (CommunityLeaderNode) encounteredNode;
         updatesCentralities(leaderNode, currentTime);
-        exchangeCommunityMessages(leaderNode, currentTime);
+        exchangeCommunityMessages(leaderNode, currentTime, encounteredNode.getId());
+
+//        double probabilityOfMeeting = getProbabilityOfMeetingNode(this, encounteredNode.getId(), currentTime);
+//        if(probabilityOfMeeting > 0.0){
+//            System.out.println(this.id + " will meet " + encounteredNode.getId() + " with a probability of "
+//                    + probabilityOfMeeting);
+//        }
 
         super.onDataExchange(encounteredNode, contactDuration, currentTime);
     }

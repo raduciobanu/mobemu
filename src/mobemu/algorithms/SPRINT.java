@@ -436,7 +436,7 @@ public class SPRINT extends Node {
      * @param dayNow current day of the week
      * @return array of future encounters per hour for 24 hours
      */
-    private static ArrayList<ArrayList<Probability>> computeFutureEncounters(SPRINT node, long currentTime, int hourNow, int dayNow) {
+    protected static ArrayList<ArrayList<Probability>> computeFutureEncounters(SPRINT node, long currentTime, int hourNow, int dayNow) {
         int devices = node.encounterProbabilities.size();
 
         // reset probabilities list
@@ -746,7 +746,7 @@ public class SPRINT extends Node {
      * Class for storing the probability of encountering a certain node in a
      * SPRINT-based network.
      */
-    private static class Probability implements Comparable<Probability> {
+    protected static class Probability implements Comparable<Probability> {
 
         private int id;
         private double probability;
@@ -761,6 +761,14 @@ public class SPRINT extends Node {
         public Probability(int id, double probability) {
             this.id = id;
             this.probability = probability;
+        }
+
+        public int getId() {
+            return id;
+        }
+
+        public double getProbability() {
+            return probability;
         }
 
         /**

@@ -24,6 +24,11 @@ public class CommunityMessage extends LeaderMessage{
     private double score;
 
     /**
+     * The centrality of the targetNode
+     */
+    private double targetCentrality;
+
+    /**
      * Creates a new community message
      * @param sourceId the id of the source
      * @param destinationId the id of the destination
@@ -33,25 +38,31 @@ public class CommunityMessage extends LeaderMessage{
         super(sourceId, destinationId, timestamp);
 
         this.targetId = targetId;
+        this.targetCentrality = 0.0;
     }
 
     public static CommunityMessage CreateRequest(int sourceId, int destinationId, int targetId, long timestamp){
         CommunityMessage leaderMessage = new CommunityMessage(sourceId, destinationId, targetId, timestamp);
         leaderMessage.messageType = CommunityMessageType.Request;
+        leaderMessage.setHopCount(sourceId, 0);
 
         return leaderMessage;
     }
 
-    public static CommunityMessage CreateResponse(int sourceId, int destinationId, int targetId, long timestamp){
+    public static CommunityMessage CreateResponse(int sourceId, int destinationId, int targetId, long timestamp,
+                                                  int hopCount){
         CommunityMessage leaderMessage = new CommunityMessage(sourceId, destinationId, targetId, timestamp);
         leaderMessage.messageType = CommunityMessageType.Response;
+        leaderMessage.setHopCount(sourceId, hopCount);
 
         return leaderMessage;
     }
 
-    public static CommunityMessage CreateAddedNode(int sourceId, int destinationId, int targetId, long timestamp){
+    public static CommunityMessage CreateAddedNode(int sourceId, int destinationId, int targetId, double targetCentrality,
+                                                   long timestamp){
         CommunityMessage leaderMessage = new CommunityMessage(sourceId, destinationId, targetId, timestamp);
         leaderMessage.messageType = CommunityMessageType.AddedNode;
+        leaderMessage.targetCentrality = targetCentrality;
 
         return leaderMessage;
     }
@@ -98,5 +109,9 @@ public class CommunityMessage extends LeaderMessage{
 
     public double getScore(){
         return this.score;
+    }
+
+    public double getTargetCentrality(){
+        return this.targetCentrality;
     }
 }

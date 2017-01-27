@@ -19,13 +19,15 @@ public class DirectLeaderMessage extends LeaderMessage{
     public static DirectLeaderMessage CreateRequest(int sourceId, int destinationId, long timestamp){
         DirectLeaderMessage leaderMessage = new DirectLeaderMessage(sourceId, destinationId, timestamp);
         leaderMessage.messageType = LeaderMessageType.Request;
+        leaderMessage.setHopCount(sourceId, 0);
 
         return leaderMessage;
     }
 
-    public static DirectLeaderMessage CreateResponse(int sourceId, int destinationId, long timestamp){
+    public static DirectLeaderMessage CreateResponse(int sourceId, int destinationId, long timestamp, int hopCount){
         DirectLeaderMessage leaderMessage = new DirectLeaderMessage(sourceId, destinationId, timestamp);
         leaderMessage.messageType = LeaderMessageType.Response;
+        leaderMessage.setHopCount(sourceId, hopCount);
 
         return leaderMessage;
     }

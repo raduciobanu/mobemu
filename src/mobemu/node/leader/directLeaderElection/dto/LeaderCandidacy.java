@@ -17,6 +17,8 @@ public class LeaderCandidacy {
 
     private long timestamp;
 
+    private long MAX_LATENCY;
+
     public LeaderCandidacy(int nodeId, double centrality, int hopCount, long timestamp) {
         this.nodeId = nodeId;
         this.centrality = centrality;
@@ -49,6 +51,17 @@ public class LeaderCandidacy {
 
     public boolean exceededHopCount(){
         return hopCount <= 0;
+    }
+
+    public double getNormalizedLatencyValue(long currentTime){
+        long latency = currentTime - timestamp;
+        if(latency > MAX_LATENCY)
+            MAX_LATENCY = latency;
+
+        if(MAX_LATENCY == 0)
+            return 1d;
+
+        return 1d - (double)(latency / MAX_LATENCY);
     }
 
     /**

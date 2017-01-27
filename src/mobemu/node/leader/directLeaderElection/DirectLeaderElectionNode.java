@@ -7,6 +7,7 @@ import mobemu.node.leader.directLeaderElection.dto.CommunityByLeader;
 import mobemu.node.leader.directLeaderElection.dto.LeaderCandidacy;
 import mobemu.node.leader.directLeaderElection.dto.DirectLeaderMessage;
 
+import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -38,7 +39,8 @@ public class DirectLeaderElectionNode extends LeaderNode {
      * @param traceStart          timestamp of the start of the trace
      * @param traceEnd            timestamp of the end of the trace
      */
-    public DirectLeaderElectionNode(int id, Context context, boolean[] socialNetwork, int dataMemorySize, int exchangeHistorySize, long seed, long traceStart, long traceEnd, boolean altruism, Node[] nodes, int cacheMemorySize) {
+    public DirectLeaderElectionNode(int id, Context context, boolean[] socialNetwork, int dataMemorySize,
+                                    int exchangeHistorySize, long seed, long traceStart, long traceEnd, boolean altruism, Node[] nodes, int cacheMemorySize) {
         super(id, context, socialNetwork, dataMemorySize, exchangeHistorySize, seed, traceStart, traceEnd, altruism, nodes, cacheMemorySize);
 
         candidacies = new ArrayList<>();
@@ -61,8 +63,8 @@ public class DirectLeaderElectionNode extends LeaderNode {
 
     public LeaderCandidacy generateCandidacy(long currentTime){
 
-        LeaderCandidacy leaderCandidacy = new LeaderCandidacy(id, getCentrality(false), communityMaxHop,
-                currentTime);
+        LeaderCandidacy leaderCandidacy = new LeaderCandidacy(id, getNormalizedCentrality(false),
+                communityMaxHop, currentTime);
 
         removeOldCandidacy();
 
@@ -114,18 +116,30 @@ public class DirectLeaderElectionNode extends LeaderNode {
     public void addCandidacy(LeaderCandidacy candidacy, long currentTime) {
         candidacies.add(candidacy);
 
-        double trust = altruism.getPerceived(candidacy.getNodeId());
+        double trust = altruism.getNormalizedPerceived(candidacy.getNodeId());
         double centrality = candidacy.getCentrality();
+//        double candidacyLatency = currentTime - candidacy.getTimestamp();
+        double latencyValue = candidacy.getNormalizedLatencyValue(currentTime);
+        double probabilityOfMeeting = getProbabilityOfMeetingNode(this, candidacy.getNodeId(), currentTime);
+//        System.out.println(candidacyLatency);
 
-        if (leaderScore == 0) {
-            //we accept leaders with 0 centrality if they have a positive trust value
-            if (centrality == 0 && trust > 0) {
-                leaderNodeId = candidacy.getNodeId();
-            }
-        }
+//        DecimalFormat df = new DecimalFormat("#.###");
+//        String formattedCentrality = df.format(centrality);
+//        System.out.println("Id: " + candidacy.getNodeId() + ", Trust: " + trust + ", Centrality: " + formattedCentrality
+//                + ", Latency: " + latencyValue + ", Probability: " + probabilityOfMeeting);
+
+//        if (leaderScore == 0) {
+//            //we accept leaders with 0 centrality if they have a positive trust value
+//            if (centrality == 0 && trust > 0) {
+//                leaderNodeId = candidacy.getNodeId();
+//            }
+//        }
 
 
-        double candidateScore = candidacy.getCentrality() * altruism.getPerceived(candidacy.getNodeId());
+//        double candidateScore = candidacy.getCentrality() * altruism.getPerceived(candidacy.getNodeId());
+
+        double candidateScore = computeLeaderScore(centrality, trust, latencyValue, probabilityOfMeeting);
+
         if (Double.compare(candidateScore,leaderScore) > 0) {
             leaderScore = candidateScore;
 
@@ -134,7 +148,7 @@ public class DirectLeaderElectionNode extends LeaderNode {
     }
 
     @Override
-    protected void deliverHeartBeat(DirectLeaderMessage heartBeat, long currentTime){
+    protected void deliverHeartBeat(DirectLeaderMessage heartBeat, long currentTime, int encounteredNodeId){
 
         /**
          * if the heartbeat is a request, then the current node is considered a leader by the source of the heartbeat
@@ -149,7 +163,7 @@ public class DirectLeaderElectionNode extends LeaderNode {
             communityByLeader.removeNode(sourceId, currentTime);
         }
 
-        super.deliverHeartBeat(heartBeat, currentTime);
+        super.deliverHeartBeat(heartBeat, currentTime, encounteredNodeId);
     }
 
     private void changeLeader(int newLeaderId, long currentTime){

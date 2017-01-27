@@ -3,6 +3,7 @@ package mobemu.node.leader.directLeaderElection;
 import mobemu.node.Node;
 import mobemu.node.leader.LeaderNode;
 import mobemu.node.leader.communityBasedLeaderElection.CommunityLeaderNode;
+import mobemu.node.leader.directLeaderElection.dto.HeartbeatResponse;
 
 import java.io.FileNotFoundException;
 import java.io.PrintWriter;
@@ -21,12 +22,14 @@ public class LeaderStats {
 
         try {
             writer = new PrintWriter(filename, "UTF-8");
+
         } catch (FileNotFoundException e) {
             e.printStackTrace();
         } catch (UnsupportedEncodingException e) {
             e.printStackTrace();
         }
 
+        System.out.println(filename + " opened!");
         return writer;
     }
 
@@ -73,25 +76,30 @@ public class LeaderStats {
     }
 
     public static void computeAverageHeartBeatResponseTime(Node[] nodes, PrintWriter writer){
-        long sum = 0;
+        long sumResponseTime = 0;
+        long sumHopCount = 0;
         long number = 0;
         long millisInAnHour= 1000 * 3600;
 
         for (Node node : nodes){
             LeaderNode leaderNode = (LeaderNode) node;
-            for(long responseTime : leaderNode.getResponseTimes()){
+            for(HeartbeatResponse heartbeatResponse : leaderNode.getResponseTimes()){
                 //skip scenarios when the node is its own leader
 //                if(responseTime == 0)
 //                    continue;
 
-                sum += responseTime;
+                long responseTime = heartbeatResponse.getResponseTime();
+                int hopCount = heartbeatResponse.getHopCount();
+                sumResponseTime += responseTime;
+                sumHopCount += hopCount;
                 number++;
 
                 writer.println(responseTime / millisInAnHour);
             }
         }
 
-        System.out.println("Average responseTime: " + sum/(number * millisInAnHour));
+        System.out.println("Average responseTime: " + sumResponseTime/(number * millisInAnHour));
+        System.out.println("Average hopCount:" + sumHopCount / number);
     }
 
     public static void printLeaderCommunities(Node[] nodes){
@@ -102,4 +110,8 @@ public class LeaderStats {
             System.out.println(leaderNode.getId() + " -- " + leaderNode.getLeaderCommunity().getNodes());
         }
     }
+
+//    public static void printDirectLeaderCommunities(Node[] nodes){
+//
+//    }
 }

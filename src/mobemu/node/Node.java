@@ -11,6 +11,8 @@ import mobemu.node.leader.directLeaderElection.LeaderStats;
 import mobemu.trace.Contact;
 import mobemu.trace.Trace;
 
+import static mobemu.utils.Constants.responseTimesFileName;
+
 /**
  * Class for a mobile node in an opportunistic network. This is an abstract
  * class that has to be inherited from by any opportunistic algorithm employed.
@@ -193,8 +195,9 @@ public abstract class Node {
 
 
 //        PrintWriter writer = LeaderStats.openFile("communities.txt");
-        PrintWriter writer = LeaderStats.openFile("responseTimes.txt");
+        PrintWriter writer = LeaderStats.openFile(responseTimesFileName);
         for (long tick = startTime; tick < endTime; tick += 10 * sampleTime) {
+            double x = (double)(tick - startTime) / (endTime - startTime);
             int count = 0;
 
             // update battery level
@@ -392,6 +395,18 @@ public abstract class Node {
         return local
                 ? localCentrality.getValue(Centrality.CentralityValue.CUMULATED)
                 : centrality.getValue(Centrality.CentralityValue.CUMULATED);
+    }
+
+    /**
+     * Gets the S-window normalized centrality for the current node.
+     * @param local he type of computation (inside or outside the local
+     * community)
+     * @return the centrality value for the current node
+     */
+    public double getNormalizedCentrality(boolean local){
+        return local
+                ? localCentrality.getNormalizedValue(Centrality.CentralityValue.CUMULATED)
+                : centrality.getNormalizedValue(Centrality.CentralityValue.CUMULATED);
     }
 
     /**
