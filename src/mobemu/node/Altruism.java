@@ -22,6 +22,8 @@ public class Altruism {
     private static final int ALTRUISM_UNKNOWN = 50; // default initial altruism value for non-community nodes
     private static final int ALTRUISM_COMMUNITY = 100; // default initial altruism value for community nodes
 
+    private static double MAX_PERCEIVED; // the maximum perceived value for the altruism
+
     /**
      * Instantiates an {@link Altruism} object.
      *
@@ -38,6 +40,9 @@ public class Altruism {
         this.perceived = new double[isConnected.length];
         for (int i = 0; i < perceived.length; i++) {
             this.perceived[i] = isConnected[i] ? altruismCommunity : altruismUnknown;
+            if(this.perceived[i] > MAX_PERCEIVED){
+                MAX_PERCEIVED = this.perceived[i];
+            }
         }
         maxBatteryThreshold = 0.25;
         behaviorConstant = 0.1;
@@ -82,6 +87,16 @@ public class Altruism {
      */
     public double getPerceived(int id) {
         return perceived[id];
+    }
+
+    /**
+     * Gets the normalized perceived altruism for a given node
+     *
+     * @param id ID of the node whose perceived altruism is requested
+     * @return normalized perceived altruism value for the given node (between 0 and 1)
+     */
+    public double getNormalizedPerceived(int id){
+        return perceived[id] / MAX_PERCEIVED;
     }
 
     /**
@@ -161,6 +176,9 @@ public class Altruism {
      */
     public void setPerceived(int id, double value) {
         this.perceived[id] = value;
+        if(this.perceived[id] > MAX_PERCEIVED){
+            MAX_PERCEIVED = this.perceived[id];
+        }
     }
 
     /**
@@ -171,6 +189,9 @@ public class Altruism {
      */
     public void increasePerceived(int id) {
         this.perceived[id] += perceivedBehaviorConstant;
+        if(this.perceived[id] > MAX_PERCEIVED){
+            MAX_PERCEIVED = this.perceived[id];
+        }
     }
 
     /**

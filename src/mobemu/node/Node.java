@@ -4,9 +4,14 @@
  */
 package mobemu.node;
 
+import java.io.PrintWriter;
 import java.util.*;
+
+import mobemu.node.leader.directLeaderElection.LeaderStats;
 import mobemu.trace.Contact;
 import mobemu.trace.Trace;
+
+import static mobemu.utils.Constants.responseTimesFileName;
 
 /**
  * Class for a mobile node in an opportunistic network. This is an abstract
@@ -158,7 +163,7 @@ public abstract class Node {
         this.network = new Network();
         this.context = context;
     }
-
+    
     /**
      * Runs an opportunistic algorithm.
      *
@@ -188,7 +193,11 @@ public abstract class Node {
 
         List<Message> messages = new ArrayList<>();
 
-        for (long tick = startTime; tick < endTime; tick += sampleTime) {
+
+//        PrintWriter writer = LeaderStats.openFile("communities.txt");
+        PrintWriter writer = LeaderStats.openFile(responseTimesFileName);
+        for (long tick = startTime; tick < endTime; tick += 10 * sampleTime) {
+            double x = (double)(tick - startTime) / (endTime - startTime);
             int count = 0;
 
             // update battery level
@@ -246,7 +255,13 @@ public abstract class Node {
             }
 
             contactCount = trace.getContactsCount();
+//            LeaderStats.printLocalCommunities(nodes, tick, startTime, writer);
+            LeaderStats.generateHeartBeats(nodes, tick, startTime);
         }
+//        LeaderStats.printLeaderCommunities(nodes);
+        LeaderStats.computeAverageHeartBeatResponseTime(nodes, writer);
+        LeaderStats.closeFile(writer);
+
 
         return messages;
     }
@@ -387,6 +402,18 @@ public abstract class Node {
     }
 
     /**
+     * Gets the S-window normalized centrality for the current node.
+     * @param local he type of computation (inside or outside the local
+     * community)
+     * @return the centrality value for the current node
+     */
+    public double getNormalizedCentrality(boolean local){
+        return local
+                ? localCentrality.getNormalizedValue(Centrality.CentralityValue.CUMULATED)
+                : centrality.getNormalizedValue(Centrality.CentralityValue.CUMULATED);
+    }
+
+    /**
      * Computes common neighbors between this node and another node.
      *
      * @param node node to compare common friends with
@@ -446,7 +473,7 @@ public abstract class Node {
             updateContactDuration(encounteredNode.id, sampleTime, tick);
 
             // when the threshold has been exceeded, insert vi in F0 and C0
-            checkThreshold(encounteredNode.id);
+            checkThreshold(encounteredNode, tick);
         }
 
         updateCentrality(timeDelta);
@@ -470,7 +497,7 @@ public abstract class Node {
 
             // step 5 of the K-clique algorithm
             if (!inLocalCommunity(encounteredNode.id)) {
-                updateLocalCommunity(encounteredNode);
+                updateLocalCommunity(encounteredNode, tick);
             }
 
             // step 6 of the K-clique algorithm
@@ -584,9 +611,10 @@ public abstract class Node {
      * Checks if the K-clique contact duration threshold has been exceeded and
      * adds the encountered node to the local community if it has.
      *
-     * @param id ID of the encountered node
+     * @param encounteredNode the encountered node
      */
-    protected void checkThreshold(int id) {
+    protected void checkThreshold(Node encounteredNode, long currentTime) {
+        int id = encounteredNode.getId();
         ContactInfo node = encounteredNodes.get(id);
 
         if (node != null) {
@@ -597,7 +625,7 @@ public abstract class Node {
                 }
 
                 if (!inLocalCommunity(id)) {
-                    localCommunity.add(id);
+                    addToLocalCommunity(encounteredNode, currentTime);
                 }
             }
         }
@@ -608,7 +636,7 @@ public abstract class Node {
      *
      * @param encounteredNode encountered node
      */
-    protected void updateLocalCommunity(Node encounteredNode) {
+    protected void updateLocalCommunity(Node encounteredNode, long currentTime) {
 
         int count = 0;
 
@@ -619,7 +647,7 @@ public abstract class Node {
         }
 
         if (count >= communityThreshold - 1) {
-            localCommunity.add(encounteredNode.id);
+            addToLocalCommunity(encounteredNode, currentTime);
         }
     }
 
@@ -645,6 +673,13 @@ public abstract class Node {
                 }
             }
         }
+    }
+
+
+
+    protected void addToLocalCommunity(Node encounteredNode, long currentTime){
+        int encounteredNodeId = encounteredNode.id;
+        localCommunity.add(encounteredNodeId);
     }
 
     /**

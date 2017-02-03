@@ -9,8 +9,13 @@ import mobemu.algorithms.Epidemic;
 import mobemu.node.Message;
 import mobemu.node.Node;
 import mobemu.node.Stats;
-import mobemu.parsers.UPB;
+import mobemu.node.leader.communityBasedLeaderElection.CommunityLeaderNode;
+import mobemu.node.leader.directLeaderElection.DirectLeaderElectionNode;
+import mobemu.parsers.Sigcomm;
 import mobemu.trace.Parser;
+import mobemu.utils.Constants;
+
+import static mobemu.utils.Constants.*;
 
 /**
  * Main class for MobEmu.
@@ -20,7 +25,22 @@ import mobemu.trace.Parser;
 public class MobEmu {
 
     public static void main(String[] args) {
-        Parser parser = new UPB(UPB.UpbTrace.UPB2011);
+//        Parser parser = new UPB(UPB.UpbTrace.UPB2012);
+        Parser parser = new Sigcomm();
+
+        //set some system variables
+//        leaderCommunityThreshold = Double.parseDouble(args[0]);
+//        leaderProposalsThreshold = Double.parseDouble(args[1]);
+
+        centralityWeight = Double.parseDouble(args[0]);
+        trustWeight = Double.parseDouble(args[1]);
+        probabilityWeight = Double.parseDouble(args[2]);
+//        latencyWeight = Double.parseDouble(args[3]);
+
+        Constants.responseTimesFileName = "responseTimes_direct_" + centralityWeight + "_" +
+                trustWeight + "_" + probabilityWeight;
+//                + "_" + latencyWeight + ".txt";
+
 
         // print some trace statistics
         double duration = (double) (parser.getTraceData().getEndTime() - parser.getTraceData().getStartTime()) / (Parser.MILLIS_PER_MINUTE * 60);
@@ -36,6 +56,17 @@ public class MobEmu {
         for (int i = 0; i < nodes.length; i++) {
             nodes[i] = new Epidemic(i, nodes.length, parser.getContextData().get(i), parser.getSocialNetwork()[i],
                     10000, 100, seed, parser.getTraceData().getStartTime(), parser.getTraceData().getEndTime(), dissemination, false);
+//                        nodes[i] = new SPRINT(i, parser.getContextData().get(i), parser.getSocialNetwork()[i],
+//                                dataMemorySize, exchangeHistorySize, seed, parser.getTraceData().getStartTime(),
+//                                parser.getTraceData().getEndTime(), false, nodes, cacheMemorySize);
+            nodes[i] = new DirectLeaderElectionNode(i, parser.getContextData().get(i), parser.getSocialNetwork()[i],
+                    dataMemorySize, exchangeHistorySize, seed, parser.getTraceData().getStartTime(),
+                    parser.getTraceData().getEndTime(), false, nodes, cacheMemorySize);
+
+//            nodes[i] = new CommunityLeaderNode(i, parser.getContextData().get(i), parser.getSocialNetwork()[i],
+//                    dataMemorySize, exchangeHistorySize, seed, parser.getTraceData().getStartTime(),
+//                    parser.getTraceData().getEndTime(), false, nodes, cacheMemorySize);
+
         }
 
         // run the trace
