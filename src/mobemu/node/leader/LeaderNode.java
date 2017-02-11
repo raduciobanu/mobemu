@@ -94,7 +94,7 @@ public abstract class LeaderNode extends SPRINT {
         return centralityWeight * centrality + trustWeight * trust + probabilityWeight * probabilityOfMeeting;
     }
 
-    protected double getProbabilityOfMeetingNode(LeaderNode node, int encounteredNodeId, long currentTime){
+    public double getProbabilityOfMeetingNode(LeaderNode node, int encounteredNodeId, long currentTime){
         Calendar today = Calendar.getInstance();
         today.setTimeInMillis(currentTime);
         int hourNow = today.get(Calendar.HOUR_OF_DAY);
@@ -166,7 +166,7 @@ public abstract class LeaderNode extends SPRINT {
 
             long responseTime = currentTime - heartBeatTimestamp;
             responseTimes.add(new HeartbeatResponse(responseTime, heartBeat.getHopCount(this.id)));
-//            System.out.println("Response Received after " + responseTime + "s!");
+//            System.out.println("AddResponse Received after " + responseTime + "s!");
         }
     }
 

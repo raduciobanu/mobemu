@@ -257,6 +257,7 @@ public abstract class Node {
             contactCount = trace.getContactsCount();
 //            LeaderStats.printLocalCommunities(nodes, tick, startTime, writer);
             LeaderStats.generateHeartBeats(nodes, tick, startTime);
+            LeaderStats.checkCommunities(nodes, tick, startTime);
         }
 //        LeaderStats.printLeaderCommunities(nodes);
         LeaderStats.computeAverageHeartBeatResponseTime(nodes, writer);

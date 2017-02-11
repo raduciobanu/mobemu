@@ -23,6 +23,10 @@ public class LeaderCommunity {
         leaderCommunity.put(nodeId, new AbstractMap.SimpleEntry<>(nodeCentrality, currentTime));
     }
 
+    public void remove(int nodeId){
+        leaderCommunity.remove(nodeId);
+    }
+
     public void addNode(Node node, long currentTime){
         leaderCommunity.put(node.getId(), new AbstractMap.SimpleEntry<>(node.getNormalizedCentrality(false), currentTime));
     }

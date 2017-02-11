@@ -174,7 +174,7 @@ public class DirectLeaderElectionNode extends LeaderNode {
 
         leaderNodeId = newLeaderId;
 
-        //generate Request of membership for the new leader
+        //generate AddRequest of membership for the new leader
         generateHeartBeat(currentTime);
         //            System.out.println("Node " + id + " changed leader to " + leaderNodeId + " with score " + leaderScore
 //            + ". Centrality = " + centrality + ", Trust = " + trust);

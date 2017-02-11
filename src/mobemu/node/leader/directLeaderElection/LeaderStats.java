@@ -1,6 +1,7 @@
 package mobemu.node.leader.directLeaderElection;
 
 import mobemu.node.Node;
+import mobemu.node.leader.LeaderMessage;
 import mobemu.node.leader.LeaderNode;
 import mobemu.node.leader.communityBasedLeaderElection.CommunityLeaderNode;
 import mobemu.node.leader.directLeaderElection.dto.HeartbeatResponse;
@@ -75,6 +76,19 @@ public class LeaderStats {
         }
     }
 
+    public static void checkCommunities(Node[] nodes, long tick, long startTime){
+        if((tick - startTime) % (heartBeatGenerationTime * 3) == 0){
+            for(Node node: nodes){
+                if(!(node instanceof CommunityLeaderNode))
+                    return;
+
+                CommunityLeaderNode leaderNode = (CommunityLeaderNode) node;
+
+                leaderNode.checkCommunities(tick);
+            }
+        }
+    }
+
     public static void computeAverageHeartBeatResponseTime(Node[] nodes, PrintWriter writer){
         long sumResponseTime = 0;
         long sumHopCount = 0;
@@ -107,7 +121,7 @@ public class LeaderStats {
         for(Node node:nodes){
             CommunityLeaderNode leaderNode = (CommunityLeaderNode)node;
 
-            System.out.println(leaderNode.getId() + " -- " + leaderNode.getLeaderCommunity().getNodes());
+            System.out.println(leaderNode.getId() + " -- " + leaderNode.getLeaderCommunityNodes());
         }
     }
 

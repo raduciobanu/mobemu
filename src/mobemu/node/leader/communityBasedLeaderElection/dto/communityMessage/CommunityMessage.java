@@ -1,6 +1,7 @@
-package mobemu.node.leader.communityBasedLeaderElection.dto;
+package mobemu.node.leader.communityBasedLeaderElection.dto.communityMessage;
 
 import mobemu.node.leader.LeaderMessage;
+import mobemu.node.leader.communityBasedLeaderElection.dto.CommunityMessageType;
 
 /**
  * Created by radu on 1/15/2017.
@@ -10,23 +11,23 @@ public class CommunityMessage extends LeaderMessage{
     /**
      * The type of the message
      */
-    private CommunityMessageType messageType;
+    protected CommunityMessageType messageType;
 
 
     /**
      * The id of the target node of the message (the node for whom the message was issued)
      */
-    private int targetId;
+    protected int targetId;
 
     /**
      * The score of the target for a leaderProposal
      */
-    private double score;
+    protected double score;
 
     /**
      * The centrality of the targetNode
      */
-    private double targetCentrality;
+    protected double targetCentrality;
 
     /**
      * Creates a new community message
@@ -41,9 +42,9 @@ public class CommunityMessage extends LeaderMessage{
         this.targetCentrality = 0.0;
     }
 
-    public static CommunityMessage CreateRequest(int sourceId, int destinationId, int targetId, long timestamp){
+    public static CommunityMessage CreateAddRequest(int sourceId, int destinationId, int targetId, long timestamp){
         CommunityMessage leaderMessage = new CommunityMessage(sourceId, destinationId, targetId, timestamp);
-        leaderMessage.messageType = CommunityMessageType.Request;
+        leaderMessage.messageType = CommunityMessageType.AddRequest;
         leaderMessage.setHopCount(sourceId, 0);
 
         return leaderMessage;
@@ -52,7 +53,7 @@ public class CommunityMessage extends LeaderMessage{
     public static CommunityMessage CreateResponse(int sourceId, int destinationId, int targetId, long timestamp,
                                                   int hopCount){
         CommunityMessage leaderMessage = new CommunityMessage(sourceId, destinationId, targetId, timestamp);
-        leaderMessage.messageType = CommunityMessageType.Response;
+        leaderMessage.messageType = CommunityMessageType.AddResponse;
         leaderMessage.setHopCount(sourceId, hopCount);
 
         return leaderMessage;
@@ -83,12 +84,30 @@ public class CommunityMessage extends LeaderMessage{
         return leaderMessage;
     }
 
+    public static CommunityMessage CreateRemoveRequest(int sourceId, int destinationId, int targetId, long timestamp){
+        CommunityMessage leaderMessage = new CommunityMessage(sourceId, destinationId, targetId, timestamp);
+        leaderMessage.messageType = CommunityMessageType.RemoveRequest;
+
+        return leaderMessage;
+    }
+
+    public static CommunityMessage CreateRemovedNode(int sourceId, int destinationId, int targetId, long timestamp){
+        CommunityMessage leaderMessage = new CommunityMessage(sourceId, destinationId, targetId, timestamp);
+        leaderMessage.messageType = CommunityMessageType.RemovedNode;
+
+        return leaderMessage;
+    }
+
+    public CommunityMessageType getMessageType(){
+        return messageType;
+    }
+
     public boolean isRequest(){
-        return messageType == CommunityMessageType.Request;
+        return messageType == CommunityMessageType.AddRequest;
     }
 
     public boolean isResponse(){
-        return messageType == CommunityMessageType.Response;
+        return messageType == CommunityMessageType.AddResponse;
     }
 
     public boolean isAddedNode(){

@@ -1,23 +1,30 @@
 package mobemu.node.leader.communityBasedLeaderElection;
 
+import mobemu.node.ContactInfo;
 import mobemu.node.Context;
 import mobemu.node.Node;
 import mobemu.node.leader.LeaderNode;
-import mobemu.node.leader.communityBasedLeaderElection.dto.CommunityMessage;
+import mobemu.node.leader.communityBasedLeaderElection.dto.communityMessage.CommunityMessage;
 import mobemu.node.leader.communityBasedLeaderElection.dto.LeaderCommunity;
-import mobemu.node.leader.communityBasedLeaderElection.dto.LeaderProposals;
+import mobemu.node.leader.communityBasedLeaderElection.dto.proposals.LeaderProposal;
+import mobemu.node.leader.communityBasedLeaderElection.dto.proposals.collections.AddProposalCollection;
+import mobemu.node.leader.communityBasedLeaderElection.dto.proposals.collections.LeaderProposalCollection;
+import mobemu.node.leader.communityBasedLeaderElection.dto.communityMessage.handlers.*;
+import mobemu.node.leader.communityBasedLeaderElection.dto.proposals.collections.RemoveProposalCollection;
 
-import java.text.DecimalFormat;
 import java.util.*;
-
-import static mobemu.utils.Constants.leaderCommunityThreshold;
-import static mobemu.utils.Constants.leaderProposalsThreshold;
 
 /**
  * Created by radu on 1/15/2017.
  */
 public class CommunityLeaderNode extends LeaderNode {
 
+    /**
+     * threshold related to last encounter with a given node
+     * if the time passed since last encounter with a node exceeded this value
+     * a request should be issued to exclude the node form community
+     */
+    private static long TIME_SINCE_LAST_ENCOUNTER_THRESHOLD = 1000 * 60 * 60 * 24;
     /**
      *  The community of the current node
      *  Key = nodeId, Value = node centrality
@@ -38,23 +45,38 @@ public class CommunityLeaderNode extends LeaderNode {
      * Dictionary of issued requests
      * Key = the id of the node, Value = the centrality of the node
      */
-    protected Map<Integer, Double> requestsSent;
+//    protected Map<Integer, Double> requestsSent;
     /**
      * Dictionary of responses received for the requests made
      * key = the id of the node whom the request was issued for
      * value = the list of nodes that responded to the requests
      */
-    protected Map<Integer, List<Integer>> receivedResponses;
+//    protected Map<Integer, List<Integer>> receivedResponses;
 
     /**
-     * Leader proposals received from other nodes
+     * Proposals for electing a leader in the community
      */
-    protected LeaderProposals leaderProposals;
+    protected LeaderProposalCollection leaderProposalCollection;
 
     /**
      * The timestamp of the latest leader change
      */
     protected long leaderElectionTimestamp;
+
+    /**
+     * Handler for community messages
+     */
+    private CommunityMessageHandler addedNodeHandler;
+
+    /**
+     * Nodes from leader community seen in the last period
+     */
+    private List<Integer> nodesSeen;
+
+    /**
+     * Nodes from leader community not seen in the last period
+     */
+    private List<Integer> nodesNotSeen;
 
     /**
      * Constructor for the {@link Node} class.
@@ -79,13 +101,86 @@ public class CommunityLeaderNode extends LeaderNode {
 
         this.communityMessages = new ArrayList<>();
         this.ownCommunityMessages = new ArrayList<>();
-        this.requestsSent = new HashMap<>();
-        this.receivedResponses = new HashMap<>();
-        this.leaderProposals = new LeaderProposals();
+        this.nodesSeen = new ArrayList<>();
+        this.nodesNotSeen = new ArrayList<>();
+//        this.requestsSent = new HashMap<>();
+//        this.receivedResponses = new HashMap<>();
+        this.leaderProposalCollection = new LeaderProposalCollection();
+        AddCommunityMessageHandlers();
     }
 
-    public LeaderCommunity getLeaderCommunity() {
-        return leaderCommunity;
+    public void AddCommunityMessageHandlers(){
+        addedNodeHandler = new AddedNodeHandler(this);
+        CommunityMessageHandler addRequestHandler = new AddRequestHandler(this);
+        CommunityMessageHandler removedRequestHandler = new RemovedRequestHandler(this);
+        CommunityMessageHandler removeRequestHandler = new RemoveRequestHandler(this);
+        CommunityMessageHandler leaderElectedHandler = new LeaderElectedHandler(this);
+        CommunityMessageHandler leaderProposalHandler = new LeaderProposalHandler(this);
+
+        addedNodeHandler.setNextHandler(addRequestHandler);
+        addRequestHandler.setNextHandler(removedRequestHandler);
+        removedRequestHandler.setNextHandler(removeRequestHandler);
+        removeRequestHandler.setNextHandler(leaderElectedHandler);
+        leaderElectedHandler.setNextHandler(leaderProposalHandler);
+    }
+
+    public int getLeaderNodeId(){
+        return leaderNodeId;
+    }
+
+    public long getLeaderElectionTimestamp(){
+        return leaderElectionTimestamp;
+    }
+
+    public List<Integer> getNodesSeen(){
+        return nodesSeen;
+    }
+
+    public List<Integer> getNodesNotSeen(){
+        return nodesNotSeen;
+    }
+
+    public Set<Integer> getLeaderCommunityNodes() {
+        return leaderCommunity.getNodes();
+    }
+
+    public void addToLeaderCommunity(int nodeId, double nodeCentrality, long currentTime){
+        leaderCommunity.add(nodeId, nodeCentrality, currentTime);
+    }
+
+    protected void addToLeaderCommunity(Node encounteredNode, long currentTime){
+        if(!leaderCommunity.containsNode(encounteredNode.getId())){
+            leaderCommunity.addNode(encounteredNode, currentTime);
+            proposeLeader(currentTime);
+        }
+    }
+
+    public void removeFromLeaderCommunity(int nodeId){
+        if(nodeId == id)
+            return;
+
+        leaderCommunity.remove(nodeId);
+    }
+
+    public LeaderProposalCollection getLeaderProposalCollection(){
+        return leaderProposalCollection;
+    }
+
+    public void addToLeaderProposals(int sourceId, int targetId, long currentTime, double score){
+        LeaderProposal proposal = new LeaderProposal(sourceId, targetId, currentTime, score);
+        leaderProposalCollection.add(proposal);
+    }
+
+//    public Map<Integer, Double> getRequestsSent(){
+//        return requestsSent;
+//    }
+
+//    public Map<Integer, List<Integer>> getReceivedResponses(){
+//        return receivedResponses;
+//    }
+
+    public void addToOwnCommunityMessages(CommunityMessage communityMessage){
+        ownCommunityMessages.add(communityMessage);
     }
 
     @Override
@@ -104,10 +199,14 @@ public class CommunityLeaderNode extends LeaderNode {
         }
     }
 
+    public boolean shouldBeToLeaderCommunity(int targetId){
+        return inLocalCommunity(targetId) || inSocialNetwork(targetId);
+    }
+
     private void requestMembershipPermissionForNode(CommunityLeaderNode encounteredLeaderNode, long currentTime){
         int encounteredNodeId = encounteredLeaderNode.getId();
-        if(receivedResponses.containsKey(encounteredNodeId))
-            return;
+//        if(receivedResponses.containsKey(encounteredNodeId))
+//            return;
 
         if(leaderCommunity.size() == 1){
             addToLeaderCommunity(encounteredLeaderNode, currentTime);
@@ -117,33 +216,29 @@ public class CommunityLeaderNode extends LeaderNode {
         }
 
         for(int nodeId : leaderCommunity.getNodes()){
-            CommunityMessage request = CommunityMessage.CreateRequest(this.id, nodeId, encounteredNodeId, currentTime);
-            ownCommunityMessages.add(request);
+            CommunityMessage request = CommunityMessage.CreateAddRequest(this.id, nodeId,
+                    encounteredNodeId, currentTime);
+            addToOwnCommunityMessages(request);
         }
 
-        requestsSent.put(encounteredNodeId, encounteredLeaderNode.getNormalizedCentrality(true));
+//        requestsSent.put(encounteredNodeId, encounteredLeaderNode.getNormalizedCentrality(true));
 
-        receivedResponses.put(encounteredNodeId, new ArrayList<>());
+//        receivedResponses.put(encounteredNodeId, new ArrayList<>());
     }
 
-    protected void addToLeaderCommunity(Node encounteredNode, long currentTime){
-        if(!leaderCommunity.containsNode(encounteredNode.getId()))
-            leaderCommunity.addNode(encounteredNode, currentTime);
-    }
+//    protected void generateCommunityResponse(int destinationId, int targetId, long currentTime, int hopCount){
+//        double probabilityOfMeeting = getProbabilityOfMeetingNode(this, targetId, currentTime);
+//        if(probabilityOfMeeting > 0.0){
+//            System.out.println(this.id + " will meet " + targetId + " with a probability of "
+//                    + probabilityOfMeeting);
+//        }
+//
+//        if(inLocalCommunity(targetId) || inSocialNetwork(targetId)) {
+//            ownCommunityMessages.add(CommunityMessage.CreateResponse(id, destinationId, targetId, currentTime, hopCount));
+//        }
+//    }
 
-    protected void generateCommunityResponse(int destinationId, int targetId, long currentTime, int hopCount){
-        double probabilityOfMeeting = getProbabilityOfMeetingNode(this, targetId, currentTime);
-        if(probabilityOfMeeting > 0.0){
-            System.out.println(this.id + " will meet " + targetId + " with a probability of "
-                    + probabilityOfMeeting);
-        }
-
-        if(inLocalCommunity(targetId) || inSocialNetwork(targetId)) {
-            ownCommunityMessages.add(CommunityMessage.CreateResponse(id, destinationId, targetId, currentTime, hopCount));
-        }
-    }
-
-    protected void proposeLeader(long currentTime){
+    public void proposeLeader(long currentTime){
         double maxScore = 0.0;
         int leaderId = -1;
         for(int nodeId: leaderCommunity.getNodes()){
@@ -158,8 +253,8 @@ public class CommunityLeaderNode extends LeaderNode {
 
             double score = computeLeaderScore(centrality, trust, probabilityOfMeeting);
 
-            if(leaderProposals.contains(nodeId, id, score))
-                continue;
+//            if(leaderProposalCollection.contains(nodeId, id, score))
+//                continue;
 
             if(score > maxScore){
                 maxScore = score;
@@ -171,79 +266,84 @@ public class CommunityLeaderNode extends LeaderNode {
         if(leaderId != -1){
             for(int nodeId: leaderCommunity.getNodes()) {
                 double centrality = leaderCommunity.get(nodeId);
-                leaderProposals.addProposal(leaderId, id, maxScore);
-                ownCommunityMessages.add(CommunityMessage.CreateLeaderProposal(id, nodeId, leaderId, centrality,
+
+                addToLeaderProposals(id, leaderId, currentTime, maxScore);
+                addToOwnCommunityMessages(CommunityMessage.CreateLeaderProposal(id, nodeId, leaderId, centrality,
                         currentTime));
 
             }
         }
     }
 
-    protected void checkLeaderCommunityThreshold(int targetId, long currentTime){
-        List<Integer> nodesThatConfirmed = receivedResponses.get(targetId);
-        if(nodesThatConfirmed.size() > leaderCommunityThreshold * leaderCommunity.size() - 1){
-            double targetCentrality = requestsSent.get(targetId);
+//    protected void checkLeaderCommunityThreshold(int targetId, long currentTime){
+//        List<Integer> nodesThatConfirmed = receivedResponses.get(targetId);
+//        if(nodesThatConfirmed.size() > leaderCommunityThreshold * leaderCommunity.size() - 1){
+//            double targetCentrality = requestsSent.get(targetId);
+//
+//            leaderCommunity.add(targetId, targetCentrality, currentTime);
+//
+//            for(int nodeId : leaderCommunity.getNodes()){
+//                ownCommunityMessages.add(CommunityMessage.CreateAddedNode(id, nodeId, targetId, targetCentrality, currentTime));
+//                proposeLeader(currentTime);
+//            }
+//        }
+//    }
 
-            leaderCommunity.add(targetId, targetCentrality, currentTime);
-
-            for(int nodeId : leaderCommunity.getNodes()){
-                ownCommunityMessages.add(CommunityMessage.CreateAddedNode(id, nodeId, targetId, targetCentrality, currentTime));
-                proposeLeader(currentTime);
-            }
-        }
-    }
-
-    private void electLeader(int leaderNodeId, long currentTime){
+    public void electLeader(int leaderNodeId, long currentTime){
         this.leaderNodeId = leaderNodeId;
         this.leaderElectionTimestamp = currentTime;
     }
 
     protected void deliverCommunityMessage(CommunityMessage message, long currentTime, int encounteredNodeId){
-        int targetId = message.getTargetId();
-        int sourceId = message.getSourceId();
+//        int targetId = message.getTargetId();
+//        int sourceId = message.getSourceId();
 
         message.transfer(encounteredNodeId, this.id);
-        if(message.isRequest()){
-            generateCommunityResponse(sourceId, targetId, currentTime, message.getHopCount(this.id));
+        try {
+            addedNodeHandler.receiveMessage(message, currentTime);
+        } catch (Exception e) {
+            e.printStackTrace();
         }
-        else if(message.isResponse()){
-            List<Integer> nodesThatConfirmed = receivedResponses.get(targetId);
-            if(!nodesThatConfirmed.contains(targetId)){
-                nodesThatConfirmed.add(targetId);
-
-                checkLeaderCommunityThreshold(targetId, currentTime);
-            }
-        }
-        else if(message.isAddedNode()){
-            double targetCentrality = message.getTargetCentrality();
-            leaderCommunity.add(targetId, targetCentrality, currentTime);
-        }
-        else if(message.isLeaderProposal()){
-            double score = message.getScore();
-            leaderProposals.addProposal(targetId, sourceId, score);
-
-
-            if(Double.compare(leaderProposals.size(), leaderProposalsThreshold * leaderCommunity.size() - 1) > 0){
-                int newLeaderId = leaderProposals.getLeader();
-
-                if(newLeaderId != leaderNodeId && newLeaderId != -1){
-                    //send LeaderElected message to all nodes from leaderCommunity
-                    for (int nodeId : leaderCommunity.getNodes()){
-                        ownCommunityMessages.add(CommunityMessage.CreateLeaderElected(this.id, nodeId, targetId,
-                                currentTime));
-                    }
-
-                    electLeader(newLeaderId, currentTime);
-                }
-            }
-        }
-        else if(message.isLeaderElected()){
-            long messageTimestamp = message.getTimestamp();
-
-            if(messageTimestamp > leaderElectionTimestamp){
-                electLeader(targetId, messageTimestamp);
-            }
-        }
+//        if(message.isRequest()){
+//            generateCommunityResponse(sourceId, targetId, currentTime, message.getHopCount(this.id));
+//        }
+//        else if(message.isResponse()){
+//            List<Integer> nodesThatConfirmed = receivedResponses.get(targetId);
+//            if(!nodesThatConfirmed.contains(targetId)){
+//                nodesThatConfirmed.add(targetId);
+//
+//                checkLeaderCommunityThreshold(targetId, currentTime);
+//            }
+//        }
+//        else if(message.isAddedNode()){
+//            double targetCentrality = message.getTargetCentrality();
+//            leaderCommunity.add(targetId, targetCentrality, currentTime);
+//        }
+//        else if(message.isLeaderProposal()){
+//            double score = message.getScore();
+//            leaderProposalCollection.addProposal(targetId, sourceId, score);
+//
+//            if(Double.compare(leaderProposalCollection.size(), leaderProposalsThreshold * leaderCommunity.size() - 1) > 0){
+//                int newLeaderId = leaderProposalCollection.getLeader();
+//
+//                if(newLeaderId != leaderNodeId && newLeaderId != -1){
+//                    //send LeaderElected message to all nodes from leaderCommunity
+//                    for (int nodeId : leaderCommunity.getNodes()){
+//                        ownCommunityMessages.add(CommunityMessage.CreateLeaderElected(this.id, nodeId, targetId,
+//                                currentTime));
+//                    }
+//
+//                    electLeader(newLeaderId, currentTime);
+//                }
+//            }
+//        }
+//        else if(message.isLeaderElected()){
+//            long messageTimestamp = message.getTimestamp();
+//
+//            if(messageTimestamp > leaderElectionTimestamp){
+//                electLeader(targetId, messageTimestamp);
+//            }
+//        }
 
     }
 
@@ -273,6 +373,33 @@ public class CommunityLeaderNode extends LeaderNode {
         boolean centralityChanged = leaderCommunity.update(encounteredNode.leaderCommunity);
         if(centralityChanged){
             proposeLeader(currentTime);
+        }
+    }
+
+    public void checkCommunities(long currentTime){
+        Set<Integer> leaderCommunityNodes = leaderCommunity.getNodes();
+//        leaderCommunityNodes.remove(id);
+        nodesSeen = new ArrayList<>(leaderCommunityNodes);
+        nodesNotSeen = new ArrayList<>();
+        for (int nodeId : leaderCommunityNodes){
+            ContactInfo info = encounteredNodes.get(nodeId);
+            if(info == null)
+                continue;
+
+            long lastEncounterTime = info.getLastEncounterTime();
+            if(currentTime - lastEncounterTime > TIME_SINCE_LAST_ENCOUNTER_THRESHOLD){
+                nodesSeen.remove(new Integer(nodeId));
+                nodesNotSeen.add(nodeId);
+            }
+        }
+
+        //send messages to nodes still in the community to remove the nodes not seen
+        for(int nodeSeen : nodesSeen){
+            for(int nodeNotSeen: nodesNotSeen){
+                CommunityMessage removeRequest = CommunityMessage.CreateRemoveRequest(id, nodeSeen,
+                        nodeNotSeen, currentTime);
+                addToOwnCommunityMessages(removeRequest);
+            }
         }
     }
 
