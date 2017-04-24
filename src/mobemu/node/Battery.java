@@ -13,8 +13,9 @@ public class Battery {
 
     private double currentLevel; // current battery level
     private long leftToRecharge; // duration until the device is fully recharged (in ticks)
+    private boolean justDepleted; // specifies if the current device's battery has just depleted
     private static double maxLevel; // maximum battery level (i.e. when it is fully charged)
-    private static long rechargeDuration; // duration of recharge (in ticks)
+    private final double rechargeDuration; // duration of recharge (in ticks)
     private static double minBatteryThreshold; // threshold under which a node doesn't participate in the network any more
     private double decreaseRate; // the battery level decreases with this amount at every contact
     private static final int NOT_CHARGING = -1;
@@ -31,13 +32,14 @@ public class Battery {
      * recharge (in ticks)
      * @param minBatteryThreshold minimum battery threshold
      */
-    public Battery(double currentLevel, double maxLevel, long rechargeDuration, double minBatteryThreshold) {
+    public Battery(double currentLevel, double maxLevel, double rechargeDuration, double minBatteryThreshold) {
         this.currentLevel = currentLevel;
         this.leftToRecharge = NOT_CHARGING;
         this.decreaseRate = 1.0;
+        this.justDepleted = false;
+        this.rechargeDuration = rechargeDuration;
 
         Battery.maxLevel = maxLevel;
-        Battery.rechargeDuration = rechargeDuration;
         Battery.minBatteryThreshold = minBatteryThreshold;
     }
 
@@ -48,6 +50,15 @@ public class Battery {
      */
     public double getCurrentLevel() {
         return currentLevel;
+    }
+
+    /**
+     * Sets the current battery level.
+     *
+     * @param currentLevel new battery level to be set
+     */
+    public void setCurrentLevel(double currentLevel) {
+        this.currentLevel = currentLevel;
     }
 
     /**
@@ -64,6 +75,25 @@ public class Battery {
      */
     public void resetDecreaseRate() {
         decreaseRate = 1.0;
+    }
+
+    /**
+     * Verifies if the device is currently charging.
+     *
+     * @return {@code true} if the device is charging, {@code false} otherwise
+     */
+    public boolean isCharging() {
+        return leftToRecharge != NOT_CHARGING;
+    }
+
+    /**
+     * Specifies if the current device's battery has just depleted.
+     *
+     * @return {@code true} if the battery has just depleted, {@code false}
+     * otherwise
+     */
+    public boolean hasJustDepleted() {
+        return justDepleted;
     }
 
     /**
@@ -95,8 +125,13 @@ public class Battery {
             if (currentLevel <= 0) {
                 currentLevel = 0;
                 leftToRecharge = 0;
+                justDepleted = true;
             }
         } else {
+            if (justDepleted) {
+                justDepleted = false;
+            }
+
             leftToRecharge++;
             if (leftToRecharge >= rechargeDuration) {
                 currentLevel = maxLevel;
