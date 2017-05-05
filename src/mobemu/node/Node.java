@@ -196,7 +196,7 @@ public abstract class Node {
 
 //        PrintWriter writer = LeaderStats.openFile("communities.txt");
         PrintWriter writer = LeaderStats.openFile(responseTimesFileName);
-        for (long tick = startTime; tick < endTime; tick += 10 * sampleTime) {
+        for (long tick = startTime; tick < endTime; tick += 1 * sampleTime) {
             double x = (double)(tick - startTime) / (endTime - startTime);
             int count = 0;
 
@@ -260,6 +260,8 @@ public abstract class Node {
             LeaderStats.checkCommunities(nodes, tick, startTime);
         }
 //        LeaderStats.printLeaderCommunities(nodes);
+//        LeaderStats.printNoOfHeartbeats(nodes);
+        LeaderStats.computesContactsRatio(nodes);
         LeaderStats.computeAverageHeartBeatResponseTime(nodes, writer);
         LeaderStats.closeFile(writer);
 
@@ -681,6 +683,7 @@ public abstract class Node {
     protected void addToLocalCommunity(Node encounteredNode, long currentTime){
         int encounteredNodeId = encounteredNode.id;
         localCommunity.add(encounteredNodeId);
+//        System.out.println(id + " added " + encounteredNodeId + " to local community");
     }
 
     /**

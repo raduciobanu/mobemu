@@ -34,8 +34,8 @@ public class AddRequestHandler extends CommunityMessageHandler{
         double probabilityOfMeeting = leaderNode.getProbabilityOfMeetingNode(leaderNode, targetId, currentTime);
 
         if(probabilityOfMeeting > 0.0){
-            System.out.println(leaderNodeId + " will meet " + targetId + " with a probability of "
-                    + probabilityOfMeeting);
+//            System.out.println(leaderNodeId + " will meet " + targetId + " with a probability of "
+//                    + probabilityOfMeeting);
         }
 
         AddProposal addProposal = new AddProposal(sourceId, targetId, currentTime, targetCentrality);

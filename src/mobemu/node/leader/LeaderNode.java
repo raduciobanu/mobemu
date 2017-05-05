@@ -5,6 +5,7 @@ import mobemu.node.Context;
 import mobemu.node.Node;
 import mobemu.node.leader.directLeaderElection.dto.DirectLeaderMessage;
 import mobemu.node.leader.directLeaderElection.dto.HeartbeatResponse;
+import sun.plugin2.message.HeartbeatMessage;
 
 import java.util.*;
 
@@ -71,6 +72,14 @@ public abstract class LeaderNode extends SPRINT {
 
     public List<HeartbeatResponse> getResponseTimes(){
         return responseTimes;
+    }
+
+    public List<DirectLeaderMessage> getHeartBeats(){
+        return heartBeats;
+    }
+
+    public List<DirectLeaderMessage> getOwnHeartBeats(){
+        return ownHeartBeats;
     }
 
     public boolean isNormalized(double value){
@@ -144,6 +153,15 @@ public abstract class LeaderNode extends SPRINT {
 
     }
 
+    public boolean containsResponseForHeartBeat(DirectLeaderMessage heartBeat){
+        for(HeartbeatResponse heartbeatResponse : responseTimes){
+            if(heartbeatResponse.getHeartbeatId() == heartBeat.getId()){
+                return true;
+            }
+        }
+        return false;
+    }
+
     protected void deliverHeartBeat(DirectLeaderMessage heartBeat, long currentTime, int encounteredNodeId){
         int sourceId = heartBeat.getSourceId();
         long heartBeatTimestamp = heartBeat.getTimestamp();
@@ -165,8 +183,10 @@ public abstract class LeaderNode extends SPRINT {
             }
 
             long responseTime = currentTime - heartBeatTimestamp;
-            responseTimes.add(new HeartbeatResponse(responseTime, heartBeat.getHopCount(this.id)));
+            if(!containsResponseForHeartBeat(heartBeat)){
+                responseTimes.add(new HeartbeatResponse(heartBeat.getId(), responseTime, heartBeat.getHopCount(this.id)));
 //            System.out.println("AddResponse Received after " + responseTime + "s!");
+            }
         }
     }
 

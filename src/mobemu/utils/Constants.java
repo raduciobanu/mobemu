@@ -10,7 +10,7 @@ public class Constants {
     public static int cacheMemorySize = 40;
 
     public static int communityMaxHop = 2;
-    public static int heartBeatGenerationTime = 1000* 60*60*3;
+    public static double heartBeatGenerationTime = 1000* 60*60*0.5;
     public static double leaderCommunityThreshold = 0.5;
     public static double leaderProposalsThreshold = 0.5;
     public static String responseTimesFileName = "responseTimes.txt";

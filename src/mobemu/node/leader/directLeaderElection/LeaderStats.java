@@ -69,20 +69,28 @@ public class LeaderStats {
     public static void generateHeartBeats(Node[] nodes, long tick, long startTime){
         if((tick - startTime) % heartBeatGenerationTime == 0){
             for(Node node: nodes){
-                LeaderNode leaderNode = (LeaderNode) node;
+                if(!(node instanceof LeaderNode))
+                    continue;
 
+                LeaderNode leaderNode = (LeaderNode) node;
                 leaderNode.generateHeartBeat(tick);
             }
         }
     }
 
+    public static CommunityLeaderNode getCommunityLeaderNode(Node node){
+        if(!(node instanceof CommunityLeaderNode))
+            return null;
+
+        return (CommunityLeaderNode) node;
+    }
+
     public static void checkCommunities(Node[] nodes, long tick, long startTime){
         if((tick - startTime) % (heartBeatGenerationTime * 3) == 0){
             for(Node node: nodes){
-                if(!(node instanceof CommunityLeaderNode))
+                CommunityLeaderNode leaderNode = getCommunityLeaderNode(node);
+                if(leaderNode == null)
                     return;
-
-                CommunityLeaderNode leaderNode = (CommunityLeaderNode) node;
 
                 leaderNode.checkCommunities(tick);
             }
@@ -94,8 +102,14 @@ public class LeaderStats {
         long sumHopCount = 0;
         long number = 0;
         long millisInAnHour= 1000 * 3600;
+        double sumOwnHeartBeats = 0.0;
+        double sumResponses = 0.0;
+
 
         for (Node node : nodes){
+            if(!(node instanceof LeaderNode))
+                continue;
+
             LeaderNode leaderNode = (LeaderNode) node;
             for(HeartbeatResponse heartbeatResponse : leaderNode.getResponseTimes()){
                 //skip scenarios when the node is its own leader
@@ -108,18 +122,76 @@ public class LeaderStats {
                 sumHopCount += hopCount;
                 number++;
 
-                writer.println(responseTime / millisInAnHour);
+
+
+                writer.println((double)responseTime / (double)millisInAnHour);
             }
+
+            int numberOfOwnHeartBeats = leaderNode.getOwnHeartBeats().size();
+            int numberOfResponses = leaderNode.getResponseTimes().size();
+
+            sumOwnHeartBeats += numberOfOwnHeartBeats;
+            sumResponses += numberOfResponses;
+
+//            System.out.println(leaderNode.getId() + " -- " + numberOfOwnHeartBeats + " -- " + numberOfResponses);
+
+//            System.out.println(leaderNode.getId() + " -- " + leaderNode.getLeaderNodeId() + " -- " +
+//                    leaderNode.getResponseTimes());
         }
 
-        System.out.println("Average responseTime: " + sumResponseTime/(number * millisInAnHour));
+        System.out.println("Response percentage: " + sumResponses / sumOwnHeartBeats);
+        System.out.println("Average responseTime: " + (double)sumResponseTime/(double)(number * millisInAnHour));
         System.out.println("Average hopCount:" + sumHopCount / number);
+    }
+
+    public static void computesContactsRatio(Node[] nodes){
+
+        double sumNumberOfContacts = 0;
+        double totalNumberOfNodes = 0;
+        double sumNumberOfContactsLeader = 0;
+        double noOfLeaders = 0;
+        for(Node node: nodes){
+            CommunityLeaderNode leaderNode = getCommunityLeaderNode(node);
+            if(leaderNode == null)
+                return;
+
+            int leaderNodeId = leaderNode.getLeaderNodeId();
+            if(leaderNodeId != -1){
+                int numberOfContactsWithLeader = leaderNode.getContactsNumber(leaderNodeId);
+                sumNumberOfContactsLeader+= numberOfContactsWithLeader;
+                noOfLeaders++;
+            }
+
+            for (int encounteredNodeId : leaderNode.getLeaderCommunityNodes()){
+                int contactsNumber = leaderNode.getContactsNumber(encounteredNodeId);
+                sumNumberOfContacts += contactsNumber;
+            }
+            totalNumberOfNodes += leaderNode.getLeaderCommunityNodes().size();
+        }
+
+        double avg = sumNumberOfContacts / totalNumberOfNodes;
+        double avgLeaders = sumNumberOfContactsLeader / noOfLeaders;
+        System.out.println("Contacts ratio:" + avg/avgLeaders);
+    }
+
+    public static void printNoOfHeartbeats(Node[] nodes){
+        System.out.println("Heartbeats:");
+        for (Node node : nodes){
+            CommunityLeaderNode leaderNode = getCommunityLeaderNode(node);
+            if(leaderNode == null)
+                return;
+
+            System.out.println(leaderNode.getId() + " -- " + leaderNode.getHeartBeats().size() + " -- "
+                    + leaderNode.getOwnHeartBeats().size());
+        }
     }
 
     public static void printLeaderCommunities(Node[] nodes){
         System.out.println("LeaderCommunities:");
         for(Node node:nodes){
-            CommunityLeaderNode leaderNode = (CommunityLeaderNode)node;
+            CommunityLeaderNode leaderNode = getCommunityLeaderNode(node);
+            if(leaderNode == null)
+                return;
 
             System.out.println(leaderNode.getId() + " -- " + leaderNode.getLeaderCommunityNodes());
         }
