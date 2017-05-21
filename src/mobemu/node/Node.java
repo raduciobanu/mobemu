@@ -4,14 +4,7 @@
  */
 package mobemu.node;
 
-import java.io.PrintWriter;
 import java.util.*;
-
-import mobemu.node.leader.directLeaderElection.LeaderStats;
-import mobemu.trace.Contact;
-import mobemu.trace.Trace;
-
-import static mobemu.utils.Constants.responseTimesFileName;
 
 /**
  * Class for a mobile node in an opportunistic network. This is an abstract
@@ -57,7 +50,7 @@ public abstract class Node {
     protected int overflowCount; // count of overflow events
 
     // message exchange information
-    protected Map<Integer, ExchangeStats> exchangeStats; // aggregation statistics
+    protected Map<Integer, ExchangeStats> exchangeStats; // aggregation Statistics
     protected List<ExchangeHistory> exchangeHistorySent; // list of sent exchange information
     protected List<ExchangeHistory> exchangeHistoryReceived; // list of received exchange information
     protected int exchangeHistorySize; // maximum exchange history size
@@ -164,111 +157,6 @@ public abstract class Node {
         this.context = context;
     }
     
-    /**
-     * Runs an opportunistic algorithm.
-     *
-     * @param nodes array of nodes
-     * @param trace mobility trace
-     * @param batteryComputation {@code true} if battery is taken into account
-     * when routing/disseminating, {@code false} otherwise
-     * @param dissemination {@code true} for dissemination, {@code false} for
-     * routing
-     * @param seed random number generator seed
-     * @return list of messages generated during the trace
-     */
-    public static List<Message> runTrace(Node[] nodes, Trace trace, boolean batteryComputation, boolean dissemination, long seed) {
-        int messageCopies = nodes.length;
-        int messageCount = nodes.length;
-
-        int contactCount = trace.getContactsCount();
-        long startTime = trace.getStartTime();
-        long endTime = trace.getEndTime();
-        long sampleTime = trace.getSampleTime();
-
-        Calendar currentDay = Calendar.getInstance();
-        Calendar generationTime = Calendar.getInstance();
-        int previousDay = -1;
-        boolean generate = false;
-        Random messageRandom = new Random(seed);
-
-        List<Message> messages = new ArrayList<>();
-
-
-//        PrintWriter writer = LeaderStats.openFile("communities.txt");
-        PrintWriter writer = LeaderStats.openFile(responseTimesFileName);
-        for (long tick = startTime; tick < endTime; tick += 1 * sampleTime) {
-            double x = (double)(tick - startTime) / (endTime - startTime);
-            int count = 0;
-
-            // update battery level
-            if (batteryComputation) {
-                for (Node node : nodes) {
-                    node.updateBatteryLevel();
-                }
-            }
-
-            for (Node node : nodes) {
-                node.onTick(tick, sampleTime);
-            }
-
-            currentDay.setTimeInMillis(tick);
-
-            if (currentDay.get(Calendar.DATE) != previousDay) {
-                generate = true;
-                previousDay = currentDay.get(Calendar.DATE);
-                generationTime = Message.generateMessageTime(messageRandom.nextDouble());
-            }
-
-            // generate messages
-            if (generate && generationTime.get(Calendar.HOUR) == currentDay.get(Calendar.HOUR)) {
-                messages.addAll(Message.generateMessages(nodes, messageCount, messageCopies, tick, dissemination, messageRandom));
-                generate = false;
-            }
-
-            for (int i = 0; i < contactCount; i++) {
-                Contact contact = trace.getContactAt(i);
-
-                if (contact.getStart() <= tick && contact.getEnd() >= tick) {
-
-                    // there is a contact.
-                    count++;
-
-                    Node observer = nodes[contact.getObserver()];
-                    Node observed = nodes[contact.getObserved()];
-
-                    long contactDuration = 0;
-                    boolean newContact = (contact.getStart() == tick);
-                    if (newContact) {
-                        contactDuration = contact.getEnd() - contact.getStart() + sampleTime;
-                    }
-
-                    // run
-                    observer.run(observed, tick, contactDuration, newContact, tick - startTime, sampleTime);
-                }
-            }
-
-            // remove unused contacts.
-            for (int i = count - 1; i >= 0; i--) {
-                if (trace.getContactAt(i).getEnd() == tick) {
-                    trace.removeContactAt(i);
-                }
-            }
-
-            contactCount = trace.getContactsCount();
-//            LeaderStats.printLocalCommunities(nodes, tick, startTime, writer);
-            LeaderStats.generateHeartBeats(nodes, tick, startTime);
-            LeaderStats.checkCommunities(nodes, tick, startTime);
-        }
-//        LeaderStats.printLeaderCommunities(nodes);
-//        LeaderStats.printNoOfHeartbeats(nodes);
-        LeaderStats.computesContactsRatio(nodes);
-        LeaderStats.computeAverageHeartBeatResponseTime(nodes, writer);
-        LeaderStats.closeFile(writer);
-
-
-        return messages;
-    }
-
     /**
      * Returns the name of the dissemination or routing algorithm this node is
      * running.
@@ -752,13 +640,13 @@ public abstract class Node {
         ExchangeStats currentStats = this.exchangeStats.get(encounteredNode.id);
         ExchangeStats encounteredStats = encounteredNode.exchangeStats.get(this.id);
 
-        // update exchange statistics for the current node
+        // update exchange Statistics for the current node
         if (currentStats == null) {
             this.exchangeStats.put(encounteredNode.id, new ExchangeStats());
             currentStats = this.exchangeStats.get(encounteredNode.id);
         }
 
-        // update exchange statistics for the encountered node
+        // update exchange Statistics for the encountered node
         if (encounteredStats == null) {
             encounteredNode.exchangeStats.put(this.id, new ExchangeStats());
             encounteredStats = encounteredNode.exchangeStats.get(this.id);
@@ -810,7 +698,7 @@ public abstract class Node {
      * @param currentTime current trace time
      * @param sampleTime trace sample time
      */
-    protected void onTick(long currentTime, long sampleTime) {
+    public void onTick(long currentTime, long sampleTime) {
     }
 
     /**
@@ -924,19 +812,7 @@ public abstract class Node {
          * deliver messages intended for the current node.
          */
         for (Message message : messagesForMe) {
-            if (!message.isDelivered(id)) {
-                if (!dissemination) {
-                    encounteredNode.dataMemory.remove(message);
-                    message.deleteCopies(encounteredNode.id);
-                }
-
-                encounteredNode.messagesDelivered++;
-                encounteredNode.messagesExchanged++;
-                message.markAsDelivered(id, currentTime);
-            } else if (!dissemination) {
-                encounteredNode.dataMemory.remove(message);
-                message.deleteCopies(encounteredNode.id);
-            }
+            downloadMessage(message, encounteredNode, dissemination, currentTime);
         }
 
         messagesForMe.clear();
@@ -978,19 +854,7 @@ public abstract class Node {
          * deliver messages intended for the current mode.
          */
         for (Message message : messagesForMe) {
-            if (!message.isDelivered(id)) {
-                if (!dissemination) {
-                    encounteredNode.dataMemory.remove(message);
-                    message.deleteCopies(encounteredNode.id);
-                }
-
-                encounteredNode.messagesDelivered++;
-                encounteredNode.messagesExchanged++;
-                message.markAsDelivered(id, currentTime);
-            } else if (!dissemination) {
-                encounteredNode.dataMemory.remove(message);
-                message.deleteCopies(encounteredNode.id);
-            }
+            downloadMessage(message, encounteredNode, dissemination, currentTime);
         }
 
         if (maxMessages == Integer.MAX_VALUE) {
@@ -998,6 +862,22 @@ public abstract class Node {
         }
 
         return Math.max(maxMessages - totalMessages, 0);
+    }
+
+    protected void downloadMessage(Message message, Node encounteredNode, boolean dissemination, long currentTime){
+        if (!message.isDelivered(id)) {
+            if (!dissemination) {
+                encounteredNode.dataMemory.remove(message);
+                message.deleteCopies(encounteredNode.id);
+            }
+
+            encounteredNode.messagesDelivered++;
+            encounteredNode.messagesExchanged++;
+            message.markAsDelivered(id, currentTime);
+        } else if (!dissemination) {
+            encounteredNode.dataMemory.remove(message);
+            message.deleteCopies(encounteredNode.id);
+        }
     }
 
     /**

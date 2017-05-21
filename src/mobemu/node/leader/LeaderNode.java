@@ -5,6 +5,7 @@ import mobemu.node.Context;
 import mobemu.node.Node;
 import mobemu.node.leader.directLeaderElection.dto.DirectLeaderMessage;
 import mobemu.node.leader.directLeaderElection.dto.HeartbeatResponse;
+import mobemu.statistics.LeaderStatistics;
 import sun.plugin2.message.HeartbeatMessage;
 
 import java.util.*;
@@ -223,7 +224,7 @@ public abstract class LeaderNode extends SPRINT {
     }
 
     @Override
-    protected void onDataExchange(Node encounteredNode, long contactDuration, long currentTime) {
+    public void onDataExchange(Node encounteredNode, long contactDuration, long currentTime) {
         if(this.equals(encounteredNode))
             return;
 

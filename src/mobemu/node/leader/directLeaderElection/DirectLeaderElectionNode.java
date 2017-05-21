@@ -48,7 +48,7 @@ public class DirectLeaderElectionNode extends LeaderNode {
     }
 
     @Override
-    protected void onDataExchange(Node encounteredNode, long contactDuration, long currentTime) {
+    public void onDataExchange(Node encounteredNode, long contactDuration, long currentTime) {
         if (!(encounteredNode instanceof DirectLeaderElectionNode)) {
             return;
         }

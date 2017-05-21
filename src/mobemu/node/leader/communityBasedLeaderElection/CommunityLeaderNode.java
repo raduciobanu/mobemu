@@ -404,7 +404,7 @@ public class CommunityLeaderNode extends LeaderNode {
     }
 
     @Override
-    protected void onDataExchange(Node encounteredNode, long contactDuration, long currentTime) {
+    public void onDataExchange(Node encounteredNode, long contactDuration, long currentTime) {
         CommunityLeaderNode leaderNode = (CommunityLeaderNode) encounteredNode;
         updatesCentralities(leaderNode, currentTime);
         exchangeCommunityMessages(leaderNode, currentTime, encounteredNode.getId());

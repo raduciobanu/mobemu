@@ -886,7 +886,7 @@ public abstract class HCMM {
         }
 
         try {
-            fstream = new FileWriter("statistics.txt");
+            fstream = new FileWriter("Statistics.txt");
             out = new BufferedWriter(fstream);
         } catch (Exception e) {
             Logger.getLogger(HCMM.class.getName()).log(Level.SEVERE, null, e);

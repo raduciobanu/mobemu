@@ -4,6 +4,8 @@
  */
 package mobemu.node;
 
+import mobemu.utils.message.IMessage;
+
 import java.util.*;
 
 /**
@@ -11,7 +13,7 @@ import java.util.*;
  *
  * @author Radu
  */
-public class Message implements Comparable<Message> {
+public class Message implements Comparable<Message>, IMessage {
 
     protected int id; // message ID
     protected int source; // ID of source node
@@ -20,7 +22,7 @@ public class Message implements Comparable<Message> {
     protected long timestamp; // time when the message was generated
     protected Context tags; // tags of this message
     protected double utility = 1.0; // utility of this message
-    protected MessageStats stats; // message statistics
+    protected MessageStats stats; // message Statistics
     protected static int messageCount = 0; // total number of messages generated
     public static final int DISSEMINATION_ID = -1;
 
@@ -28,6 +30,12 @@ public class Message implements Comparable<Message> {
      * Constructor for a routing {@link Message}.
      */
     public Message() {
+    }
+
+    private Message(int source, String message, long timestamp){
+        this.source = source;
+        this.message = message;
+        this.timestamp = timestamp;
     }
 
     /**
@@ -40,11 +48,17 @@ public class Message implements Comparable<Message> {
      * @param copies number of copies this message starts with
      */
     public Message(int source, int destination, String message, long timestamp, int copies) {
+        this(source, message, timestamp);
         this.id = messageCount++;
-        this.source = source;
         this.destination = destination;
-        this.message = message;
-        this.timestamp = timestamp;
+        this.tags = new Context();
+        this.stats = new MessageStats(copies, id);
+    }
+
+    public Message(int messageId, int source, int destination, String message, long timestamp, int copies){
+        this(source, message, timestamp);
+        this.id = messageId;
+        this.destination = destination;
         this.tags = new Context();
         this.stats = new MessageStats(copies, id);
     }
@@ -59,11 +73,9 @@ public class Message implements Comparable<Message> {
      * @param copies number of copies this message starts with
      */
     public Message(int source, Context tags, String message, long timestamp, int copies) {
+        this(source, message, timestamp);
         this.id = messageCount++;
-        this.source = source;
         this.destination = DISSEMINATION_ID;
-        this.message = message;
-        this.timestamp = timestamp;
         this.tags = tags;
         this.stats = new MessageStats(copies, source);
     }

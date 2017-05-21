@@ -5,7 +5,7 @@
 package mobemu.node;
 
 /**
- * Class containing statistics about a data exchange.
+ * Class containing Statistics about a data exchange.
  *
  * @author Radu
  */

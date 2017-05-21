@@ -10,7 +10,7 @@ import java.io.UnsupportedEncodingException;
 import java.util.List;
 
 /**
- * Class with static methods for performing computations on message statistics.
+ * Class with static methods for performing computations on message Statistics.
  *
  * @author Radu
  */
