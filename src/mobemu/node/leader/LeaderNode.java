@@ -3,6 +3,7 @@ package mobemu.node.leader;
 import mobemu.algorithms.SPRINT;
 import mobemu.node.Context;
 import mobemu.node.Node;
+import mobemu.node.consensus.ConsensusLeaderNode;
 import mobemu.node.leader.directLeaderElection.dto.DirectLeaderMessage;
 import mobemu.node.leader.directLeaderElection.dto.HeartbeatResponse;
 import mobemu.statistics.LeaderStatistics;
@@ -35,6 +36,8 @@ public abstract class LeaderNode extends SPRINT {
 
     protected List<DirectLeaderMessage> heartBeatsForCurrentNode;
 
+    protected ConsensusLeaderNode consensusLeaderNode;
+
     /**
      * Instantiates an {@code ONSIDE} object.
      *
@@ -52,7 +55,7 @@ public abstract class LeaderNode extends SPRINT {
      * @param nodes               array of all the nodes in the network
      * @param cacheMemorySize     size of the cache holding the most recent
      */
-    public LeaderNode(int id, Context context, boolean[] socialNetwork, int dataMemorySize, int exchangeHistorySize, long seed, long traceStart, long traceEnd, boolean altruism, Node[] nodes, int cacheMemorySize) {
+    public LeaderNode(int id, Context context, boolean[] socialNetwork, int dataMemorySize, int exchangeHistorySize, long seed, long traceStart, long traceEnd, boolean altruism, Node[] nodes, int cacheMemorySize, ConsensusLeaderNode consensusLeaderNode) {
         super(id, context, socialNetwork, dataMemorySize, exchangeHistorySize, seed, traceStart, traceEnd, altruism, nodes, cacheMemorySize);
 
         leaderNodeId = id;
@@ -61,6 +64,7 @@ public abstract class LeaderNode extends SPRINT {
         ownHeartBeats = new ArrayList<>();
         responseTimes = new ArrayList<>();
         heartBeatsForCurrentNode = new ArrayList<>();
+        this.consensusLeaderNode = consensusLeaderNode;
     }
 
     public int getLeaderNodeId() {
@@ -87,6 +91,10 @@ public abstract class LeaderNode extends SPRINT {
         return value >= 0 && value <= 1;
     }
 
+    public void setConsensusLeaderNode(ConsensusLeaderNode consensusLeaderNode) {
+        this.consensusLeaderNode = consensusLeaderNode;
+    }
+
     public double computeLeaderScore(double centrality, double trust, double latencyValue, double probabilityOfMeeting){
         if(!isNormalized(centrality) || !isNormalized(trust) || !isNormalized(latencyValue)
                 || !isNormalized(probabilityOfMeeting))
@@ -102,6 +110,14 @@ public abstract class LeaderNode extends SPRINT {
 
 
         return centralityWeight * centrality + trustWeight * trust + probabilityWeight * probabilityOfMeeting;
+    }
+
+    protected void changeLeader(int newLeaderId, long currentTime){
+        leaderNodeId = newLeaderId;
+
+        if(consensusLeaderNode != null){
+            consensusLeaderNode.changeLeader(newLeaderId, currentTime);
+        }
     }
 
     public double getProbabilityOfMeetingNode(LeaderNode node, int encounteredNodeId, long currentTime){

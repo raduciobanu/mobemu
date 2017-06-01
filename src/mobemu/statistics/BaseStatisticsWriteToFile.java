@@ -25,16 +25,16 @@ public abstract class BaseStatisticsWriteToFile<T extends IMessage, U extends IM
 
     @Override
     public void runBeforeTraceStart() {
-        openFile(Constants.responseTimesFileName);
+        writer = openFile(Constants.responseTimesFileName);
     }
 
     @Override
     public void runAfterTraceEnd(Node[] nodes) {
-        closeFile();
+        closeFile(writer);
     }
 
-    public void openFile(String fileName){
-        writer = null;
+    public PrintWriter openFile(String fileName){
+        PrintWriter writer = null;
 
         try {
             writer = new PrintWriter(fileName, "UTF-8");
@@ -46,9 +46,11 @@ public abstract class BaseStatisticsWriteToFile<T extends IMessage, U extends IM
         }
 
         System.out.println(fileName + " opened!");
+
+        return writer;
     }
 
-    public void closeFile(){
+    public void closeFile(PrintWriter writer){
         writer.close();
     }
 }

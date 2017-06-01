@@ -34,7 +34,7 @@ public class LeaderStatistics extends BaseStatisticsWriteToFile<Message, Message
         computesContactsRatio(nodes);
         computeAverageHeartBeatResponseTime(nodes);
 
-        super.closeFile();
+        super.closeFile(writer);
     }
 
     private void generateHeartBeats(Node[] nodes, long tick, long startTime){

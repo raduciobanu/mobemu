@@ -3,6 +3,7 @@ package mobemu.node.leader.communityBasedLeaderElection;
 import mobemu.node.ContactInfo;
 import mobemu.node.Context;
 import mobemu.node.Node;
+import mobemu.node.consensus.ConsensusLeaderNode;
 import mobemu.node.leader.LeaderNode;
 import mobemu.node.leader.communityBasedLeaderElection.dto.communityMessage.CommunityMessage;
 import mobemu.node.leader.communityBasedLeaderElection.dto.LeaderCommunity;
@@ -92,8 +93,8 @@ public class CommunityLeaderNode extends LeaderNode {
      * @param traceStart          timestamp of the start of the trace
      * @param traceEnd            timestamp of the end of the trace
      */
-    public CommunityLeaderNode(int id, Context context, boolean[] socialNetwork, int dataMemorySize, int exchangeHistorySize, long seed, long traceStart, long traceEnd, boolean altruism, Node[] nodes, int cacheMemorySize) {
-        super(id, context, socialNetwork, dataMemorySize, exchangeHistorySize, seed, traceStart, traceEnd, altruism, nodes, cacheMemorySize);
+    public CommunityLeaderNode(int id, Context context, boolean[] socialNetwork, int dataMemorySize, int exchangeHistorySize, long seed, long traceStart, long traceEnd, boolean altruism, Node[] nodes, int cacheMemorySize, ConsensusLeaderNode consensusLeaderNode) {
+        super(id, context, socialNetwork, dataMemorySize, exchangeHistorySize, seed, traceStart, traceEnd, altruism, nodes, cacheMemorySize, consensusLeaderNode);
 
         this.leaderNodeId = -1;
         this.leaderCommunity = new LeaderCommunity();
@@ -290,8 +291,9 @@ public class CommunityLeaderNode extends LeaderNode {
 //    }
 
     public void electLeader(int leaderNodeId, long currentTime){
-        this.leaderNodeId = leaderNodeId;
         this.leaderElectionTimestamp = currentTime;
+
+        super.changeLeader(leaderNodeId, currentTime);
     }
 
     protected void deliverCommunityMessage(CommunityMessage message, long currentTime, int encounteredNodeId){

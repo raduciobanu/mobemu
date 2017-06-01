@@ -14,6 +14,7 @@ public class Constants {
     public static double leaderCommunityThreshold = 0.5;
     public static double leaderProposalsThreshold = 0.5;
     public static String responseTimesFileName = "responseTimes.txt";
+    public static String deliveryLatenciesFileName = "deliveryLatency.txt";
 
     public static double centralityWeight = 0.2;
     public static double trustWeight = 0.2;

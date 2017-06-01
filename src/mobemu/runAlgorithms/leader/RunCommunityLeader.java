@@ -30,6 +30,6 @@ public class RunCommunityLeader extends RunLeader{
     public Node initializeNode(int index, long seed, Node[] nodes) {
         return new CommunityLeaderNode(index, parser.getContextData().get(index), parser.getSocialNetwork()[index],
                 dataMemorySize, exchangeHistorySize, seed, parser.getTraceData().getStartTime(),
-                parser.getTraceData().getEndTime(), false, nodes, cacheMemorySize);
+                parser.getTraceData().getEndTime(), false, nodes, cacheMemorySize, null);
     }
 }

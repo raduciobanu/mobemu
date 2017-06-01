@@ -1,0 +1,9 @@
+java -cp .;mobEmu.jar;lib/* mobemu.MobEmu 0.55
+java -cp .;mobEmu.jar;lib/* mobemu.MobEmu 0.6
+java -cp .;mobEmu.jar;lib/* mobemu.MobEmu 0.65
+java -cp .;mobEmu.jar;lib/* mobemu.MobEmu 0.7
+java -cp .;mobEmu.jar;lib/* mobemu.MobEmu 0.75
+java -cp .;mobEmu.jar;lib/* mobemu.MobEmu 0.8
+java -cp .;mobEmu.jar;lib/* mobemu.MobEmu 0.85
+java -cp .;mobEmu.jar;lib/* mobemu.MobEmu 0.9
+java -cp .;mobEmu.jar;lib/* mobemu.MobEmu 0.95

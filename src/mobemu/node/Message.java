@@ -24,7 +24,12 @@ public class Message implements Comparable<Message>, IMessage {
     protected double utility = 1.0; // utility of this message
     protected MessageStats stats; // message Statistics
     protected static int messageCount = 0; // total number of messages generated
+
+    protected int copies; //number of copies to be disseminated in the network
+
     public static final int DISSEMINATION_ID = -1;
+
+
 
     /**
      * Constructor for a routing {@link Message}.
@@ -53,6 +58,7 @@ public class Message implements Comparable<Message>, IMessage {
         this.destination = destination;
         this.tags = new Context();
         this.stats = new MessageStats(copies, id);
+        this.copies = copies;
     }
 
     public Message(int messageId, int source, int destination, String message, long timestamp, int copies){
@@ -61,6 +67,7 @@ public class Message implements Comparable<Message>, IMessage {
         this.destination = destination;
         this.tags = new Context();
         this.stats = new MessageStats(copies, id);
+        this.copies = copies;
     }
 
     /**
@@ -78,6 +85,7 @@ public class Message implements Comparable<Message>, IMessage {
         this.destination = DISSEMINATION_ID;
         this.tags = tags;
         this.stats = new MessageStats(copies, source);
+        this.copies = copies;
     }
 
     /**
@@ -260,6 +268,10 @@ public class Message implements Comparable<Message>, IMessage {
      */
     public void setUtility(double utility) {
         this.utility = utility;
+    }
+
+    public int getCopies() {
+        return copies;
     }
 
     @Override

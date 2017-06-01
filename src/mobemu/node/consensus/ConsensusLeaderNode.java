@@ -8,6 +8,8 @@ import mobemu.node.leader.LeaderNode;
 import mobemu.utils.message.MessageList;
 
 import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -26,12 +28,7 @@ public class ConsensusLeaderNode extends SPRINT {
 
     protected MessageList<ConsensusDecision> ownDecisions;
 
-    /**
-     * Dictionary of decision requests made (MessageId, LeaderId)
-     * Used because the leader might change several times before the end of the trace
-     * And we are interested if the request has been answered by the leader which the request was issued for
-     */
-    protected Map<Integer, Integer> decisionRequests;
+    protected DecisionRequestsAndResponses decisionRequestsAndResponses;
 
     /**
      * Instantiates an {@code ONSIDE} object.
@@ -59,7 +56,9 @@ public class ConsensusLeaderNode extends SPRINT {
         this.receivedDecisions = new DecisionMessageList();
         this.ownDecisions = new DecisionMessageList();
 
-        decisionRequests = new HashMap<>();
+//        requests = new HashMap<>();
+        decisionRequestsAndResponses = new DecisionRequestsAndResponses();
+        leaderNode.setConsensusLeaderNode(this);
     }
 
     public LeaderNode getLeaderNode() {
@@ -72,7 +71,7 @@ public class ConsensusLeaderNode extends SPRINT {
 
     @Override
     public Message generateMessage(Message message) {
-        decisionRequests.put(message.getId(), message.getDestination());
+        decisionRequestsAndResponses.addRequest(message);
 
         //if the current node is its own leader
         //add the decision
@@ -86,6 +85,22 @@ public class ConsensusLeaderNode extends SPRINT {
     @Override
     public String getName() {
         return "ConsensusNode using " + leaderNode.getName();
+    }
+
+//    @Override
+//    public void onTick(long currentTime, long sampleTime) {
+//        leaderNode.onTick(currentTime, sampleTime);
+//        super.onTick(currentTime, sampleTime);
+//    }
+
+    @Override
+    public void run(Node encounteredNode, long tick, long contactDuration, boolean newContact, long timeDelta, long sampleTime) {
+        super.run(encounteredNode, tick, contactDuration, newContact, timeDelta, sampleTime);
+
+        ConsensusLeaderNode consensusEncounteredNode = (ConsensusLeaderNode)encounteredNode;
+        LeaderNode encounteredLeaderNode = consensusEncounteredNode.getLeaderNode();
+
+        leaderNode.run(encounteredLeaderNode, tick, contactDuration, newContact, timeDelta, sampleTime);
     }
 
     @Override
@@ -103,7 +118,7 @@ public class ConsensusLeaderNode extends SPRINT {
 
         leaderNode.onDataExchange(encounteredLeaderNode, contactDuration, currentTime);
 
-        exchangeDecisions(encounteredNode);
+        exchangeDecisions(encounteredNode, currentTime);
     }
 
     @Override
@@ -118,7 +133,7 @@ public class ConsensusLeaderNode extends SPRINT {
 
         ConsensusDecision decision = messageDictionary.getDecision(message.getId(), this.getId(), currentTime);
 
-        addDecision(decision);
+        addDecision(decision, currentTime);
     }
 
     /**
@@ -126,18 +141,20 @@ public class ConsensusLeaderNode extends SPRINT {
      *
      * @param decision
      */
-    protected void addDecision(ConsensusDecision decision) {
+    protected void addDecision(ConsensusDecision decision, long currentTime) {
+
         ownDecisions.add(decision);
+        decisionRequestsAndResponses.addResponse(decision, currentTime);
     }
 
-    protected void exchangeDecisions(Node encounteredNode) {
+    protected void exchangeDecisions(Node encounteredNode, long currentTime) {
         if (!(encounteredNode instanceof ConsensusLeaderNode))
             return;
 
         ConsensusLeaderNode encounteredConsensusNode = (ConsensusLeaderNode) encounteredNode;
 
-        getDecisionsFromList(encounteredConsensusNode.ownDecisions);
-        getDecisionsFromList(encounteredConsensusNode.receivedDecisions);
+        getDecisionsFromList(encounteredConsensusNode.ownDecisions, currentTime);
+        getDecisionsFromList(encounteredConsensusNode.receivedDecisions, currentTime);
     }
 
     /**
@@ -145,25 +162,40 @@ public class ConsensusLeaderNode extends SPRINT {
      *
      * @param decisions
      */
-    private void getDecisionsFromList(MessageList<ConsensusDecision> decisions) {
+    private void getDecisionsFromList(MessageList<ConsensusDecision> decisions, long currentTime) {
         for (ConsensusDecision decision : decisions) {
             receivedDecisions.add(decision);
+            decisionRequestsAndResponses.addResponse(decision, currentTime);
         }
     }
 
-    public String getDecisionValueForMessageId(int messageId) {
-        for (ConsensusDecision decision : receivedDecisions) {
-            if (decision.match(messageId, decisionRequests.get(messageId))) {
-                return decision.getValue();
-            }
-        }
+    public boolean hasRequestForMessageId(int messageId){
+        return decisionRequestsAndResponses.requestsContainKey(messageId);
+    }
 
-        for (ConsensusDecision decision : ownDecisions) {
-            if (decision.match(messageId, decisionRequests.get(messageId))) {
-                return decision.getValue();
-            }
-        }
+    public DecisionResponse getDecisionValueForMessageId(int messageId) {
+        return decisionRequestsAndResponses.getResponseForMessageId(messageId);
 
-        return "";
+//        for (ConsensusDecision decision : receivedDecisions) {
+//            if (decision.match(messageId, decisionRequestsAndResponses.getRequestDestination(messageId))) {
+//                return decision.getValue();
+//            }
+//        }
+//
+//        for (ConsensusDecision decision : ownDecisions) {
+//            if (decision.match(messageId, decisionRequestsAndResponses.getRequestDestination(messageId))) {
+//                return decision.getValue();
+//            }
+//        }
+
+//        return "";
+    }
+
+    public void changeLeader(int leaderId, long currentTime){
+        List<Message> unrepliedRequests = decisionRequestsAndResponses.updateUnrepliedRequest(leaderId, currentTime);
+
+        for (Message message: unrepliedRequests){
+            super.generateMessage(message);
+        }
     }
 }

@@ -2,6 +2,7 @@ package mobemu.node.leader.directLeaderElection;
 
 import mobemu.node.Context;
 import mobemu.node.Node;
+import mobemu.node.consensus.ConsensusLeaderNode;
 import mobemu.node.leader.LeaderNode;
 import mobemu.node.leader.directLeaderElection.dto.CommunityByLeader;
 import mobemu.node.leader.directLeaderElection.dto.LeaderCandidacy;
@@ -40,8 +41,8 @@ public class DirectLeaderElectionNode extends LeaderNode {
      * @param traceEnd            timestamp of the end of the trace
      */
     public DirectLeaderElectionNode(int id, Context context, boolean[] socialNetwork, int dataMemorySize,
-                                    int exchangeHistorySize, long seed, long traceStart, long traceEnd, boolean altruism, Node[] nodes, int cacheMemorySize) {
-        super(id, context, socialNetwork, dataMemorySize, exchangeHistorySize, seed, traceStart, traceEnd, altruism, nodes, cacheMemorySize);
+                                    int exchangeHistorySize, long seed, long traceStart, long traceEnd, boolean altruism, Node[] nodes, int cacheMemorySize, ConsensusLeaderNode consensusLeaderNode) {
+        super(id, context, socialNetwork, dataMemorySize, exchangeHistorySize, seed, traceStart, traceEnd, altruism, nodes, cacheMemorySize, consensusLeaderNode);
 
         candidacies = new ArrayList<>();
         communityByLeader = new CommunityByLeader();
@@ -166,18 +167,19 @@ public class DirectLeaderElectionNode extends LeaderNode {
         super.deliverHeartBeat(heartBeat, currentTime, encounteredNodeId);
     }
 
-    private void changeLeader(int newLeaderId, long currentTime){
+    @Override
+    protected void changeLeader(int newLeaderId, long currentTime){
         if(leaderNodeId != id){
             //generate ChangedLeader message for the old leader
             ownHeartBeats.add(DirectLeaderMessage.CreateChangedLeader(id, leaderNodeId, currentTime));
         }
 
-        leaderNodeId = newLeaderId;
 
         //generate AddRequest of membership for the new leader
         generateHeartBeat(currentTime);
         //            System.out.println("Node " + id + " changed leader to " + leaderNodeId + " with score " + leaderScore
 //            + ". Centrality = " + centrality + ", Trust = " + trust);
+        super.changeLeader(newLeaderId, currentTime);
     }
 
     @Override

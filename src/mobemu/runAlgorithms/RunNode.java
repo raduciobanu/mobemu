@@ -2,6 +2,7 @@ package mobemu.runAlgorithms;
 
 import mobemu.node.Message;
 import mobemu.node.Node;
+import mobemu.parsers.HCMM;
 import mobemu.parsers.Sigcomm;
 import mobemu.parsers.UPB;
 import mobemu.statistics.IStatistics;
@@ -30,7 +31,7 @@ public abstract class RunNode implements IRun {
     protected Parser parser;
 
     public RunNode(String[] args){
-        parser = getSigcommParser();
+        parser = getUPB2012Parser();
         statistics = new NodeStatistics();
         initialize(args);
     }
@@ -183,5 +184,15 @@ public abstract class RunNode implements IRun {
 
     protected Parser getUPB2012Parser(){
         return new UPB(UPB.UpbTrace.UPB2012);
+    }
+
+    private Parser getHCMMParser(){
+        int nodesNo = 40;
+        float days = 1f;
+        float size = 1000f;
+        int tiles = 100;
+        int groups = 4;
+        int travelers = 10;
+        return new HCMM(nodesNo, (int)(days * 2 * 3600), 30 * 24 * 3600, 1.25f, 1.50f, 0.1f, size, size, tiles, tiles, 10.0, 0.7, groups, travelers, 1.50f, 0.8f, 0);
     }
 }
