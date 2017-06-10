@@ -14,15 +14,21 @@ public class ConsensusMessageDictionary {
      */
     private Map<Integer, ConsensusMessageReplicas> requestDictionary;
 
+    /**
+     * Back reference to the node for getting trust values for other nodes
+     */
+    private ConsensusLeaderNode node;
+
     private int decisionThreshold;
 
-    public ConsensusMessageDictionary(int decisionThreshold){
-        requestDictionary = new HashMap<>();
+    public ConsensusMessageDictionary(int decisionThreshold, ConsensusLeaderNode node){
+        this(node);
         this.decisionThreshold = decisionThreshold;
     }
 
-    public ConsensusMessageDictionary(){
+    public ConsensusMessageDictionary(ConsensusLeaderNode node){
         requestDictionary = new HashMap<>();
+        this.node = node;
     }
 
     public void add(Message message){
@@ -32,7 +38,7 @@ public class ConsensusMessageDictionary {
         if(requestDictionary.containsKey(messageId)){
             messagesFromSource = requestDictionary.get(messageId);
         }else{
-            messagesFromSource = new ConsensusMessageReplicas();
+            messagesFromSource = new ConsensusMessageReplicas(node);
         }
 
         messagesFromSource.add(message);
@@ -44,15 +50,15 @@ public class ConsensusMessageDictionary {
     }
 
     public ConsensusDecision getDecision(int messageId, int sourceId, long currentTime){
-//        if(getNumberOfReplicasForMessageId(messageId) < decisionThreshold)
-//            return null;
-
         if(!requestDictionary.containsKey(messageId)){
             return null;
         }
 
         ConsensusMostFrequentValue mostFrequentValue = requestDictionary.get(messageId).getDecision();
-        return new ConsensusDecision(messageId, sourceId, currentTime, mostFrequentValue);
+        if(mostFrequentValue == null)
+            return null;
 
+        requestDictionary.get(messageId).updateMalevolence(mostFrequentValue, currentTime);
+        return new ConsensusDecision(messageId, sourceId, currentTime, mostFrequentValue);
     }
 }

@@ -22,4 +22,9 @@ public class ConsensusMessageValue {
     public long getTimestamp() {
         return timestamp;
     }
+
+    @Override
+    public String toString() {
+        return value;
+    }
 }

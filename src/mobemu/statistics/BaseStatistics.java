@@ -1,9 +1,11 @@
 package mobemu.statistics;
 
 import mobemu.node.Node;
+import mobemu.utils.Constants;
 import mobemu.utils.message.IMessage;
 import mobemu.utils.message.IMessageGenerator;
 
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
 import java.util.Random;
@@ -28,7 +30,7 @@ public abstract class BaseStatistics<T extends IMessage, U extends IMessageGener
     }
 
     @Override
-    public Calendar generateMessageTime(double value) {
-        return messageGenerator.generateMessageTime(value);
+    public List<Long> getMessageGenerationTimes(Random random, long startTrace, long endTrace, long sampleTime) {
+        return messageGenerator.getMessageGenerationTimes(random, startTrace, endTrace, sampleTime);
     }
 }

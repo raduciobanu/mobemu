@@ -10,7 +10,7 @@ import java.util.*;
 /**
  * Created by radu on 5/13/2017.
  */
-public class ConsensusMessageGenerator implements IMessageGenerator<Message> {
+public class ConsensusMessageGenerator extends MessageGenerator {
 
     /**
      * The id of the message (All messages generated in the same time will have the same messageId)
@@ -18,7 +18,12 @@ public class ConsensusMessageGenerator implements IMessageGenerator<Message> {
     private static int messageId;
 
     /**
-     * The percent of correct values when generating random messages
+     * The percentage of malicious nodes in the network
+     */
+    private float maliciousPercentage;
+
+    /**
+     * The percentage of correct values when generating random messages
      */
     private float correctPercentage;
 
@@ -27,8 +32,9 @@ public class ConsensusMessageGenerator implements IMessageGenerator<Message> {
      */
     private Map<Integer, Map<String, Integer>> messageValues;
 
-    public ConsensusMessageGenerator(float correctPercentage) {
+    public ConsensusMessageGenerator(float maliciousPercentage, float correctPercentage) {
         this.messageValues = new HashMap<>();
+        this.maliciousPercentage = maliciousPercentage;
         this.correctPercentage = correctPercentage;
     }
 
@@ -47,10 +53,12 @@ public class ConsensusMessageGenerator implements IMessageGenerator<Message> {
             ConsensusLeaderNode consensusLeaderNode = (ConsensusLeaderNode) node;
             int leaderId = consensusLeaderNode.getLeaderNode().getLeaderNodeId();
             if (leaderId == -1) {
-                continue;
+//                continue;
+                leaderId = nodeId;
             }
 
-            String messageValue = generateMessageValue(random, correctPercentage);
+            boolean isMalicious = isMalicious(random, maliciousPercentage);
+            String messageValue = generateMessageValue(random, correctPercentage, isMalicious);
 
             Message message = new Message(messageId, nodeId, leaderId, messageValue, tick, messageCopies);
             node.generateMessage(message);
@@ -64,18 +72,20 @@ public class ConsensusMessageGenerator implements IMessageGenerator<Message> {
         return messages;
     }
 
-    @Override
-    public Calendar generateMessageTime(double value) {
-        return Message.generateMessageTime(value);
+    public static boolean isMalicious(Random random, double maliciousPercentage){
+        return random.nextDouble() < maliciousPercentage;
     }
 
+    public static String generateMessageValue(Random random, double correctPercentage, boolean isMalicious) {
+        if(isMalicious){
+            if (random.nextDouble() < correctPercentage) {
+                return "1";
+            }
 
-    public static String generateMessageValue(Random random, double correctPercentage) {
-        if (random.nextDouble() < correctPercentage) {
-            return "1";
+            return "0";
         }
 
-        return "0";
+        return "1";
     }
 
     public void addToMessageValues(int messageId, String messageValue) {

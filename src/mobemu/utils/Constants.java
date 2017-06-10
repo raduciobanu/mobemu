@@ -15,9 +15,16 @@ public class Constants {
     public static double leaderProposalsThreshold = 0.5;
     public static String responseTimesFileName = "responseTimes.txt";
     public static String deliveryLatenciesFileName = "deliveryLatency.txt";
+    public static int numberOfGeneratedMessages = 4;
 
+
+    public static int MIN_REPLICAS = 3;
+    public static double MIN_CONFIDENCE_LEVEL = 0.6;
+    public static double Epsilon = 0.001;
+    public static double MalavolenceConstant = 0.2;
     public static double centralityWeight = 0.2;
     public static double trustWeight = 0.2;
     public static double probabilityWeight = 0.6;
     public static double latencyWeight = 0.2;
+
 }

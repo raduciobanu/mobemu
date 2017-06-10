@@ -35,7 +35,8 @@ public class DecisionRequestsAndResponses {
 
     public void addResponse(ConsensusDecision decision, long currentTime){
         //if there is already a response for the decision
-        if(containsResponse(decision.getId()))
+        DecisionResponse responseForMessageId = getResponse(decision.getId());
+        if(responseForMessageId != null && responseForMessageId.getTimestamp() > decision.getTimestamp())
             return;
 
         //if there is no request for the decision
@@ -46,23 +47,23 @@ public class DecisionRequestsAndResponses {
         }
 
         long spentTime = currentTime - request.getTimestamp();
-        responses.put(decision.getId(), new DecisionResponse(decision.getSourceId(), decision.getValue(), spentTime));
+        responses.put(decision.getId(), new DecisionResponse(decision.getSourceId(), decision.getValue(), currentTime, spentTime));
     }
 
     public DecisionResponse getResponseForMessageId(int messageId){
         return responses.get(messageId);
     }
 
-    public boolean containsResponse(int messageId){
+    public DecisionResponse getResponse(int messageId){
         Iterator it = responses.entrySet().iterator();
         while(it.hasNext()){
             Map.Entry<Integer, DecisionResponse> pair = (Map.Entry)it.next();
             if(pair.getKey() == messageId){
-                return true;
+                return pair.getValue();
             }
         }
 
-        return false;
+        return null;
     }
 
     public Message getRequestForDecision(ConsensusDecision decision){
@@ -71,7 +72,7 @@ public class DecisionRequestsAndResponses {
             Map.Entry<Integer, Message> pair = (Map.Entry)it.next();
             int messageId = pair.getKey();
             Message request = pair.getValue();
-            if(decision.match(messageId, request.getDestination())){
+            if(decision.fullMatch(messageId, request.getDestination())){
                 return request;
             }
         }

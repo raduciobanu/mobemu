@@ -10,8 +10,6 @@ import mobemu.statistics.NodeStatistics;
 import mobemu.trace.Contact;
 import mobemu.trace.Parser;
 import mobemu.trace.Trace;
-import mobemu.utils.message.IMessageGenerator;
-import mobemu.utils.message.MessageGenerator;
 
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -31,7 +29,7 @@ public abstract class RunNode implements IRun {
     protected Parser parser;
 
     public RunNode(String[] args){
-        parser = getUPB2012Parser();
+        parser = getHCMMParser();
         statistics = new NodeStatistics();
         initialize(args);
     }
@@ -104,7 +102,11 @@ public abstract class RunNode implements IRun {
 
         statistics.runBeforeTraceStart();
         statistics.runBeforeTraceStart();
-        for (long tick = startTime; tick < endTime; tick += 10 * sampleTime) {
+
+        List<Long> generationTimes = statistics.getMessageGenerationTimes(messageRandom, startTime, endTime, sampleTime);
+//        System.out.println("Generation times:" + generationTimes);
+//        System.out.println("Start time: " + startTime + ", end time: " + endTime + ", sample time: " + sampleTime);
+        for (long tick = startTime; tick < endTime; tick += sampleTime) {
             double x = (double)(tick - startTime) / (endTime - startTime);
             int count = 0;
 
@@ -121,16 +123,22 @@ public abstract class RunNode implements IRun {
 
             currentDay.setTimeInMillis(tick);
 
-            if (currentDay.get(Calendar.DATE) != previousDay) {
-                generate = true;
-                previousDay = currentDay.get(Calendar.DATE);
-                generationTime = statistics.generateMessageTime(messageRandom.nextDouble());
-            }
+//            if (currentDay.get(Calendar.DATE) != previousDay) {
+//                generate = true;
+//                previousDay = currentDay.get(Calendar.DATE);
+//                generationTime = statistics.getMessageGenerationTimes(messageRandom, startTime, endTime);
+//            }
 
             // generate messages
-            if (generate && generationTime.get(Calendar.HOUR) == currentDay.get(Calendar.HOUR)) {
-                messages.addAll(statistics.generateMessages(nodes, messageCount, messageCopies, tick, dissemination, messageRandom));
-                generate = false;
+//            if (generate && generationTime.get(Calendar.HOUR) == currentDay.get(Calendar.HOUR)) {
+//                messages.addAll(statistics.generateMessages(nodes, messageCount, messageCopies, tick, dissemination, messageRandom));
+//                generate = false;
+//            }
+
+            if(generationTimes.contains(tick)){
+//                System.out.println("Messages generated at: " + tick);
+                messages.addAll(statistics.generateMessages(nodes, messageCount, messageCopies, tick, dissemination,
+                        messageRandom));
             }
 
             for (int i = 0; i < contactCount; i++) {
@@ -173,7 +181,7 @@ public abstract class RunNode implements IRun {
 
     /**
      * To be overwritten by the subclasses using the desired algorithm
-     * @param index
+     * @param index the index of the node
      * @return the initialized node
      */
     public abstract Node initializeNode(int index, long seed, Node[] nodes);

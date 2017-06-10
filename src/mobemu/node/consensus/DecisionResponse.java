@@ -11,11 +11,14 @@ public class DecisionResponse {
 
     private String value;
 
+    private long timestamp;
+
     private long spentTime;
 
-    public DecisionResponse(int sourceId, String value, long spentTime) {
+    public DecisionResponse(int sourceId, String value, long timestamp, long spentTime) {
         this.sourceId = sourceId;
         this.value = value;
+        this.timestamp = timestamp;
         this.spentTime = spentTime;
     }
 
@@ -25,6 +28,10 @@ public class DecisionResponse {
 
     public String getValue() {
         return value;
+    }
+
+    public long getTimestamp() {
+        return timestamp;
     }
 
     public long getSpentTime() {

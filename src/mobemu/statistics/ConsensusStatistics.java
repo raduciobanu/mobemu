@@ -17,12 +17,18 @@ import java.util.*;
 public class ConsensusStatistics extends BaseStatisticsWriteToFile<Message, ConsensusMessageGenerator> {
 
     /**
-     * The percent of correct values when generating random messages
+     * Percentage of malicious nodes in the network
+     */
+    private float maliciousPercentage;
+
+    /**
+     * Percentage of correct values when generating random messages
      */
     private float correctPercentage;
 
-    public ConsensusStatistics(float correctPercentage) {
-        super(new ConsensusMessageGenerator(correctPercentage));
+    public ConsensusStatistics(float maliciousPercentage, float correctPercentage) {
+        super(new ConsensusMessageGenerator(maliciousPercentage, correctPercentage));
+        this.maliciousPercentage = maliciousPercentage;
         this.correctPercentage = correctPercentage;
     }
 
@@ -65,14 +71,21 @@ public class ConsensusStatistics extends BaseStatisticsWriteToFile<Message, Cons
 
                 DecisionResponse response = consensusNode.getDecisionValueForMessageId(msgId);
                 if (response == null) {
+//                    System.out.println("Null decision for node: " + node.getId() + ", message: " + msgId);
                     continue;
                 }
 
                 String decisionValue = response.getValue();
                 decisionNumber++;
-                if (decisionValue.equals(getMostFrequentValueForMessage(msgId))) {
+                String mostFrequentValue = getMostFrequentValueForMessage(msgId);
+                if (decisionValue.equals(mostFrequentValue)) {
                     correctDecisions++;
                 }
+//                else{
+//                    System.out.println("decision with value " + decisionValue + " for node: " + node.getId() + ", " +
+//                            "message: " +
+//                            msgId);
+//                }
                 decisionLatency += response.getSpentTime();
 
                 double responseLatency = response.getSpentTime();
@@ -87,6 +100,8 @@ public class ConsensusStatistics extends BaseStatisticsWriteToFile<Message, Cons
 
 //        int messageNumber = nodes.length * messageGenerator.getNumberOfMessages();
 
+        System.out.println("Decision Number: " + decisionNumber);
+
         double correctnessPercentage =  (double)correctDecisions / (double)decisionNumber;
         double decisionPercentage = (double)decisionNumber / (double)decisionsRequestedNumber;
         double meanDecisionLatency = (double)decisionLatency / (decisionNumber * 1000 * 60 * 60);
@@ -96,7 +111,7 @@ public class ConsensusStatistics extends BaseStatisticsWriteToFile<Message, Cons
         String formattedDecision = numberFormat.format(decisionPercentage);
         String formattedMeanDecisionLatency = numberFormat.format(meanDecisionLatency);
 
-        writer.println(formattedCorrectness);
+        writerWrapper.println(formattedCorrectness);
 
         System.out.println("Correctness percentage: " + formattedCorrectness);
         System.out.println("Decision percentage: " + formattedDecision);

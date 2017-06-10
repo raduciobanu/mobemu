@@ -20,7 +20,7 @@ public class RunConsensus extends RunNode{
     public RunConsensus(String[] args) {
         super(args);
 
-        statistics = new ConsensusStatistics(Float.parseFloat(args[0]));
+        statistics = new ConsensusStatistics(Float.parseFloat(args[0]), Float.parseFloat(args[1]));
         leaderElectionAlgorithm = "direct";
         Constants.responseTimesFileName = "results_consensus_" + leaderElectionAlgorithm + "_" + parser.getTraceData().getName()
                 + "_" + args[0]+ ".txt";

@@ -53,6 +53,12 @@ public abstract class MessageList <T extends IMessage> implements Iterable<T>{
         messageList.add(message);
     }
 
+    public int size(){
+        return messageList.size();
+    }
+
+    public abstract List<T> getByMessageId(int messageId);
+
     @Override
     public Iterator<T> iterator() {
         return messageList.iterator();

@@ -56,6 +56,9 @@ public class ConsensusDecision implements IMessage{
     }
 
     public String getValue() {
+        if(value == null)
+            return "";
+
         return value.getValue();
     }
 
@@ -64,7 +67,11 @@ public class ConsensusDecision implements IMessage{
         return currentTime;
     }
 
-    public boolean match(int messageId, int leaderId){
+    public boolean fullMatch(int messageId, int leaderId){
         return this.messageId == messageId && this.sourceId == leaderId;
+    }
+
+    public boolean semiMatch(int messageId){
+        return this.messageId == messageId;
     }
 }

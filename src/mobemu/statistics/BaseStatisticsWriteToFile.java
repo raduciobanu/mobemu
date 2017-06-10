@@ -17,40 +17,20 @@ public abstract class BaseStatisticsWriteToFile<T extends IMessage, U extends IM
     /**
      * Used to write results to file
      */
-    protected PrintWriter writer;
+    protected WriterWrapper writerWrapper;
 
     public BaseStatisticsWriteToFile(U messageGenerator) {
         super(messageGenerator);
+        writerWrapper = new WriterWrapper();
     }
 
     @Override
     public void runBeforeTraceStart() {
-        writer = openFile(Constants.responseTimesFileName);
+        writerWrapper.openFile(Constants.responseTimesFileName);
     }
 
     @Override
     public void runAfterTraceEnd(Node[] nodes) {
-        closeFile(writer);
-    }
-
-    public PrintWriter openFile(String fileName){
-        PrintWriter writer = null;
-
-        try {
-            writer = new PrintWriter(fileName, "UTF-8");
-
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
-        } catch (UnsupportedEncodingException e) {
-            e.printStackTrace();
-        }
-
-        System.out.println(fileName + " opened!");
-
-        return writer;
-    }
-
-    public void closeFile(PrintWriter writer){
-        writer.close();
+        writerWrapper.closeFile();
     }
 }

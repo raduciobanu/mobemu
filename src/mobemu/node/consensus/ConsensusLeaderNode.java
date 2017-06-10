@@ -1,16 +1,16 @@
 package mobemu.node.consensus;
 
 import mobemu.algorithms.SPRINT;
+import mobemu.node.Altruism;
 import mobemu.node.Context;
 import mobemu.node.Message;
 import mobemu.node.Node;
+import mobemu.node.consensus.Malevolence.Malevolence;
 import mobemu.node.leader.LeaderNode;
+import mobemu.node.leader.communityBasedLeaderElection.CommunityLeaderNode;
 import mobemu.utils.message.MessageList;
 
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * Created by radu on 5/5/2017.
@@ -29,6 +29,8 @@ public class ConsensusLeaderNode extends SPRINT {
     protected MessageList<ConsensusDecision> ownDecisions;
 
     protected DecisionRequestsAndResponses decisionRequestsAndResponses;
+
+    protected Malevolence malevolence;
 
     /**
      * Instantiates an {@code ONSIDE} object.
@@ -51,14 +53,22 @@ public class ConsensusLeaderNode extends SPRINT {
         super(id, context, socialNetwork, dataMemorySize, exchangeHistorySize, seed, traceStart, traceEnd, altruism, nodes, cacheMemorySize);
 
         this.leaderNode = leaderNode;
-        this.messageDictionary = new ConsensusMessageDictionary();
-
+        this.messageDictionary = new ConsensusMessageDictionary(this);
         this.receivedDecisions = new DecisionMessageList();
         this.ownDecisions = new DecisionMessageList();
 
 //        requests = new HashMap<>();
         decisionRequestsAndResponses = new DecisionRequestsAndResponses();
         leaderNode.setConsensusLeaderNode(this);
+        malevolence = new Malevolence(this.id);
+    }
+
+    public Malevolence getMalevolence(){
+        return this.malevolence;
+    }
+
+    public Altruism getAltruism(){
+        return this.altruism;
     }
 
     public LeaderNode getLeaderNode() {
@@ -116,24 +126,43 @@ public class ConsensusLeaderNode extends SPRINT {
         ConsensusLeaderNode consensusLeaderNode = (ConsensusLeaderNode) encounteredNode;
         LeaderNode encounteredLeaderNode = consensusLeaderNode.leaderNode;
 
+        exchangeOpinions(encounteredNode);
+
         leaderNode.onDataExchange(encounteredLeaderNode, contactDuration, currentTime);
 
         exchangeDecisions(encounteredNode, currentTime);
+
+//        if(getId() == 17){
+//            System.out.println("Node 17 meet node " + encounteredLeaderNode.getId() + ", with received decisions " +
+//                    receivedDecisions.size() + " and own decisions " + ownDecisions.size());
+//        }
     }
 
     @Override
     protected void downloadMessage(Message message, Node encounteredNode, boolean dissemination, long currentTime) {
+        boolean messageDelivered = message.isDelivered(id);
         super.downloadMessage(message, encounteredNode, dissemination, currentTime);
 
-        computeDecisionForMessage(message, currentTime);
+        if (!messageDelivered) {
+            computeDecisionForMessage(message, currentTime);
+        }
     }
 
     protected void computeDecisionForMessage(Message message, long currentTime) {
         messageDictionary.add(message);
-
         ConsensusDecision decision = messageDictionary.getDecision(message.getId(), this.getId(), currentTime);
+//        printCommunity();
+        if(decision != null){
+            addDecision(decision, currentTime);
+        }
+    }
 
-        addDecision(decision, currentTime);
+    private void printCommunity(){
+        if(!(leaderNode instanceof CommunityLeaderNode))
+            return;
+
+        CommunityLeaderNode communityLeaderNode = (CommunityLeaderNode)leaderNode;
+        System.out.println(leaderNode.getId() + "->" + communityLeaderNode.getLeaderCommunityNodes());
     }
 
     /**
@@ -145,6 +174,14 @@ public class ConsensusLeaderNode extends SPRINT {
 
         ownDecisions.add(decision);
         decisionRequestsAndResponses.addResponse(decision, currentTime);
+    }
+
+    protected void exchangeOpinions(Node encounteredNode){
+        if (!(encounteredNode instanceof ConsensusLeaderNode))
+            return;
+
+        ConsensusLeaderNode encounteredConsensusNode = (ConsensusLeaderNode) encounteredNode;
+        this.malevolence.exchange(encounteredConsensusNode.getMalevolence());
     }
 
     protected void exchangeDecisions(Node encounteredNode, long currentTime) {
@@ -174,21 +211,75 @@ public class ConsensusLeaderNode extends SPRINT {
     }
 
     public DecisionResponse getDecisionValueForMessageId(int messageId) {
-        return decisionRequestsAndResponses.getResponseForMessageId(messageId);
+        DecisionResponse decisionForMessage = decisionRequestsAndResponses.getResponseForMessageId(messageId);
+        if(decisionForMessage != null){
+            return decisionForMessage;
+        }
 
-//        for (ConsensusDecision decision : receivedDecisions) {
-//            if (decision.match(messageId, decisionRequestsAndResponses.getRequestDestination(messageId))) {
-//                return decision.getValue();
-//            }
-//        }
-//
-//        for (ConsensusDecision decision : ownDecisions) {
-//            if (decision.match(messageId, decisionRequestsAndResponses.getRequestDestination(messageId))) {
-//                return decision.getValue();
-//            }
-//        }
+//        return null;
+        List<ConsensusDecision> allDecisionsByMessageId = receivedDecisions.getByMessageId(messageId);
+        allDecisionsByMessageId.addAll(ownDecisions.getByMessageId(messageId));
 
-//        return "";
+        if(allDecisionsByMessageId.size() == 0){
+//            System.out.println("Node " + getId() + ", leaderId: " + leaderNode.getId() + ", no decision received for:" +
+//                    " " + messageId + "decisions size: " + receivedDecisions.size());
+        }
+
+        return getAverageDecision(allDecisionsByMessageId);
+    }
+
+    public DecisionResponse getAverageDecision(List<ConsensusDecision> decisionsByMessageId){
+        //Dictionary of values and their number of appearances
+        Map<String, Double> values = new HashMap<>();
+        Map<String, Integer> appearances = new HashMap<>();
+        for(ConsensusDecision decision : decisionsByMessageId){
+            String value = decision.getValue();
+            if(!values.containsKey(value)){
+                values.put(value, decision.getConfidenceLevel());
+                appearances.put(value, 1);
+                continue;
+            }
+
+            int currentNumberOfAppearances = appearances.get(value);
+            appearances.put(value, currentNumberOfAppearances + 1);
+            double currentConfidenceLevel = values.get(value);
+            values.put(value, currentConfidenceLevel + decision.getConfidenceLevel());
+
+        }
+
+        //compute average confidence level
+        for(Map.Entry<String, Double> value: values.entrySet()){
+            value.setValue(value.getValue() / appearances.get(value.getKey()));
+        }
+
+        String mostFrequentValue = "";
+        double maxConfidenceLevel = 0;
+        boolean multipleMostFrequentValues = false;
+        for(Map.Entry<String, Double> item: values.entrySet()){
+            if(item.getValue() == maxConfidenceLevel){
+                multipleMostFrequentValues=true;
+                continue;
+            }
+
+            if(item.getValue() > maxConfidenceLevel){
+                maxConfidenceLevel = item.getValue();
+                mostFrequentValue = item.getKey();
+                multipleMostFrequentValues = false;
+            }
+        }
+
+        if(multipleMostFrequentValues){
+//            System.out.println("MultipleValues all: " + values.size());
+
+            return null;
+        }
+
+        if(mostFrequentValue.equals("")){
+            return null;
+//            System.out.println("Empty Value, decisionsForMessage size: " + decisionsByMessageId.size());
+        }
+
+        return new DecisionResponse(-1, mostFrequentValue, 0, 0);
     }
 
     public void changeLeader(int leaderId, long currentTime){

@@ -13,5 +13,5 @@ public interface IMessageGenerator<T> {
     List<T> generateMessages(Node[] nodes, int messageCount, int messageCopies, long tick, boolean dissemination,
                              Random random);
 
-    Calendar generateMessageTime(double value);
+    List<Long> getMessageGenerationTimes(Random random, long startTrace, long endTrace, long sampleTime);
 }
