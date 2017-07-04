@@ -5,6 +5,7 @@
 package mobemu.node;
 
 import java.util.*;
+import mobemu.communitydetection.KClique;
 import mobemu.trace.Contact;
 import mobemu.trace.Trace;
 
@@ -35,15 +36,10 @@ public abstract class Node {
     protected List<Integer> uniqueLocalNodes; // list of unique local nodes encountered per time unit
     protected int[] encounters; // how many times a node has encountered the other nodes
 
-    // community data (K-clique algorithm and social data)
-    protected boolean[] familiarSet; // the familiar set of the current node
-    protected int familiarSetSize; // size of the current node's familiar set
-    protected List<Integer> localCommunity; // the local community of the current node
-    protected boolean[][] globalFamiliarSet; // the global familiar set of the current node
-    protected static int contactThreshold = 20 * 60 * 1000; // contact threshold for the K-clique algorithm
-    protected static int communityThreshold = 5; // community threshold for the K-clique algorithm.
+    // centrality and community data
     protected Centrality centrality; // the node's centrality
     protected Centrality localCentrality; // the node's local centrality
+    protected CommunityDetection community; // community information
 
     // message data
     protected int messagesDelivered; // total number of messages ever delivered by the current node
@@ -136,16 +132,12 @@ public abstract class Node {
         this.encountersPerHour = new int[HOURS_IN_DAY][(int) ((double) (traceEndReset - traceStartReset) / MILLIS_IN_DAY) + 1][nodes];
         this.timesPerHour = new long[HOURS_IN_DAY][(int) ((double) (traceEndReset - traceStartReset) / MILLIS_IN_DAY) + 1][nodes];
         this.exchangeStats = new HashMap<>();
-        this.familiarSet = new boolean[nodes];
-        this.familiarSetSize = 0;
-        this.localCommunity = new ArrayList<>(nodes);
-        this.localCommunity.add(id);
-        this.globalFamiliarSet = new boolean[nodes][nodes];
         this.battery = new Battery(batteryRandom.nextDouble() * 24.0 * 3600.0, 24.0 * 3600.0, 3600, 0.2);
         this.messagesDelivered = 0;
         this.messagesExchanged = 0;
         this.centrality = new Centrality();
         this.localCentrality = new Centrality();
+        this.community = new KClique(id, nodes);
         this.uniqueNodes = new ArrayList<>();
         this.uniqueLocalNodes = new ArrayList<>();
         this.overflowCount = 0;
@@ -314,24 +306,21 @@ public abstract class Node {
     }
 
     /**
+     * Gets the node's community detection information.
+     *
+     * @return
+     */
+    public CommunityDetection getCommunityInfo() {
+        return community;
+    }
+
+    /**
      * Gets the node's local community (computed using k-CLIQUE).
      *
      * @return the node's local community
      */
     public List<Integer> getLocalCommunity() {
-        return localCommunity;
-    }
-
-    /**
-     * Checks if the encountered node is in the familiar set of the current
-     * node.
-     *
-     * @param id ID of the encountered node
-     * @return {@code true} if the encountered node is in the familiar set, {@code false}
-     * otherwise
-     */
-    public boolean inFamiliarSet(int id) {
-        return familiarSet[id];
+        return community.getLocalCommunity();
     }
 
     /**
@@ -339,11 +328,11 @@ public abstract class Node {
      * node.
      *
      * @param id ID of the encountered node
-     * @return {@code true} if the encountered node is in the local community, {@code false}
-     * otherwise
+     * @return {@code true} if the encountered node is in the local community,
+     * {@code false} otherwise
      */
     public boolean inLocalCommunity(int id) {
-        return localCommunity.contains(id);
+        return community.inLocalCommunity(id);
     }
 
     /**
@@ -351,8 +340,8 @@ public abstract class Node {
      * node.
      *
      * @param id ID of the encountered node
-     * @return {@code true} if the encountered node is in the social network, {@code false}
-     * otherwise
+     * @return {@code true} if the encountered node is in the social network,
+     * {@code false} otherwise
      */
     public boolean inSocialNetwork(int id) {
         return socialNetwork[id];
@@ -428,27 +417,33 @@ public abstract class Node {
     }
 
     /**
+     * Sets the community detection algorithm (default is K-clique with default
+     * thresholds).
+     *
+     * @param community community detection algorithm
+     */
+    public void setCommunityDetection(CommunityDetection community) {
+        this.community = community;
+    }
+
+    /**
      * Runs a routing or dissemination algorithm upon contacts between two
      * nodes.
      *
      * @param encounteredNode encountered node
      * @param tick current tick in the mobility trace
      * @param contactDuration duration of the contact
-     * @param newContact {@code true} if the contact has just started, {@code false}
-     * otherwise
+     * @param newContact {@code true} if the contact has just started,
+     * {@code false} otherwise
      * @param timeDelta duration between the beginning of the trace and the
      * current moment
      * @param sampleTime sample time of the mobility trace
      */
     public void run(Node encounteredNode, long tick, long contactDuration, boolean newContact, long timeDelta, long sampleTime) {
-        if (!inFamiliarSet(encounteredNode.id)) {
-            // update total contact duration of encountered node
-            updateContactDuration(encounteredNode.id, sampleTime, tick);
+        // update community information
+        community.onUpdate(encounteredNode, encounteredNodes);
 
-            // when the threshold has been exceeded, insert vi in F0 and C0
-            checkThreshold(encounteredNode.id);
-        }
-
+        updateContactDuration(encounteredNode.id, sampleTime, tick);
         updateCentrality(timeDelta);
         updateTimes(encounteredNode.id, tick);
 
@@ -457,26 +452,11 @@ public abstract class Node {
             // update the number of contacts
             updateContactsNumber(encounteredNode.id, tick);
 
-            // update the global familiar set of the current node
-            updateFamiliarSet(encounteredNode, true);
-
             // update the number of encounters per hour
             updateEncounters(encounteredNode.id, tick);
 
-            // step 4 of the K-clique algorithm
-            if (!inFamiliarSet(encounteredNode.id)) {
-                updateFamiliarSet(encounteredNode, false);
-            }
-
-            // step 5 of the K-clique algorithm
-            if (!inLocalCommunity(encounteredNode.id)) {
-                updateLocalCommunity(encounteredNode);
-            }
-
-            // step 6 of the K-clique algorithm
-            if (inLocalCommunity(encounteredNode.id)) {
-                updateLocalCommunityAggressive(encounteredNode);
-            }
+            // update community information
+            community.onContact(encounteredNode);
 
             // data routing/dissemination
             exchangeData(encounteredNode, contactDuration, tick);
@@ -492,28 +472,6 @@ public abstract class Node {
     public Message generateMessage(Message message) {
         ownMessages.add(message);
         return message;
-    }
-
-    /**
-     * Updates the global familiar set for the encountered node.
-     *
-     * @param node encountered node
-     * @param global {@code true} for updating the global familiar set, {@code false}
-     * for updating the local familiar set
-     */
-    protected void updateFamiliarSet(Node node, boolean global) {
-
-        if (global) {
-            for (int i = 0; i < globalFamiliarSet.length; i++) {
-                for (int j = 0; j < globalFamiliarSet[i].length; j++) {
-                    globalFamiliarSet[i][j] |= node.globalFamiliarSet[i][j];
-                }
-            }
-        } else {
-            for (int j = 0; j < globalFamiliarSet[node.id].length; j++) {
-                globalFamiliarSet[node.id][j] |= node.familiarSet[j];
-            }
-        }
     }
 
     /**
@@ -581,80 +539,13 @@ public abstract class Node {
     }
 
     /**
-     * Checks if the K-clique contact duration threshold has been exceeded and
-     * adds the encountered node to the local community if it has.
-     *
-     * @param id ID of the encountered node
-     */
-    protected void checkThreshold(int id) {
-        ContactInfo node = encounteredNodes.get(id);
-
-        if (node != null) {
-            if (node.getDuration() > contactThreshold) {
-                if (!inFamiliarSet(id)) {
-                    familiarSet[id] = true;
-                    familiarSetSize++;
-                }
-
-                if (!inLocalCommunity(id)) {
-                    localCommunity.add(id);
-                }
-            }
-        }
-    }
-
-    /**
-     * Updates the local community.
-     *
-     * @param encounteredNode encountered node
-     */
-    protected void updateLocalCommunity(Node encounteredNode) {
-
-        int count = 0;
-
-        for (Integer localNode : localCommunity) {
-            if (encounteredNode.familiarSet[localNode]) {
-                count++;
-            }
-        }
-
-        if (count >= communityThreshold - 1) {
-            localCommunity.add(encounteredNode.id);
-        }
-    }
-
-    /**
-     * Aggressively updates the local community.
-     *
-     * @param encounteredNode encountered node
-     */
-    protected void updateLocalCommunityAggressive(Node encounteredNode) {
-
-        for (Integer newID : encounteredNode.localCommunity) {
-            int count = 0;
-
-            for (int i = 0; i < globalFamiliarSet[newID].length; i++) {
-                if (globalFamiliarSet[newID][i] && inLocalCommunity(i)) {
-                    count++;
-                }
-            }
-
-            if (count >= communityThreshold - 1) {
-                if (!inLocalCommunity(newID)) {
-                    localCommunity.add(newID);
-                }
-            }
-        }
-    }
-
-    /**
      * Inserts a message in the node's data memory.
      *
      * @param message the message to be inserted
      * @param from the node that delivers this message
      * @param currentTime the time this exchange is performed at
-     * @param altruism {@code true} if altruism computations are performed, {@code false}
-     * otherwise
+     * @param altruism {@code true} if altruism computations are performed,
+     * {@code false} otherwise
      * @param dissemination {@code true} if dissemination is used, {@code false}
      * if routing is used
      * @return {@code true} if the message wasn't already in the data memory or
