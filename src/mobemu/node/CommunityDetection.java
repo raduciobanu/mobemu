@@ -46,6 +46,8 @@ public interface CommunityDetection {
      * contact.
      *
      * @param encounteredNode encountered node
+     * @param tick trace time
+     * @param sampleTime trace sample time
      */
-    public void onContact(Node encounteredNode);
+    public void onContact(Node encounteredNode, long tick, long sampleTime);
 }

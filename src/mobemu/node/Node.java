@@ -456,7 +456,7 @@ public abstract class Node {
             updateEncounters(encounteredNode.id, tick);
 
             // update community information
-            community.onContact(encounteredNode);
+            community.onContact(encounteredNode, tick, sampleTime);
 
             // data routing/dissemination
             exchangeData(encounteredNode, contactDuration, tick);

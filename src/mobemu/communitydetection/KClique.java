@@ -15,6 +15,11 @@ import mobemu.node.Node;
 /**
  * Class for the K-clique community detection algorithm.
  *
+ * Pan Hui, Eiko Yoneki, Shu Yan Chan, and Jon Crowcroft. Distributed community
+ * detection in delay tolerant networks. Proceedings of 2nd ACM/IEEE
+ * International Workshop on Mobility in the Evolving Internet Architecture.
+ * ACM, 2007.
+ *
  * @author Radu
  */
 public class KClique implements CommunityDetection {
@@ -74,7 +79,7 @@ public class KClique implements CommunityDetection {
     }
 
     @Override
-    public void onContact(Node encounteredNode) {
+    public void onContact(Node encounteredNode, long tick, long sampleTime) {
         // update the global familiar set of the current node
         updateFamiliarSet(encounteredNode, true);
 
