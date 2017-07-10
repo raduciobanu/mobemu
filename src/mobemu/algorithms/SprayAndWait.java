@@ -26,7 +26,7 @@ public class SprayAndWait extends Node {
     private final Type type;
 
     /**
-     * Instantiates an {@code Epidemic} object.
+     * Instantiates a {@code SprayAndWait} object.
      *
      * @param id ID of the node
      * @param nodes total number of existing nodes
