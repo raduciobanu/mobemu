@@ -6,7 +6,10 @@ package mobemu.algorithms;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Comparator;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Random;
 import mobemu.node.Centrality;
 import mobemu.node.Context;
@@ -16,7 +19,10 @@ import mobemu.node.Node;
 /**
  * Class for an Adaptive Routing node.
  *
- * TODO: add paper when published
+ * Radu-Ioan Ciobanu, Ciprian Dobre, Daniel Gutierrez Raina and Sergio L. Toral.
+ * A dynamic data routing solution for opportunistic networks. In Proceedings of
+ * the 14th International Conference on Telecommunications, ConTEL 2017, pages
+ * 83-90, Zagreb, Croatia, 2017. IEEE.
  *
  * @author Radu
  */
@@ -75,7 +81,8 @@ public class AdaptiveRouting extends Node {
      * Initial weights for (in this order) similarity, centrality, friendship,
      * strength, trust.
      */
-    double[] initialWeights = {0.05, 0.3, 0.5, 0.1, 0.05};
+    double[] initialWeights = {0.05, 0.3, 0.5, 0.1, 0.05}; // UPB
+    //double[] initialWeights = {0.05, 0.3, 0.3, 0.1, 0.25}; // Sigcomm
     /**
      * Algorithm version (1 - equal split, 2 - weighted split, 3 - equal
      * values).
@@ -99,6 +106,15 @@ public class AdaptiveRouting extends Node {
      * Set to {@code true} if the algorithm should use only default parameters.
      */
     private boolean defaultRun;
+    /**
+     * Map that specifies the importance of each message from this node's
+     * standpoint.
+     */
+    private Map<Integer, Double> messageImportances;
+    /**
+     * Sorter for the message in the data memory.
+     */
+    private Comparator<Message> messageSorter;
 
     /**
      * Constructor for the {@link AdaptiveRouting} class.
@@ -138,6 +154,8 @@ public class AdaptiveRouting extends Node {
         this.interContactTime = new long[nodes];
         this.lastContactTime = new long[nodes];
         this.maxParams = new UtilityFunctionParams(-1);
+        this.messageImportances = new HashMap<>();
+        this.messageSorter = Comparator.comparing(Message::getUtility).thenComparing(Message::getTimestamp);
 
         this.version = version;
         this.prob = prob;
@@ -190,6 +208,14 @@ public class AdaptiveRouting extends Node {
                 insertMessage(message, encNode, currentTime, false, false);
                 totalMessages++;
             }
+        }
+
+        for (Message m : dataMemory) {
+            m.setUtility(messageImportances.get(m.getId()));
+        }
+
+        if (dataMemory.size() > 1) {
+            dataMemory.sort(messageSorter);
         }
     }
 
@@ -317,23 +343,23 @@ public class AdaptiveRouting extends Node {
         int inCommon = 0;
 
         // count the number of parameters "in common" (i.e., similar in value)
-        if (Math.abs(params.similarity - paramsEncounteredNode.similarity) <= closeness) {
+        if (Math.abs(params.similarity * initialWeights[0] - paramsEncounteredNode.similarity * encounteredNode.initialWeights[0]) <= closeness) {
             inCommon++;
         }
 
-        if (Math.abs(params.centrality - paramsEncounteredNode.centrality) <= closeness) {
+        if (Math.abs(params.centrality * initialWeights[1] - paramsEncounteredNode.centrality * encounteredNode.initialWeights[1]) <= closeness) {
             inCommon++;
         }
 
-        if (Math.abs(params.friendship - paramsEncounteredNode.friendship) <= closeness) {
+        if (Math.abs(params.friendship * initialWeights[2] - paramsEncounteredNode.friendship * encounteredNode.initialWeights[2]) <= closeness) {
             inCommon++;
         }
 
-        if (Math.abs(params.strength - paramsEncounteredNode.strength) <= closeness) {
+        if (Math.abs(params.strength * initialWeights[3] - paramsEncounteredNode.strength * encounteredNode.initialWeights[3]) <= closeness) {
             inCommon++;
         }
 
-        if (Math.abs(params.trust - paramsEncounteredNode.trust) <= closeness) {
+        if (Math.abs(params.trust * initialWeights[4] - paramsEncounteredNode.trust * encounteredNode.initialWeights[4]) <= closeness) {
             inCommon++;
         }
 
@@ -360,33 +386,67 @@ public class AdaptiveRouting extends Node {
                 nodeProbability = prob;
             }
         } else {
+            List<Integer> similarMetrics = new ArrayList<>(5);
+            double weightRemainder = 0;
+
             // if a parameter is similar for both nodes, set its weight
             // to zero and update the other weights accordingly
-            if (Math.abs(params.similarity - paramsEncounteredNode.similarity) <= closeness) {
+            if (Math.abs(params.similarity * initialWeights[0] - paramsEncounteredNode.similarity * encounteredNode.initialWeights[0]) <= closeness) {
                 updateWeights(zeroIndices, weights, 0);
+                weightRemainder += updateInitialWeights(similarMetrics, 0);
             }
 
-            if (Math.abs(params.centrality - paramsEncounteredNode.centrality) <= closeness) {
+            if (Math.abs(params.centrality * initialWeights[1] - paramsEncounteredNode.centrality * encounteredNode.initialWeights[1]) <= closeness) {
                 updateWeights(zeroIndices, weights, 1);
+                weightRemainder += updateInitialWeights(similarMetrics, 1);
             }
 
-            if (Math.abs(params.friendship - paramsEncounteredNode.friendship) <= closeness) {
+            if (Math.abs(params.friendship * initialWeights[2] - paramsEncounteredNode.friendship * encounteredNode.initialWeights[2]) <= closeness) {
                 updateWeights(zeroIndices, weights, 2);
+                weightRemainder += updateInitialWeights(similarMetrics, 2);
             }
 
-            if (Math.abs(params.strength - paramsEncounteredNode.strength) <= closeness) {
+            if (Math.abs(params.strength * initialWeights[3] - paramsEncounteredNode.strength * encounteredNode.initialWeights[3]) <= closeness) {
                 updateWeights(zeroIndices, weights, 3);
+                weightRemainder += updateInitialWeights(similarMetrics, 3);
             }
 
-            if (Math.abs(params.trust - paramsEncounteredNode.trust) <= closeness) {
+            if (Math.abs(params.trust * initialWeights[4] - paramsEncounteredNode.trust * encounteredNode.initialWeights[4]) <= closeness) {
                 updateWeights(zeroIndices, weights, 4);
+                weightRemainder += updateInitialWeights(similarMetrics, 4);
             }
 
             nodeProbability = weights[0] * params.similarity + weights[1] * params.centrality
                     + weights[2] * params.friendship + weights[0] * params.strength + weights[3] * params.trust;
+
+            for (int i = 0; i < 5; i++) {
+                if (!similarMetrics.contains(i)) {
+                    initialWeights[i] += weightRemainder / (5 - similarMetrics.size());
+                }
+            }
         }
 
+        // set the importance of this message as its probability
+        messageImportances.put(message.getId(), nodeProbability);
+
         return RAND.nextDouble() <= nodeProbability;
+    }
+
+    private double updateInitialWeights(List<Integer> similarMetrics, int index) {
+        double decrease = 0.01;
+
+        double ret = 0;
+        similarMetrics.add(index);
+
+        if (initialWeights[index] > decrease) {
+            initialWeights[index] -= decrease;
+            ret = decrease;
+        } else {
+            ret = initialWeights[index];
+            initialWeights[index] = 0;
+        }
+
+        return ret;
     }
 
     /**
