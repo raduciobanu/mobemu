@@ -29,6 +29,19 @@ public class Message implements Comparable<Message> {
      */
     public Message() {
     }
+    
+    /**
+     * Constructor for a routing {@link Message}.
+     */
+    public Message(Message m) {
+    	this.id = m.getId();
+    	this.source = m.getSource();
+    	this.destination = m.getDestination();
+    	this.message = m.getMessage();
+    	this.timestamp = m.getTimestamp();
+    	this.tags = m.getTags();	// posibil sa trebuiasca sa copiez prin valoare asta -sau poate ca nu ca vreau stats'uri globale per mesaj indif de FA-uri
+    	this.stats = m.getStats();	// si asta :))
+    }
 
     /**
      * Constructor for a routing {@link Message}.
