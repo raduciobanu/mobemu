@@ -11,13 +11,14 @@ import java.util.*;
  *
  * @author Radu
  */
-public class Message implements Comparable<Message> {
+public class Message implements Comparable<Message>, Cloneable {
 
     protected int id; // message ID
     protected int source; // ID of source node
     protected int destination; // ID of destination node or -1 if transmission is publish/subscribe (i.e. dissemination)
     protected String message; // message content
     protected long timestamp; // time when the message was generated
+    protected long ttl; // message time-to-live
     protected Context tags; // tags of this message
     protected double utility = 1.0; // utility of this message
     protected MessageStats stats; // message statistics
@@ -39,8 +40,9 @@ public class Message implements Comparable<Message> {
     	this.destination = m.getDestination();
     	this.message = m.getMessage();
     	this.timestamp = m.getTimestamp();
-    	this.tags = m.getTags();	// posibil sa trebuiasca sa copiez prin valoare asta -sau poate ca nu ca vreau stats'uri globale per mesaj indif de FA-uri
-    	this.stats = m.getStats();	// si asta :))
+    	this.ttl = m.ttl;
+    	this.tags = (Context) m.getTags().clone();
+    	this.stats = (MessageStats) m.getStats().clone();
     }
 
     /**
@@ -58,6 +60,7 @@ public class Message implements Comparable<Message> {
         this.destination = destination;
         this.message = message;
         this.timestamp = timestamp;
+        this.ttl = 43200;	// default is 12 hours
         this.tags = new Context();
         this.stats = new MessageStats(copies, id);
     }
@@ -80,6 +83,23 @@ public class Message implements Comparable<Message> {
         this.tags = tags;
         this.stats = new MessageStats(copies, source);
     }
+    
+    @Override
+    public boolean equals(Object other){
+        if (other == null) return false;
+        if (other == this) return true;
+        if (!(other instanceof Message))return false;
+        Message otherMessage = (Message) other;
+        if (this.id != otherMessage.getId() || this.source == otherMessage.getSource() || this.destination == otherMessage.getDestination())
+        	return false;
+        return true;
+    }
+    
+    public Object clone() {  
+    	Object o = new Message(this);
+    	return o;
+    }  
+    
 
     /**
      * Gets the message's ID.
@@ -107,6 +127,13 @@ public class Message implements Comparable<Message> {
     public int getDestination() {
         return destination;
     }
+    
+	public long getTtl() {
+		return ttl;
+	}
+	public void setTtl(long t) {
+		ttl = t;
+	}
 
     /**
      * Gets the message's tags.
@@ -133,6 +160,10 @@ public class Message implements Comparable<Message> {
      */
     public long getTimestamp() {
         return timestamp;
+    }
+    
+    public long getTTL() {
+    	return ttl;
     }
 
     /**
@@ -191,6 +222,10 @@ public class Message implements Comparable<Message> {
      */
     public void setCopies(int id, int value) {
         stats.setCopies(id, value);
+    }
+    
+    public void setTimestamp(long t) {
+    	timestamp = t;
     }
 
     /**

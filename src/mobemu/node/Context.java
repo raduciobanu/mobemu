@@ -14,7 +14,7 @@ import java.util.Set;
  *
  * @author Radu
  */
-public class Context {
+public class Context implements Cloneable {
 
     private int id; // id of the node whose context this is
     private Set<Topic> topics; // topics belonging to this context
@@ -180,6 +180,11 @@ public class Context {
         hash = 97 * hash + Objects.hashCode(this.topics);
         return hash;
     }
+    
+    public Object clone()  {
+    	Object o = new Context(this); 
+    	return o;
+    }  
 
     /**
      * Gets the maximum number of topics.

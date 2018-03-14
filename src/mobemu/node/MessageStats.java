@@ -14,7 +14,7 @@ import java.util.Set;
  *
  * @author Radu
  */
-public class MessageStats {
+public class MessageStats implements Cloneable {
 
     private Map<Integer, Integer> hops; // number of hops until each destination
     private Set<Integer> delivered; // list of nodes the message has been delivered to
@@ -34,7 +34,17 @@ public class MessageStats {
         this.delivered = new HashSet<>();
         this.latency = new HashMap<>();
     }
-
+    
+    public MessageStats(MessageStats ms) {
+    	this.hops = (Map<Integer, Integer>) ((HashMap<Integer, Integer>) ms.hops).clone();
+    	this.delivered = (Set<Integer>) ((HashSet<Integer>) ms.delivered).clone();
+    	this.latency = (Map<Integer, Long>) ((HashMap<Integer, Long>) ms.latency).clone();
+    	this.copies = (Map<Integer, Integer>) ((HashMap<Integer, Integer>) ms.copies).clone();
+    }
+    public Object clone() {  
+    	Object o = new MessageStats(this);
+    	return o;
+    }  
     /**
      * Gets the number of copies of this message at a given node.
      *
