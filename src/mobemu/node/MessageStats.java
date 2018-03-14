@@ -35,7 +35,8 @@ public class MessageStats implements Cloneable {
         this.latency = new HashMap<>();
     }
     
-    public MessageStats(MessageStats ms) {
+    @SuppressWarnings("unchecked")
+	public MessageStats(MessageStats ms) {
     	this.hops = (Map<Integer, Integer>) ((HashMap<Integer, Integer>) ms.hops).clone();
     	this.delivered = (Set<Integer>) ((HashSet<Integer>) ms.delivered).clone();
     	this.latency = (Map<Integer, Long>) ((HashMap<Integer, Long>) ms.latency).clone();

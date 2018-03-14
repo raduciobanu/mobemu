@@ -24,7 +24,7 @@ import mobemu.trace.Parser;
 public class MobEmu {
 
     public static void main(String[] args) {
-        Parser parser = new UPB(UPB.UpbTrace.UPB2011);
+        Parser parser = new UPB(UPB.UpbTrace.UPB2012);
     	//Parser parser = new Haggle(Haggle.HaggleTrace.CAMBRIDGE);
 
         // print some trace statistics

@@ -23,7 +23,7 @@ public class SocialProximity {
         this.cumulatedContactDurations = new double[nodes];
         this.contactFrequencies = new int[nodes];
         lastThreshold = 0;
-        timeWindow = 21600; // default is six hours
+        timeWindow = 21600 * 1000; // default is six hours
     }
 
     /**

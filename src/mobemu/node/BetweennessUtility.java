@@ -11,7 +11,7 @@ public class BetweennessUtility {
 		for (int i = 0; i < nodes; i++)
 			betweennessUtilities[i] = 0;
 		lastThreshold = 0;
-		timeWindow = 21600; // default is six hours
+		timeWindow = 21600 * 1000; // default is six hours
 	}
 	
     /**
