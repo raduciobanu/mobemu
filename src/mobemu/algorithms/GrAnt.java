@@ -338,7 +338,7 @@ public class GrAnt extends Node {
 				currentPath.add(new Tuple<Integer, Double>(grantEncounteredNode.getId(), grantEncounteredNode.getCentrality(false)));
 				currentPath.add(new Tuple<Integer, Double>(this.id, this.centrality.getValue(CentralityValue.CURRENT)));
 				insertMessage(fa, grantEncounteredNode, currentTime, false, false);    
-				toRemove.add(message);
+				//toRemove.add(message);
 			}
 			else if (grantEncounteredNode.bestForwarders.get(message.getDestination()) != null) {
 				int bestForwarder = grantEncounteredNode.bestForwarders.get(message.getDestination()).getKey();
@@ -352,7 +352,7 @@ public class GrAnt extends Node {
 					List<Tuple<Integer, Double>> currentPath = fa.getCurrentPath();
 					currentPath.add(new Tuple<Integer, Double>(grantEncounteredNode.getId(), grantEncounteredNode.getCentrality(false)));
 					insertMessage(fa, grantEncounteredNode, currentTime, false, false);    
-					toRemove.add(message);
+					//toRemove.add(message);
 				}
 				else if (currentUtility >= bestForwarderUtility) {
 					// update best forwarder & send ForwardAnt
@@ -362,7 +362,7 @@ public class GrAnt extends Node {
 					List<Tuple<Integer, Double>> currentPath = fa.getCurrentPath();
 					currentPath.add(new Tuple<Integer, Double>(grantEncounteredNode.getId(), grantEncounteredNode.getCentrality(false)));
 					insertMessage(fa, grantEncounteredNode, currentTime, false, false);    
-					toRemove.add(message);
+					//toRemove.add(message);
 				}
 			}
 			else {
@@ -376,7 +376,7 @@ public class GrAnt extends Node {
 					List<Tuple<Integer, Double>> currentPath = fa.getCurrentPath();
 					currentPath.add(new Tuple<Integer, Double>(grantEncounteredNode.getId(), grantEncounteredNode.getCentrality(false)));
 					insertMessage(fa, grantEncounteredNode, currentTime, false, false);  
-					toRemove.add(message);
+					//toRemove.add(message);
 				}
 			}
 		}
