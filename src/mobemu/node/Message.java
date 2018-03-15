@@ -41,8 +41,8 @@ public class Message implements Comparable<Message>, Cloneable {
     	this.message = m.getMessage();
     	this.timestamp = m.getTimestamp();
     	this.ttl = m.ttl;
-    	this.tags = (Context) m.getTags().clone();
-    	this.stats = (MessageStats) m.getStats().clone();
+    	this.tags = (Context) m.getTags();	// leave those global
+    	this.stats = (MessageStats) m.getStats();	// leave those global
     }
 
     /**

@@ -132,8 +132,15 @@ public class GrAnt extends Node {
 					fa.deleteCopies(grantEncounteredNode.getId());
 					continue;
 				}	
-				
+				// mark ForwardAnt delivered
 				fa.markAsDelivered(id, currentTime);
+				
+				grantEncounteredNode.messagesDelivered++;
+				grantEncounteredNode.messagesExchanged++;
+				
+				// remove ForwardAnt from encounteredNode
+				grantEncounteredNode.removeMessage(fa, true);
+				
 				// compute ForwardAnt's path quality
 				List<Tuple<Integer, Double>> currentPath = fa.getCurrentPath();
 				currentPath.add(new Tuple<Integer, Double>(id, centrality.getValue(CentralityValue.CURRENT)));
@@ -149,10 +156,8 @@ public class GrAnt extends Node {
 				ba.setFoundPathQuality(pathQuality);
 				// save BackwardAnt in data memory
 				dataMemory.add(ba);
-				// mark ForwardAnt delivered
-				grantEncounteredNode.messagesDelivered++;
-				grantEncounteredNode.messagesExchanged++;
-				grantEncounteredNode.removeMessage(fa, true);
+
+
 			}
 			if (message instanceof BackwardAnt) {				
 				BackwardAnt ba = (BackwardAnt) message;
@@ -227,6 +232,7 @@ public class GrAnt extends Node {
 
 	@Override
 	protected void onDataExchange(Node encounteredNode, long contactDuration, long currentTime) {
+		/*
 		System.out.println("###########new encounter#############");
 		System.out.println("Social Proximity");
 		for (int i = 0; i < nodes; i++) {
@@ -237,7 +243,7 @@ public class GrAnt extends Node {
 			System.out.println(i + " : " + ((GrAnt)encounteredNode).bestForwarders.get(i));
 		}
 		System.out.println("#####################################");
-		
+		*/
 		if (!(encounteredNode instanceof GrAnt)) {
 			return;
 		}
