@@ -46,6 +46,11 @@ public class DropComputing extends Node {
 	 * List of tasks to handle (or move around) for other nodes.
 	 */
 	private final SortedSet<Task> otherTasks;
+	/*
+	 * A map between task's id and the list with data version(corrupted or
+	 * unmodified)
+	 */
+	private final Map<Integer, List<Integer>> waitingTasks;
 	/**
 	 * Sample time of the trace.
 	 */
@@ -70,6 +75,8 @@ public class DropComputing extends Node {
 	 * WiFi transfer speed (in MB/s).
 	 */
 	private static final int WIFI_SPEED = 5;
+
+	private double majority = 0.0;
 
 	static {
 		DEVICE_FACTORY = new DeviceFactory();
@@ -121,6 +128,7 @@ public class DropComputing extends Node {
 		cloudTasks = new TaskGroup(id);
 		otherTasks = new TreeSet<>(new TaskComparator(id));
 		completedTasks = new ArrayList<>();
+		waitingTasks = new HashMap<Integer, List<Integer>>();
 
 		if (RAND == null) {
 			RAND = new Random(seed);
@@ -138,6 +146,23 @@ public class DropComputing extends Node {
 	public int whatPercentOfAisB(int A, int B) {
 
 		return 0;
+	}
+
+	public double calculatingMajority(List<Integer> list) {
+		double majority = 100;
+		int nrOfOnes = 0, nrOfZeros = 0;
+		for (Integer dataVersion : list) {
+			if (dataVersion == 0)
+				nrOfZeros++;
+			else if (dataVersion == 1)
+				nrOfOnes++;
+		}
+		if (nrOfOnes > nrOfZeros && nrOfZeros != 0)
+			majority = nrOfOnes / nrOfZeros;
+		else if (nrOfOnes != 0 && nrOfZeros != 0) {
+			majority = nrOfZeros / nrOfOnes;
+		}
+		return majority;
 	}
 
 	@Override
@@ -161,26 +186,51 @@ public class DropComputing extends Node {
 			for (Task task : dcNode.completedTasks) {
 				// the current node gets a message that one of its tasks has
 				// finished
-				int numberOfZeros = 0, numberOfOnes = 0;
-				for (int i = 0; i < task.list.size(); ++i) {
-					if (task.list.get(i) == 0)
-						++numberOfOnes;
-					else
-						++numberOfOnes;
-				}
+				if (task.ownerID == id) {
 
-				if (task.ownerID == id && ownTasks.finishTask(task)) {
+					// verificare lista de versiuni pe care le are nodul vizitat
+					// pentru task-ul(taskid-ul) care te intereseaza(care e al
+					// tau)
 
-					// verificare lista de versiuni din task
+					// verificare numarul de noduri la care se gaseste task-ul
+					if (waitingTasks.containsKey(task.id)) {
+						List<Integer> list = waitingTasks.get(task.id);
+						list.add(task.map.get(dcNode.id));// dece list e null?
 
-					if (numberOfOnes > (numberOfZeros + 1) || numberOfZeros > (numberOfOnes + 1)) {
+						waitingTasks.put(task.id, list);
+						// trebuie adaugat si in nodul vizitat pentru ca se
+						// identifica 3 valori ale taskului globale(care sunt copiate in fiecare nod) nu 3 valori
+						// distincte primite de fiecare nod
+						dcNode.waitingTasks.put(task.id, list);
 
-						System.out.println("task " + task.id + " has data corruption rate low  " + numberOfZeros + ":"
-								+ numberOfOnes);
-						toRemove.add(task);
+						if (waitingTasks.get(task.id).size() == 3) {
+							this.majority = calculatingMajority(waitingTasks.get(task.id));
+							System.out.println("the majority was " + this.majority);
+							System.out.println("task " + task.id + " has enough versions at node " + this.id + " -- " + waitingTasks.get(task.id) );
+							waitingTasks.remove(task.id);
+							dcNode.waitingTasks.remove(task.id);
+							ownTasks.finishTask(task);
+						}
+					} else if (!waitingTasks.containsKey(task.id)) {
 
+						if (!dcNode.waitingTasks.containsKey(task.id)) {
+							List<Integer> list = new ArrayList<Integer>();
+							list.add(task.map.get(dcNode.id));
+
+							waitingTasks.put(task.id, list);
+							dcNode.waitingTasks.put(task.id, list); // aici cred
+																	// ca ar fi
+																	// trbuit sa
+																	// exista
+																	// deja?
+						} else {
+							waitingTasks.put(task.id, dcNode.waitingTasks.get(task.id));
+						}
 					}
 
+					
+					task.map.put(this.id, task.map.get(dcNode.id));
+					toRemove.add(task);
 					exchangedData = true;
 
 					// count the number of transferred tasks
@@ -199,15 +249,21 @@ public class DropComputing extends Node {
 					// update battery level
 					setBatteryOpportunisticExchange(this, dcNode, task.type, sampleTime);
 				} else if (!completedTasks.contains(task) && condition) {
-					// get completed tasks info to disseminate it further
-					
-					if (numberOfOnes > (numberOfZeros + 1) || numberOfZeros > (numberOfOnes + 1)) {
 
-						System.out.println("task " + task.id + " has data corruption rate low  " + numberOfZeros + ":"
-								+ numberOfOnes);	
-						completedTasks.add(task);
-					}
-					
+					completedTasks.add(task);
+					task.map.put(this.id, task.map.get(dcNode.id)); // adaug
+																	// valoarea
+																	// din nodul
+																	// rezultat
+																	// si cred
+																	// ca ar
+																	// trebui sa
+																	// schimb si
+																	// waiting
+																	// list-ul
+
+					// aici imi pune numai null in lista, de ce nu exista dcNode.waitingTasks.get(task.id)?
+					// waitingTasks.put(task.id,dcNode.waitingTasks.get(task.id));
 					exchangedData = true;
 
 					// count the number of transferred tasks
@@ -255,39 +311,74 @@ public class DropComputing extends Node {
 				List<Task> currentTasks = new ArrayList<>();
 				List<Task> otherNodeTasks = new ArrayList<>();
 
+				/*
+				 * Map<Integer,Integer> currentWaitingTasks = new
+				 * HashMap<Integer,Integer>(); Map<Integer,Integer>
+				 * otherNodeWaitingTasks = new HashMap<Integer,Integer>();
+				 */
+
 				currentTasks.addAll(otherTasks);
 				currentTasks.addAll(dcNode.otherTasks);
-				// HERE?? otherNodeTask instead of currentTasks above
+
 				balance(this, dcNode, currentTasks, otherNodeTasks);
+
+				List<Task> toRemoveCurrentNode = new ArrayList<Task>();
+				List<Task> toRemoveOtherNode = new ArrayList<Task>();
 
 				// if at least one task has been exchanged between the two
 				// devices, increase battery decrease rate
 				for (Task task : otherTasks) {
 					if (!currentTasks.contains(task)) {
 						setBatteryOpportunisticExchange(this, dcNode, task.type, sampleTime);
+						// means that the task was transferred at encounteredNode
+						task.map.put(dcNode.id, task.map.get(this.id));
+
+						if (completedTasks.contains(task)) {
+							dcNode.waitingTasks.put(task.id, waitingTasks.get(task.id));
+						}
+						toRemoveCurrentNode.add(task);
 					}
 				}
 
 				for (Task task : dcNode.otherTasks) {
 					if (!otherNodeTasks.contains(task)) {
 						setBatteryOpportunisticExchange(dcNode, this, task.type, sampleTime);
+						// means that the task was transferred from
+						// encounteredNode to currentNode
+						task.map.put(this.id, task.map.get(dcNode.id));
+
+						if (dcNode.completedTasks.contains(task)) {
+							waitingTasks.put(task.id, dcNode.waitingTasks.get(task.id));
+						}
+						toRemoveOtherNode.add(task);
 					}
 				}
 
 				// remove transferred tasks if the nodes are sufficiently
 				// familiar
 				if (condition) {
+					/*
+					 * for(Task task : otherNodeTasks)
+					 * if(otherTasks.contains(task))
+					 * waitingTasks.remove(task.id);
+					 */
+					for (Task task : toRemoveCurrentNode) {
+						task.map.remove(this.id);
+						waitingTasks.remove(task.id);
+					}
 					otherTasks.clear();
 				}
 				otherTasks.addAll(currentTasks);
-				// daca nu se adauga taskurile transferate de la celalalt dar se
-				// pastreaza si taskurile pe care posibil au fost transferate la
-				// alt nod daca nu cele doua noduri nu sunt suficient de
-				// familiare
+
 				if (condition) {
+					for (Task task : toRemoveOtherNode) {
+						task.map.remove(dcNode.id);
+						dcNode.waitingTasks.remove(task.id);
+					}
 					dcNode.otherTasks.clear();
 				}
 				dcNode.otherTasks.addAll(otherNodeTasks);
+
 			}
 		}
 	}
@@ -445,10 +536,15 @@ public class DropComputing extends Node {
 
 		// decide whether the current node needs to perform a series of tasks
 		// here?? RAND.nextDouble() >= 0.999
-		if (!ownTasks.hasTasks() && !cloudTasks.hasTasks() && RAND.nextDouble() >= 0.999) {
+		if (!ownTasks.hasTasks() && !cloudTasks.hasTasks() && RAND.nextDouble() >= 0.999) {// &&
+																							// DropComputingStats.nrOfTasksCreated
+																							// <
+																							// 14000)
+																							// {
 			SortedSet<Task> newTasks = generateTasks(currentTime);
 			ownTasks.addTasks(newTasks);
 			otherTasks.addAll(newTasks);
+
 		}
 
 		// coruperea datelor
@@ -461,16 +557,26 @@ public class DropComputing extends Node {
 
 			// could the same task be more than once here? that's how i supposed
 
-			if (currentTime % 20000 == 0) {
-				task.data = 0;
+			if (currentTime % 450 == 0) {
+				// task.data = 0;
+
+				task.map.put(this.id, 0);
+				// task.ma
 				// System.out.println("too much");
-			}
+			} else
+				task.map.put(this.id, 1);
+
 			// compute battery decrease rate based on the type of task
 			batteryDecreaseRate = deviceInfo.taskBatteryMultiplier;
 
 			if (task.execute(deviceInfo, sampleTime, id)) {// here?cum se
 															// executa un task
+
+				// aici
 				otherTasks.remove(task);
+				// executa taskul si inca il are
+				// task.map.remove(this.id);
+
 				DropComputingStats.nrOfTasksExecuted++;
 
 				// adaugarea in map
@@ -510,9 +616,10 @@ public class DropComputing extends Node {
 					 * task.map.put(task.id, list); }
 					 */
 
-					task.list.add(task.data);
-					System.out.println(task.id + "    " + task.list);
+					// task.list.add(task.data);
+					// System.out.println(task.id + " " + task.list);
 					completedTasks.add(task);
+					// task.map.put(this.id, 1);
 				}
 			}
 		}
@@ -688,6 +795,7 @@ public class DropComputing extends Node {
 						 * checking if the running tasks was corrupted or not,
 						 * if was the current is not executed
 						 */
+						// if(task.map.get(this))
 						if (!task.modifiedOrUnmodifiedData()) {
 							System.out.println("aici1");
 							DropComputingStats.corruptedTasks++;
@@ -1402,7 +1510,7 @@ public class DropComputing extends Node {
 		 */
 		private int data = 1;
 
-		private Map<Integer, List<Integer>> map;
+		private Map<Integer, Integer> map;
 
 		/*
 		 * List of variants of executed tasks(corrupted or unmodified)
@@ -1469,7 +1577,9 @@ public class DropComputing extends Node {
 			this.initialTime = Double.MIN_VALUE;
 			this.cloudUploadDuration = computeCloudUploadDuration();
 
-			this.map = new HashMap<Integer, List<Integer>>();
+			this.map = new HashMap<Integer, Integer>();
+			this.map.put(this.ownerID, 1); // map ul este intre id-ul nodurilor
+											// si valoarea
 			this.data = 1;
 			this.list = new ArrayList<Integer>();
 		}
