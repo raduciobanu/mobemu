@@ -8,6 +8,8 @@ import java.util.*;
 import mobemu.node.Battery;
 import mobemu.node.Context;
 import mobemu.node.Node;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 
 /**
  * Class for a Drop Computing node.
@@ -51,6 +53,11 @@ public class DropComputing extends Node {
 	 * unmodified)
 	 */
 	private final Map<Integer, List<Integer>> waitingTasks;
+	
+	private Map<Integer, List<Integer>> mapTaskIdExecutorId;
+	
+	private MessageDigest messageDigest;
+	
 	/**
 	 * Sample time of the trace.
 	 */
@@ -129,7 +136,13 @@ public class DropComputing extends Node {
 		otherTasks = new TreeSet<>(new TaskComparator(id));
 		completedTasks = new ArrayList<>();
 		waitingTasks = new HashMap<Integer, List<Integer>>();
-
+		mapTaskIdExecutorId = new HashMap<Integer, List<Integer>>();
+		
+		try{
+			messageDigest = MessageDigest.getInstance("SHA-256");
+		}catch(NoSuchAlgorithmException ex){
+			ex.printStackTrace();
+		}
 		if (RAND == null) {
 			RAND = new Random(seed);
 		}
@@ -158,11 +171,24 @@ public class DropComputing extends Node {
 				nrOfOnes++;
 		}
 		if (nrOfOnes > nrOfZeros && nrOfZeros != 0)
-			majority = nrOfOnes / nrOfZeros;
-		else if (nrOfOnes != 0 && nrOfZeros != 0) {
-			majority = nrOfZeros / nrOfOnes;
-		}
+			majority = (nrOfOnes*100) / list.size();
+		else if (nrOfOnes != 0 && nrOfZeros != 0)
+			majority = (nrOfZeros*100) / list.size();
+		
 		return majority;
+	}
+	public boolean verifyHashCollisions(String data1, String data2){
+		
+		messageDigest.update(data1.getBytes());
+		byte[] enString1 = messageDigest.digest();
+		
+		messageDigest.reset();
+		
+		messageDigest.update(data2.getBytes());
+		byte[] enString2 = messageDigest.digest();
+	
+		//System.out.println(Arrays.equals(enString1, enString2));
+		return Arrays.equals(enString1, enString2);
 	}
 
 	@Override
@@ -184,52 +210,116 @@ public class DropComputing extends Node {
 			List<Task> toRemove = new ArrayList<>();
 
 			for (Task task : dcNode.completedTasks) {
-				// the current node gets a message that one of its tasks has
-				// finished
-				if (task.ownerID == id) {
-
+				// the current node gets a message that one of its tasks has finished
+				
+				if (task.ownerID == id && ownTasks.getTasks().contains(task)) {	//adaugat aici pentru a verifica versiunea datelor din nodul parinte a taskului cu versiunile pe care le-am primit
+					
+					if(task.id == 128853){
+						System.out.println("de cate ori!");
+					}
+								
+					task.listOfEncounteredSolvers.add(task.solverBy);
+					task.listOfNodesMeetByOwner.add(dcNode.id);
+								
 					// verificare lista de versiuni pe care le are nodul vizitat
 					// pentru task-ul(taskid-ul) care te intereseaza(care e al
 					// tau)
-
 					// verificare numarul de noduri la care se gaseste task-ul
 					if (waitingTasks.containsKey(task.id)) {
-						List<Integer> list = waitingTasks.get(task.id);
-						list.add(task.map.get(dcNode.id));// dece list e null?
-
+						List<Integer> list = waitingTasks.get(task.id);					
+						list.add(task.map.get(dcNode.id));
+						
+						List<Integer> list2 = mapTaskIdExecutorId.get(task.id);
+						list2.add(task.mapNodeIdExecutorId.get(dcNode.id));
+						
+						if (task.id == 13386) {
+							System.out.println("Nodul: " + this.id + " task-ul 133386 este la nodul " + dcNode.id + " " + task.map.get(dcNode.id) + " " + task.map);
+						}
+						
 						waitingTasks.put(task.id, list);
-						// trebuie adaugat si in nodul vizitat pentru ca se
-						// identifica 3 valori ale taskului globale(care sunt copiate in fiecare nod) nu 3 valori
-						// distincte primite de fiecare nod
-						dcNode.waitingTasks.put(task.id, list);
-
-						if (waitingTasks.get(task.id).size() == 3) {
+						mapTaskIdExecutorId.put(task.id, list2);
+						
+						if (waitingTasks.get(task.id).size() == 5) {
 							this.majority = calculatingMajority(waitingTasks.get(task.id));
+							
+							
+							//nu contine taskul peste care e proprietar?? nu ar trebui sa fie generat de el
+							//este false pentru ca poate fi acelasi task prezent de mai multe ori aici, dar dupa ce e prezent o data se elimina din ownTask
+							System.out.println("aiciTest " + ownTasks.getTasks().contains(task));
+							
+							
+							
 							System.out.println("the majority was " + this.majority);
 							System.out.println("task " + task.id + " has enough versions at node " + this.id + " -- " + waitingTasks.get(task.id) );
+							
+							//sunt in ordine versiunile cu nodurile de la care le primesc? asa ar trebui
+							Iterator<Task> it = ownTasks.getTasks().iterator();
+							int currentData = -1;
+							while(it.hasNext()){
+								if(task == it.next()){
+									currentData = task.data;
+								}
+							}
+							if(currentData == -1){
+								System.out.println("nu ar trebui, nu mai este referinta catre taskul parinte");
+							} 
+							int counter = -1;
+							for(Integer data : waitingTasks.get(task.id) ) {
+								counter++;
+								if( !verifyHashCollisions(String.valueOf(data),String.valueOf(currentData)) ){
+									System.out.println("corrupted data from node " + task.listOfNodesMeetByOwner.get(counter) + " executed by " + mapTaskIdExecutorId.get(task.id).get(counter));
+								}
+								//indicii ar trebui sa se refere la aceleasi noduri
+							}
+							
+							
+							//afisare istoric
+							System.out.println("Task-ul " + task.id + " al nodului " + this.id + " a fost rezolvat de nodurile " + task.listOfSolvers);
+							System.out.println("Si cele 3 versiuni au fost primite de la nodurile " + task.listOfNodesMeetByOwner);
+							System.out.println("Si cele 3 versiuni au fost executate de " + mapTaskIdExecutorId.get(task.id));
+						
+							
+							System.out.print("Taskul a mai fost prezent in nodurile " + task.listOfVisitedNodes + " cu valorile [");
+							for( int id : task.listOfVisitedNodes)
+								System.out.print( task.map.get(id)  + ", ");
+							System.out.println("]");
+							
+							System.out.println("Taskul a ramas prezent in nodurile " + task.map.keySet());
+							System.out.println(" ");
+							task.listOfEncounteredSolvers.clear();
+							task.listOfNodesMeetByOwner.clear();
+							
+							//task.listOfSolvers.clear();
 							waitingTasks.remove(task.id);
-							dcNode.waitingTasks.remove(task.id);
 							ownTasks.finishTask(task);
+							otherTasks.remove(task);	//adaugat aici
+							task.map.remove(this.id);
+							task.mapNodeIdExecutorId.remove(this.id);
+							
 						}
 					} else if (!waitingTasks.containsKey(task.id)) {
 
-						if (!dcNode.waitingTasks.containsKey(task.id)) {
+					
 							List<Integer> list = new ArrayList<Integer>();
 							list.add(task.map.get(dcNode.id));
 
 							waitingTasks.put(task.id, list);
-							dcNode.waitingTasks.put(task.id, list); // aici cred
-																	// ca ar fi
-																	// trbuit sa
-																	// exista
-																	// deja?
-						} else {
-							waitingTasks.put(task.id, dcNode.waitingTasks.get(task.id));
-						}
+							
+							List<Integer> list2 = new ArrayList<Integer>();
+							list2.add(task.mapNodeIdExecutorId.get(dcNode.id));
+							mapTaskIdExecutorId.put(task.id, list2);
+							
+							if (task.id == 13386) {
+								System.out.println("Nodul: " + this.id + " prima data task-ul 13386 este la nodul " + dcNode.id + " " + task.map.get(dcNode.id) + " " + task.map);
+							}
 					}
 
 					
 					task.map.put(this.id, task.map.get(dcNode.id));
+					task.mapNodeIdExecutorId.put(this.id, task.mapNodeIdExecutorId.get(dcNode.id));
+					
+					task.listOfVisitedNodes.add(this.id);
+					
 					toRemove.add(task);
 					exchangedData = true;
 
@@ -250,22 +340,19 @@ public class DropComputing extends Node {
 					setBatteryOpportunisticExchange(this, dcNode, task.type, sampleTime);
 				} else if (!completedTasks.contains(task) && condition) {
 
+					
+					//aici il corupt, si ii corup rezolvare
 					completedTasks.add(task);
-					task.map.put(this.id, task.map.get(dcNode.id)); // adaug
-																	// valoarea
-																	// din nodul
-																	// rezultat
-																	// si cred
-																	// ca ar
-																	// trebui sa
-																	// schimb si
-																	// waiting
-																	// list-ul
-
-					// aici imi pune numai null in lista, de ce nu exista dcNode.waitingTasks.get(task.id)?
-					// waitingTasks.put(task.id,dcNode.waitingTasks.get(task.id));
+					task.map.put(this.id, task.map.get(dcNode.id));
+					
+					if( new Random().nextDouble() > 0.95) {
+						task.map.put(this.id, 0);
+					}
+					task.mapNodeIdExecutorId.put(this.id, task.mapNodeIdExecutorId.get(dcNode.id));
+					task.listOfVisitedNodes.add(this.id);
+					
 					exchangedData = true;
-
+					
 					// count the number of transferred tasks
 					switch (task.type) {
 					case SMALL:
@@ -305,17 +392,17 @@ public class DropComputing extends Node {
 			// remove all completion messages from encountered node, so they
 			// won't be disseminated more
 			dcNode.completedTasks.removeAll(toRemove);
-
+			for (Task task : toRemove) {
+				// RC: se face remove la toate entry-urile in map pentru taskurile completate
+				task.map.remove(dcNode.id);
+				task.mapNodeIdExecutorId.remove(dcNode.id);
+			}
+			
+			
 			// if the two nodes are not balanced, balance their tasks
 			if (!isBalanced(this, dcNode)) {
 				List<Task> currentTasks = new ArrayList<>();
 				List<Task> otherNodeTasks = new ArrayList<>();
-
-				/*
-				 * Map<Integer,Integer> currentWaitingTasks = new
-				 * HashMap<Integer,Integer>(); Map<Integer,Integer>
-				 * otherNodeWaitingTasks = new HashMap<Integer,Integer>();
-				 */
 
 				currentTasks.addAll(otherTasks);
 				currentTasks.addAll(dcNode.otherTasks);
@@ -331,11 +418,11 @@ public class DropComputing extends Node {
 					if (!currentTasks.contains(task)) {
 						setBatteryOpportunisticExchange(this, dcNode, task.type, sampleTime);
 						// means that the task was transferred at encounteredNode
-						task.map.put(dcNode.id, task.map.get(this.id));
-
-						if (completedTasks.contains(task)) {
-							dcNode.waitingTasks.put(task.id, waitingTasks.get(task.id));
-						}
+						task.map.put(dcNode.id, task.map.get(this.id));	
+						task.mapNodeIdExecutorId.put(dcNode.id, task.mapNodeIdExecutorId.get(this.id));
+						
+						task.listOfVisitedNodes.add(dcNode.id);
+						
 						toRemoveCurrentNode.add(task);
 					}
 				}
@@ -346,25 +433,29 @@ public class DropComputing extends Node {
 						// means that the task was transferred from
 						// encounteredNode to currentNode
 						task.map.put(this.id, task.map.get(dcNode.id));
-
-						if (dcNode.completedTasks.contains(task)) {
-							waitingTasks.put(task.id, dcNode.waitingTasks.get(task.id));
-						}
+						task.mapNodeIdExecutorId.put(this.id, task.mapNodeIdExecutorId.get(dcNode.id));
+						
+						task.listOfVisitedNodes.add(this.id);
 						toRemoveOtherNode.add(task);
 					}
 				}
 
+				if (id == 12 && (toRemoveCurrentNode.size() > 0 || toRemoveOtherNode.size()> 0))
+					System.out.println("dsa");
+				
+				// RC: recompute condition
+				condition = (encounteredNodes.get(dcNode.id) != null
+						&& encounteredNodes.get(dcNode.id).getContacts() >= 3);
+
+				
 				// remove transferred tasks if the nodes are sufficiently
 				// familiar
 				if (condition) {
-					/*
-					 * for(Task task : otherNodeTasks)
-					 * if(otherTasks.contains(task))
-					 * waitingTasks.remove(task.id);
-					 */
+					
 					for (Task task : toRemoveCurrentNode) {
 						task.map.remove(this.id);
-						waitingTasks.remove(task.id);
+						task.mapNodeIdExecutorId.remove(this.id);
+					//	task.listOfVisitedNodes.remove(this.id);
 					}
 					otherTasks.clear();
 				}
@@ -373,7 +464,8 @@ public class DropComputing extends Node {
 				if (condition) {
 					for (Task task : toRemoveOtherNode) {
 						task.map.remove(dcNode.id);
-						dcNode.waitingTasks.remove(task.id);
+						task.mapNodeIdExecutorId.remove(dcNode.id);
+					//	task.listOfVisitedNodes.remove(dcNode.id);
 					}
 					dcNode.otherTasks.clear();
 				}
@@ -505,7 +597,7 @@ public class DropComputing extends Node {
 	@Override
 	protected void onTick(long currentTime, long sampleTime) {
 		super.onTick(currentTime, sampleTime);
-		// here?? unde se apeleaza functia asta
+		
 		// se apeleaza in runTrace pentru fiecare nod la fiecare moment de timp,
 		// e implementata in clasa parinte Node
 
@@ -535,58 +627,65 @@ public class DropComputing extends Node {
 		}
 
 		// decide whether the current node needs to perform a series of tasks
-		// here?? RAND.nextDouble() >= 0.999
-		if (!ownTasks.hasTasks() && !cloudTasks.hasTasks() && RAND.nextDouble() >= 0.999) {// &&
-																							// DropComputingStats.nrOfTasksCreated
-																							// <
-																							// 14000)
-																							// {
+		if (!ownTasks.hasTasks() && !cloudTasks.hasTasks() && RAND.nextDouble() >= 0.999) {
 			SortedSet<Task> newTasks = generateTasks(currentTime);
 			ownTasks.addTasks(newTasks);
 			otherTasks.addAll(newTasks);
-
 		}
 
-		// coruperea datelor
 		double batteryDecreaseRate = 0;
 
+		// coruperea datelor random a celor pe care le detin si nu sunt proprietar
+		//daca le corup aici voi propaga taskul doar corupt, trebuie implementata coruperea random in lista de taskuri completate fara a distribui acea varianta
+		/*for (Task task : otherTasks) {
+			//if (currentTime % 450 == 0) {
+			if (task.ownerID != id && new Random().nextDouble() > 0.95) {
+				task.map.put(this.id, 0);
+				// System.out.println("too much");
+			} //else
+				//task.map.put(this.id, 1); // RC: De ce pui pe 1? Daca un nod a primit informatia si era deja corupta, nu poate sa o de-corupa
+		}*/
 		// if the current node is already computing a task, continue to run it;
 		// if the task finished, remove it from the list of tasks
 		if (battery.canParticipate() && !otherTasks.isEmpty()) {
 			Task task = otherTasks.first();
 
 			// could the same task be more than once here? that's how i supposed
-
-			if (currentTime % 450 == 0) {
-				// task.data = 0;
-
+			// Yes
+			/*aici corupeam doar acelasi task de mai multe ori si era doar primul si lista
+			 * if (currentTime % 450 == 0) {
 				task.map.put(this.id, 0);
-				// task.ma
-				// System.out.println("too much");
-			} else
-				task.map.put(this.id, 1);
+			}*/ 
 
 			// compute battery decrease rate based on the type of task
 			batteryDecreaseRate = deviceInfo.taskBatteryMultiplier;
 
-			if (task.execute(deviceInfo, sampleTime, id)) {// here?cum se
-															// executa un task
-
-				// aici
+			if (task.execute(deviceInfo, sampleTime, id)) {
+				
+				//executerID este id - setat in functia execute
+				task.mapNodeIdExecutorId.put(this.id, task.executorID);
+				
+				//executorId e setat in functia execute
+				task.solverBy = id;
+				task.listOfSolvers.add(id);
+				
 				otherTasks.remove(task);
-				// executa taskul si inca il are
-				// task.map.remove(this.id);
-
 				DropComputingStats.nrOfTasksExecuted++;
-
-				// adaugarea in map
 
 				if (task.ownerID == id) {
 					// if this was a local task, check if the local task group
 					// has finished
 
+					if (task.id == 13386) {
+						System.out.println("Finished here!");
+					}
+					
 					DropComputingStats.executedOwnTaskNumber++;
-					// here? why have to finish all the tasks which are own
+					
+					/* here? why have to finish all the tasks which are own
+					 * 
+					 * R: because we are supposed that a task contains many other subtasks which are not independently
+					 */
 					if (ownTasks.hasFinished()) {
 						ownTasks.finish(currentTime);
 
@@ -608,17 +707,13 @@ public class DropComputing extends Node {
 					// I added in map the id of the task which was executed and
 					// the list of tasks data(which can be 0-corrupted or
 					// 1-unmodified)
-					/*
-					 * if (task.map.get(task.id) != null){ List<Integer> list =
-					 * task.map.get(task.id); list.add(task.data);
-					 * task.map.put(task.id, list); } else{ List<Integer> list =
-					 * new ArrayList<Integer>(); list.add(task.data);
-					 * task.map.put(task.id, list); }
-					 */
-
-					// task.list.add(task.data);
-					// System.out.println(task.id + " " + task.list);
+					
+					// aici adaugat coruperea dupa ce l-a rezolvat, dar trebuie corupt si la nodurile care il transportA
+					
 					completedTasks.add(task);
+					if(new Random().nextDouble() > 0.95) {
+						task.map.put(this.id, 0);
+					}
 					// task.map.put(this.id, 1);
 				}
 			}
@@ -1308,16 +1403,15 @@ public class DropComputing extends Node {
 		 *         otherwise
 		 */
 		public boolean execute(DeviceInfo device, long sampleTime, int executorID) {
+			System.out.println("se apeleaza??");
 			int finishedTasks = 0;
 
 			for (Task task : tasks) {
 
-				if (task.modifiedOrUnmodifiedData()) {
+				if (task.modifiedOrUnmodifiedData()) {		//aici
 					System.out.println("aici2");
 					corruptedTasks++;
-					// DropComputingStats.corruptedTasks++; se vor mofica in
-					// execute de la task
-					// continue;
+					
 				}
 
 				if (task.hasFinished()) {
@@ -1510,6 +1604,14 @@ public class DropComputing extends Node {
 		 */
 		private int data = 1;
 
+		private int solverBy;
+		private List<Integer> listOfSolvers;
+		private List<Integer> listOfEncounteredSolvers;
+		private Set<Integer> listOfVisitedNodes;
+		private List<Integer> listOfNodesMeetByOwner;
+		
+		
+		private Map<Integer,Integer> mapNodeIdExecutorId;
 		private Map<Integer, Integer> map;
 
 		/*
@@ -1580,8 +1682,22 @@ public class DropComputing extends Node {
 			this.map = new HashMap<Integer, Integer>();
 			this.map.put(this.ownerID, 1); // map ul este intre id-ul nodurilor
 											// si valoarea
+			
+			this.mapNodeIdExecutorId = new HashMap<Integer, Integer>();
+			this.mapNodeIdExecutorId.put(this.ownerID, executorID);		//map intre id-ul nodurilor prezent si id-ul nodului care l-a executat
+			
+			
 			this.data = 1;
 			this.list = new ArrayList<Integer>();
+			
+			this.listOfSolvers = new ArrayList<Integer>();
+			this.listOfEncounteredSolvers = new ArrayList<Integer>();
+			
+			this.listOfVisitedNodes = new HashSet<Integer>();
+			this.listOfVisitedNodes.add(this.ownerID);
+			
+			
+			this.listOfNodesMeetByOwner = new ArrayList<Integer>();
 		}
 
 		/*
@@ -1608,6 +1724,7 @@ public class DropComputing extends Node {
 		public boolean execute(DeviceInfo device, long sampleTime, int executorID) {
 			this.executorID = executorID;
 
+			//this.mapNodeIdExecutorId.put(key, value)
 			if (!modifiedOrUnmodifiedData()) {
 				DropComputingStats.corruptedTasks++;
 				// nu are sens, nu se va intra niciodata aici
