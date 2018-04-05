@@ -8,6 +8,8 @@ import java.util.*;
 import mobemu.node.Battery;
 import mobemu.node.Context;
 import mobemu.node.Node;
+import sun.misc.Queue;
+
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 
@@ -56,8 +58,10 @@ public class DropComputing extends Node {
 	
 	private Map<Integer, List<Integer>> mapTaskIdExecutorId;
 	
-	private MessageDigest messageDigest;
+	private MessageDigest messageDigest;	
+	private int numberOfWaitingTasks;
 	
+	public static int nodes = -1;
 	/**
 	 * Sample time of the trace.
 	 */
@@ -129,7 +133,10 @@ public class DropComputing extends Node {
 		this.opportunistic = opportunistic;
 		this.useCloud = useCloud;
 		this.sampleTime = sampleTime;
-
+		
+		if( DropComputing.nodes == -1 )
+			DropComputing.nodes = nodes;
+		
 		deviceInfo = DEVICE_FACTORY.getDevice(deviceType);
 		ownTasks = new TaskGroup(id);
 		cloudTasks = new TaskGroup(id);
@@ -137,6 +144,7 @@ public class DropComputing extends Node {
 		completedTasks = new ArrayList<>();
 		waitingTasks = new HashMap<Integer, List<Integer>>();
 		mapTaskIdExecutorId = new HashMap<Integer, List<Integer>>();
+		numberOfWaitingTasks = 5;
 		
 		try{
 			messageDigest = MessageDigest.getInstance("SHA-256");
@@ -190,6 +198,58 @@ public class DropComputing extends Node {
 		//System.out.println(Arrays.equals(enString1, enString2));
 		return Arrays.equals(enString1, enString2);
 	}
+	
+	public void printPath(LinkedList<Integer> path){
+		
+		System.out.print("[");
+		for(int elem : path){
+			System.out.print(elem + ",");
+		}
+		System.out.println("]");
+	}
+	public boolean isVisited(int elem, LinkedList<Integer> path){
+		return path.contains(elem);
+	}
+	public boolean historyOfTask(int source, int destination, LinkedList<LinkedList<Integer>> adjcent){
+	
+		LinkedList<Integer> queue = (LinkedList<Integer>) adjcent.get(source).clone();
+		int currentNode;
+		
+		
+		LinkedList<LinkedList<Integer>> paths = new LinkedList<>();
+		
+		LinkedList<Integer> firstPath = new LinkedList<Integer>();
+		firstPath.add(source);
+		paths.add(firstPath);
+		
+		LinkedList<Integer> currentPath;
+		int currentVertex, elem;
+		Iterator<Integer> it;
+		
+		while(!paths.isEmpty()){
+			
+			currentPath = paths.poll();
+			currentVertex = currentPath.peekLast();
+			if(currentVertex == destination){
+				System.out.println("S-a gasit calea intre " + source + " si " + destination);
+				printPath(currentPath);
+				return true;
+			}
+			
+			it = adjcent.get(currentVertex).iterator();
+			while(it.hasNext()){
+				elem = it.next();
+				if( !isVisited(elem, currentPath )){
+					LinkedList<Integer> newPath = (LinkedList<Integer>) currentPath.clone();
+					newPath.add(elem);
+					paths.add(newPath);
+				}
+			}
+		}
+			
+		System.out.println("nu s-a gasit cale intre " + source + " si " + destination);
+		return false;
+	}
 
 	@Override
 	protected void onDataExchange(Node encounteredNode, long contactDuration, long currentTime) {
@@ -212,12 +272,14 @@ public class DropComputing extends Node {
 			for (Task task : dcNode.completedTasks) {
 				// the current node gets a message that one of its tasks has finished
 				
+			//	System.out.println("s a intalnit " + this.id + " cu " + dcNode.id);
+				
 				if (task.ownerID == id && ownTasks.getTasks().contains(task)) {	//adaugat aici pentru a verifica versiunea datelor din nodul parinte a taskului cu versiunile pe care le-am primit
 					
-					if(task.id == 128853){
-						System.out.println("de cate ori!");
-					}
-								
+					//traseu de la owner la dcNode
+					//System.out.println("istoria " + task.adjacent);
+					//historyOfTask(this.id, dcNode.id, task.adjacent);
+					
 					task.listOfEncounteredSolvers.add(task.solverBy);
 					task.listOfNodesMeetByOwner.add(dcNode.id);
 								
@@ -239,16 +301,16 @@ public class DropComputing extends Node {
 						waitingTasks.put(task.id, list);
 						mapTaskIdExecutorId.put(task.id, list2);
 						
-						if (waitingTasks.get(task.id).size() == 5) {
+						if (waitingTasks.get(task.id).size() == numberOfWaitingTasks) {
 							this.majority = calculatingMajority(waitingTasks.get(task.id));
 							
 							
 							//nu contine taskul peste care e proprietar?? nu ar trebui sa fie generat de el
 							//este false pentru ca poate fi acelasi task prezent de mai multe ori aici, dar dupa ce e prezent o data se elimina din ownTask
-							System.out.println("aiciTest " + ownTasks.getTasks().contains(task));
+							//System.out.println("aiciTest " + ownTasks.getTasks().contains(task));
 							
 							
-							
+		
 							System.out.println("the majority was " + this.majority);
 							System.out.println("task " + task.id + " has enough versions at node " + this.id + " -- " + waitingTasks.get(task.id) );
 							
@@ -276,6 +338,10 @@ public class DropComputing extends Node {
 							//afisare istoric
 							System.out.println("Task-ul " + task.id + " al nodului " + this.id + " a fost rezolvat de nodurile " + task.listOfSolvers);
 							System.out.println("Si cele 3 versiuni au fost primite de la nodurile " + task.listOfNodesMeetByOwner);
+							System.out.println("versiunile au venit pe calea: ");
+							for(int nodeId : task.listOfNodesMeetByOwner){
+								historyOfTask(this.id, nodeId, task.adjacent);
+							}
 							System.out.println("Si cele 3 versiuni au fost executate de " + mapTaskIdExecutorId.get(task.id));
 						
 							
@@ -340,6 +406,8 @@ public class DropComputing extends Node {
 					setBatteryOpportunisticExchange(this, dcNode, task.type, sampleTime);
 				} else if (!completedTasks.contains(task) && condition) {
 
+					
+					task.addEdge(dcNode.id, this.id);
 					
 					//aici il corupt, si ii corup rezolvare
 					completedTasks.add(task);
@@ -421,6 +489,8 @@ public class DropComputing extends Node {
 						task.map.put(dcNode.id, task.map.get(this.id));	
 						task.mapNodeIdExecutorId.put(dcNode.id, task.mapNodeIdExecutorId.get(this.id));
 						
+						task.adjacent.get(this.id).add(dcNode.id);
+						
 						task.listOfVisitedNodes.add(dcNode.id);
 						
 						toRemoveCurrentNode.add(task);
@@ -434,6 +504,7 @@ public class DropComputing extends Node {
 						// encounteredNode to currentNode
 						task.map.put(this.id, task.map.get(dcNode.id));
 						task.mapNodeIdExecutorId.put(this.id, task.mapNodeIdExecutorId.get(dcNode.id));
+						task.adjacent.get(dcNode.id).add(this.id);
 						
 						task.listOfVisitedNodes.add(this.id);
 						toRemoveOtherNode.add(task);
@@ -456,6 +527,7 @@ public class DropComputing extends Node {
 						task.map.remove(this.id);
 						task.mapNodeIdExecutorId.remove(this.id);
 					//	task.listOfVisitedNodes.remove(this.id);
+						//cele care au fost vizitate nu se schimba, cele care in care a mai ramas taskul sunt setul de chei din task.map
 					}
 					otherTasks.clear();
 				}
@@ -1613,7 +1685,8 @@ public class DropComputing extends Node {
 		
 		private Map<Integer,Integer> mapNodeIdExecutorId;
 		private Map<Integer, Integer> map;
-
+		private LinkedList<LinkedList<Integer>> adjacent;
+		
 		/*
 		 * List of variants of executed tasks(corrupted or unmodified)
 		 */
@@ -1698,8 +1771,18 @@ public class DropComputing extends Node {
 			
 			
 			this.listOfNodesMeetByOwner = new ArrayList<Integer>();
+			this.adjacent = new LinkedList<>();
+			for(int i = 0; i < DropComputing.nodes; ++i){
+				this.adjacent.add(new LinkedList<Integer>());
+			}
 		}
 
+		public void addEdge(int node, int encounteredNode){
+			
+			if(!this.adjacent.get(node).add(encounteredNode))
+				System.out.println("error add edge");
+		}
+		
 		/*
 		 * checking if the data was corrupted or not
 		 */
