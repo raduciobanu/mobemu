@@ -4,6 +4,9 @@
  */
 package mobemu;
 
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.PrintStream;
 import java.util.*;
 
 import mobemu.algorithms.DropComputing;
@@ -14,6 +17,7 @@ import mobemu.node.Context;
 import mobemu.node.Message;
 import mobemu.node.Node;
 import mobemu.node.Stats;
+import mobemu.parsers.HCMM;
 import mobemu.parsers.UPB;
 import mobemu.trace.Parser;
 
@@ -25,8 +29,15 @@ import mobemu.trace.Parser;
 public class MobEmu {
 
     public static void main(String[] args) {
-        Parser parser = new UPB(UPB.UpbTrace.UPB2011);
-        //se parseaza fisierul social.dat si upb2011.dat din traces/upb2011 si se adauga un contact in lista de contacte care e retinuta in clasa Trace
+      //  Parser parser = new UPB(UPB.UpbTrace.UPB2011);
+    	try {
+			System.setOut(new PrintStream(new FileOutputStream("output.txt")));
+		} catch (FileNotFoundException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+    	Parser parser = new HCMM(30, 6 * 3600, 30 * 24 * 3600, 1.25f, 1.50f, 0.1f, 1000f, 1000f, 100, 100, 10.0, 0.7, 5, 5, 1.25f, 0.8f, 0);
+    	//se parseaza fisierul social.dat si upb2011.dat din traces/upb2011 si se adauga un contact in lista de contacte care e retinuta in clasa Trace
         //creandu se un trace la inceputul parsarii in metoda de parsare din clasa UPB, la 2011 nr. de device-uri e hardcodat la 22
         // print some trace statistics
         double duration = (double) (parser.getTraceData().getEndTime() - parser.getTraceData().getStartTime()) / (Parser.MILLIS_PER_MINUTE * 60);
@@ -40,11 +51,6 @@ public class MobEmu {
         boolean dissemination = false;
         Node[] nodes = new Node[parser.getNodesNumber()];
         for (int i = 0; i < nodes.length; i++) {
-           // nodes[i] = new Epidemic(i, nodes.length, parser.getContextData().get(i), parser.getSocialNetwork()[i],
-             //       10000, 100, seed, parser.getTraceData().getStartTime(), parser.getTraceData().getEndTime(), dissemination, false);
-        
-        	
-        	
         	/*public DropComputing(int id, int nodes, Context context, boolean[] socialNetwork, int dataMemorySize,
                     int exchangeHistorySize, long seed, long traceStart, long traceEnd, DeviceType deviceType,
                     long sampleTime, boolean opportunistic, boolean useCloud) */
