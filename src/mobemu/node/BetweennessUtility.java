@@ -2,16 +2,18 @@ package mobemu.node;
 
 public class BetweennessUtility {
 	
-	int[] betweennessUtilities;
-	private static double lastThreshold;
+	private int[] betweennessUtilities;
+	private double[] lastThresholds;
 	private static int timeWindow;
 	
 	public BetweennessUtility(int nodes) {
 		betweennessUtilities = new int[nodes];
-		for (int i = 0; i < nodes; i++)
+		lastThresholds = new double[nodes];
+		for (int i = 0; i < nodes; i++) {
 			betweennessUtilities[i] = 0;
-		lastThreshold = 0;
-		timeWindow = 21600 * 1000; // default is six hours
+			lastThresholds[i] = 0.0;
+		}
+		timeWindow = 7 * 24 * 3600 * 1000; // default is one week
 	}
 	
     /**
@@ -37,8 +39,8 @@ public class BetweennessUtility {
      *
      * @return the last threshold for the betweenness computation
      */
-    public static double getLastThreshold() {
-        return lastThreshold;
+    public double getLastThreshold(int id) {
+        return lastThresholds[id];
     }
 
     /**
@@ -46,8 +48,23 @@ public class BetweennessUtility {
      *
      * @return the new value of the last threshold
      */
-    public static double increaseLastThreshold() {
-        return ++lastThreshold;
+    public double increaseLastThreshold(int id) {
+        return ++lastThresholds[id];
+    }
+    
+    public double setLastThreshold(int id, double value) {
+        lastThresholds[id] = value;
+        return lastThresholds[id];
+    }
+    
+    /**
+     * Gets the value for the given destination.
+     * 
+     * @param dest destination
+     * @return current value of the desired betweenness utility
+     */
+    public int getValue(int id) {
+    	return betweennessUtilities[id];
     }
     
     /**
@@ -56,8 +73,8 @@ public class BetweennessUtility {
      * @param dest destination
      * @param value new value to be set
      */
-    public void setValue(int dest, int value) {
-    	betweennessUtilities[dest] = value;
+    public void setValue(int id, int value) {
+    	betweennessUtilities[id] = value;
     }
 
     /**
@@ -67,15 +84,5 @@ public class BetweennessUtility {
      */
     public void increaseValue(int dest) {
     	betweennessUtilities[dest]++;
-    }
-
-    /**
-     * Gets the value for the given destination.
-     * 
-     * @param dest destination
-     * @return current value of the desired betweenness utility
-     */
-    public int getValue(int dest) {
-    	return betweennessUtilities[dest];
     }
 }

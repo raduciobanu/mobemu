@@ -60,7 +60,7 @@ public class Message implements Comparable<Message>, Cloneable {
         this.destination = destination;
         this.message = message;
         this.timestamp = timestamp;
-        this.ttl = 43200 * 1000;	// default is 12 hours
+        this.ttl = 7 * 24 * 3600 * 1000;	// default is one week
         this.tags = new Context();
         this.stats = new MessageStats(copies, id);
     }
@@ -96,8 +96,16 @@ public class Message implements Comparable<Message>, Cloneable {
     }
     
     public Object clone() {  
-    	Object o = new Message(this);
-    	return o;
+    	Message m = new Message();
+    	m.id = this.id;
+    	m.source = this.source;
+    	m.destination = this.destination;
+    	m.message = this.message;
+    	m.timestamp = this.timestamp;
+    	m.ttl = this.ttl;
+    	m.tags = (Context) this.tags.clone();
+    	m.stats = (MessageStats) this.stats.clone();
+    	return m;
     }  
     
 
@@ -108,6 +116,10 @@ public class Message implements Comparable<Message>, Cloneable {
      */
     public int getId() {
         return id;
+    }
+    
+    public void setId(int id) {
+    	this.id = id;
     }
 
     /**

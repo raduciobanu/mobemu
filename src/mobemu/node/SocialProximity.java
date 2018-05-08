@@ -7,11 +7,11 @@ package mobemu.node;
  */
 public class SocialProximity {
 	
+    private int[] contactFrequencies;
     private double[] currentContactDurations;
     private double[] previousContactDurations;
     private double[] cumulatedContactDurations;
-    private int[] contactFrequencies;
-    private static double lastThreshold;
+    private double[] lastThresholds;
     private static int timeWindow;
 
     /**
@@ -22,8 +22,15 @@ public class SocialProximity {
         this.previousContactDurations = new double[nodes];
         this.cumulatedContactDurations = new double[nodes];
         this.contactFrequencies = new int[nodes];
-        lastThreshold = 0;
-        timeWindow = 21600 * 1000; // default is six hours
+        this.lastThresholds = new double[nodes];
+        for (int i = 0; i < nodes; i++) {
+        	this.currentContactDurations[i] = 0.0;
+        	this.previousContactDurations[i] = 0.0;
+        	this.cumulatedContactDurations[i] = 0.0;
+        	this.contactFrequencies[i] = 0;
+        	this.lastThresholds[i] = 0;
+        }
+        timeWindow = 7 * 24 * 3600 * 1000; // default is one week
     }
 
     /**
@@ -34,7 +41,7 @@ public class SocialProximity {
     public static void setTimeWindow(int newTimeWindow) {
         timeWindow = newTimeWindow;
     }
-
+    
     /**
      * Returns the time window.
      *
@@ -49,8 +56,8 @@ public class SocialProximity {
      *
      * @return the last threshold for the social proximity computation
      */
-    public static double getLastThreshold() {
-        return lastThreshold;
+    public double getLastThreshold(int id) {
+        return lastThresholds[id];
     }
 
     /**
@@ -58,8 +65,14 @@ public class SocialProximity {
      *
      * @return the new value of the last threshold
      */
-    public static double increaseLastThreshold() {
-        return ++lastThreshold;
+    public double increaseLastThreshold(int id, double value) {
+       lastThresholds[id] += value;
+       return lastThresholds[id];
+    }
+    
+    public double setLastThreshold(int id, double value) {
+        lastThresholds[id] = value;
+        return lastThresholds[id];
     }
     
     public void setFrequency(int node, int value) {

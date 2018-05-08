@@ -10,7 +10,6 @@ import java.util.HashMap;
 import java.util.List;
 
 import mobemu.utils.Tuple;
-import mobemu.node.Centrality.CentralityValue;
 import mobemu.node.Context;
 import mobemu.node.Message;
 import mobemu.node.Node;
@@ -21,12 +20,16 @@ import mobemu.node.Node;
  *
  */
 public class GrAnt extends Node {
+	
+	public static final double phEvaporationRate = 0.7;
+	
+	public static HashMap<Integer, Integer> totalDelivers = new HashMap<>();
 
-	protected HashMap<Integer, List<Double>> phConcentration; // Keeps track of the current node's neighboring links pheromone level concentration for a given destination.
-	protected HashMap<Integer, Tuple<Integer, Double>> bestForwarders; // Keeps track of the current node's best forwarder for a given destination.
+	public HashMap<Integer, List<Double>> phConcentration; 			// Keeps track of the current node's neighboring links pheromone level concentration for a given destination.
+	public HashMap<Integer, Tuple<Integer, Double>> bestForwarders; // Keeps track of the current node's best forwarder for a given destination.
 
 	class ForwardAnt extends Message {			
-		private List<Tuple<Integer, Double>> currentPath; // A list of nodes encountered during the ant's lifetime identified by the node's id and the node's quality during the encounter. 
+		private List<Tuple<Integer, Double>> currentPath; 			// A list of nodes encountered during the ant's lifetime identified by the node's id and the node's quality during the encounter. 
 		public ForwardAnt(Message m) {
 			super(m);
 			currentPath = new ArrayList<>();
@@ -40,8 +43,8 @@ public class GrAnt extends Node {
 	}
 
 	class BackwardAnt extends Message {
-		private double foundPathQuality; // A measure of the found path quality
-		private List<Tuple<Integer, Double>> foundPath; // A list of tuples representing the nodes encountered along the path found and their utilities, represented by the node centrality.
+		private double foundPathQuality; 							// A measure of the found path quality
+		private List<Tuple<Integer, Double>> foundPath; 			// A list of tuples representing the nodes encountered along the path found and their utilities, represented by the node centrality.
 		public BackwardAnt(Message m) {
 			super(m);
 			foundPathQuality = 0;
@@ -110,6 +113,7 @@ public class GrAnt extends Node {
 		int totalMessages = 0;
 		
 		for (Message message : grantEncounteredNode.dataMemory) {
+			
 			if (totalMessages >= maxMessages) {
 				break;
 			}
@@ -126,53 +130,85 @@ public class GrAnt extends Node {
 			if (message instanceof ForwardAnt) {			
 				ForwardAnt fa = (ForwardAnt) message;
 				
-				// if ForwardAnt has expired, delete it from encounteredNode's data memory
+				// if ForwardAnt has expired, delete it from encounteredNode's data memory	
 				if (currentTime - message.getTimestamp() > fa.getTtl()) {
-					grantEncounteredNode.dataMemory.remove(fa);
-					fa.deleteCopies(grantEncounteredNode.getId());
+					grantEncounteredNode.removeMessage(fa, true);
 					continue;
-				}	
-				// mark ForwardAnt delivered
-				fa.markAsDelivered(id, currentTime);
+				}
 				
-				grantEncounteredNode.messagesDelivered++;
-				grantEncounteredNode.messagesExchanged++;
+				// mark ForwardAnt delivered
+				if (!fa.isDelivered(id)) {
+					fa.markAsDelivered(id, currentTime);
+					grantEncounteredNode.messagesDelivered++;
+					grantEncounteredNode.messagesExchanged++;
+					
+					Integer value = totalDelivers.get(id);
+					if (value == null) {
+						totalDelivers.put(id, 1);
+					}
+					else {
+						totalDelivers.put(id, value+1);
+					}
+				}
 				
 				// remove ForwardAnt from encounteredNode
 				grantEncounteredNode.removeMessage(fa, true);
-				
+
+
 				// compute ForwardAnt's path quality
 				List<Tuple<Integer, Double>> currentPath = fa.getCurrentPath();
-				currentPath.add(new Tuple<Integer, Double>(id, centrality.getValue(CentralityValue.CURRENT)));
+				currentPath.add(new Tuple<Integer, Double>(id, getCentrality(false)));
 				double pathQuality = computePathQuality(currentPath);	
 				Collections.reverse(currentPath);
+				currentPath.remove(0);
 				currentPath.remove(0);
 				// create BackwardAnt for ForwardAnt
 				Message	message_copy = (Message) fa.clone();
 				message_copy.setTimestamp(currentTime);
+				message_copy.setTtl(7 * 24 * 3600 * 1000);
 				BackwardAnt ba = new BackwardAnt(message_copy);
-				ba.setTtl(currentTime - fa.getTimestamp());
 				ba.setFoundPath(new ArrayList<>(currentPath));
 				ba.setFoundPathQuality(pathQuality);
 				// save BackwardAnt in data memory
-				dataMemory.add(ba);
-
-
+				//dataMemory.add(ba);
+				grantEncounteredNode.insertMessage(ba, this, currentTime, false, false);
+				
+				// update pheromone concentration
+				double ph = grantEncounteredNode.phConcentration.get(this.id).get(this.getId()); 
+				double ph_new = phEvaporationRate * ph + pathQuality;
+				if(ph_new > 0.000001)
+					grantEncounteredNode.phConcentration.get(this.id).set(this.id, ph_new); 
+				else
+					grantEncounteredNode.phConcentration.get(this.id).set(this.id, 0.0); 
+				
+				// update betweenness utility
+				grantEncounteredNode.updateBetweennessUtility(this, currentTime - Node.traceStart); //khkkkkkkkkkkkkkkkkkkkkkkk
 			}
+			
 			if (message instanceof BackwardAnt) {				
 				BackwardAnt ba = (BackwardAnt) message;
+				
 				// if BackwardAnt has expired, delete it from encounteredNode's data memory
 				if (currentTime - message.getTimestamp() > ba.getTTL()) {
-					grantEncounteredNode.dataMemory.remove(ba);
-					ba.deleteCopies(grantEncounteredNode.getId());
+					grantEncounteredNode.removeMessage(ba, true);
 					continue;
-				}		
+				}
+				
+		        ArrayList<Message> toRemove = new ArrayList<>();
+					
 				// delete any existing ForwardAnts associated with this BackwardAnt, if any
 				for (Message m : dataMemory) {
-					if (m instanceof ForwardAnt && m.equals(ba)) {
-						removeMessage(m, true);
+					if (m instanceof ForwardAnt && m.getSource() == ba.getSource() && m.getDestination() == ba.getDestination() && m.getMessage() == ba.getMessage()) {	//suprascrie equals din ba si punte ba in loc de m
+						toRemove.add(m);
 					}
 				}
+				
+				for (Message m : toRemove) {
+					removeMessage(m, true);
+				}
+				
+				toRemove.clear();
+				
 				List<Tuple<Integer, Double>> foundPath = ba.getFoundPath();
 				Double foundPathQuality = ba.getFoundPathQuality();		
 				if (foundPath.get(0).getKey() == id) {
@@ -180,30 +216,35 @@ public class GrAnt extends Node {
 					foundPath.remove(0);
 					// download BackwardAnt
 					insertMessage(ba, grantEncounteredNode, currentTime, false, false);
-					// delete BackwardAnt from sender's data memory
-					grantEncounteredNode.removeMessage(ba, true);
 					// update pheromone concentration 
 					double ph = phConcentration.get(ba.getDestination()).get(grantEncounteredNode.getId()); 
-					double ph_new = 0.5 * ph + foundPathQuality;
+					double ph_new = phEvaporationRate * ph + foundPathQuality;
 					phConcentration.get(ba.getDestination()).set(grantEncounteredNode.getId(), ph_new); 
-					// update node betweenness
-	                computeBetweennessUtility(encounteredNode, currentTime - Node.traceStart);
+					// delete BackwardAnt from sender's data memory
+					grantEncounteredNode.removeMessage(ba, true);
+					// update node betweenness utility
+	                increaseBetweennessUtility(grantEncounteredNode, currentTime - Node.traceStart);
 					// if BackwardAnt reached source node, delete source message
-					if (foundPath.isEmpty()) {
-						for (int i = 0; i < ownMessages.size(); i++) {
-							if (ownMessages.get(i).equals(ba)) {
-								removeMessage(ownMessages.get(i), false);
+					if (foundPath.size() == 0) {
+						for (Message m : ownMessages) {
+							if (m.getSource() == ba.getSource() && m.getDestination() == ba.getDestination() && m.getMessage() == ba.getMessage()) {
+								removeMessage(m, false);
+								break;
 							}
 						}
+						// delete BackwardAnt from memory
+						removeMessage(ba, true);
+						removeMessage(ba, false);
 					}
-					// delete BackwardAnt from memory
-					removeMessage(ba, true);
 				}
 				else {
 					// update pheromone concentration
 					double ph = phConcentration.get(ba.getDestination()).get(grantEncounteredNode.getId()); 
-					double ph_new = 0.5 * ph;
-					phConcentration.get(ba.getDestination()).set(grantEncounteredNode.getId(), ph_new); 
+					double ph_new = phEvaporationRate * ph;
+					if (ph_new > 0.000001)
+						phConcentration.get(ba.getDestination()).set(grantEncounteredNode.getId(), ph_new); 
+					else
+						phConcentration.get(this.id).set(this.id, 0.0); 
 				}
 			}  	
 		}
@@ -223,24 +264,31 @@ public class GrAnt extends Node {
 	}
 
 	private double computePathQuality(List<Tuple<Integer, Double>> path) {	
-		double sum = 0;
+		double sum = 0.0;
 		for (int i = 0; i < path.size(); i++) {
 			sum += path.get(i).getValue();
 		}
-		return (sum / path.size() + 1 / path.size());
+		return sum / path.size() + 1.0 / path.size();
 	}
+	
+	@Override
+    protected void preDataExchange(Node encounteredNode, long currentTime) {
+
+    }
 
 	@Override
 	protected void onDataExchange(Node encounteredNode, long contactDuration, long currentTime) {
 		/*
-		System.out.println("###########new encounter#############");
-		System.out.println("Social Proximity");
+		System.out.println("###########new encounter between " + encounteredNode.getId() + " and " + this.id + "#############");
+		System.out.println("Ph Concentrations of " + encounteredNode.getId());
+		System.out.println(((GrAnt)encounteredNode).phConcentration);
+		System.out.println("Social Proximity of " + encounteredNode.getId() + ":");
 		for (int i = 0; i < nodes; i++) {
 			System.out.println(i + " : " + encounteredNode.getSocialProximity(i));
 		}
-		System.out.println("Best Forwarders");
+		System.out.println("Betweenness Utility of " + encounteredNode.getId());
 		for (int i = 0; i < nodes; i++) {
-			System.out.println(i + " : " + ((GrAnt)encounteredNode).bestForwarders.get(i));
+			System.out.println(i + " : " + ((GrAnt)encounteredNode).getBetweennessUtility(i));
 		}
 		System.out.println("#####################################");
 		*/
@@ -260,58 +308,61 @@ public class GrAnt extends Node {
 			}
 
 			if (message instanceof ForwardAnt) {
+				ForwardAnt fa = (ForwardAnt) message;
 				
 				// if ForwardAnt has expired, delete it from encounteredNode's data memory
-				if (currentTime - message.getTimestamp() > message.getTtl()) {
-					toRemove.add(message);
+				if (currentTime - fa.getTimestamp() > fa.getTtl()) {
+					toRemove.add(fa);
 					continue;
 				}	
 				
-				if (grantEncounteredNode.phConcentration.get(message.getDestination()).get(id) > 0 &&
-						(grantEncounteredNode.getSocialProximity(message.getDestination()) + grantEncounteredNode.getBetweennessUtility(message.getDestination())) < 
-						(getSocialProximity(message.getDestination()) + getBetweennessUtility(message.getDestination()))) {
+				if (grantEncounteredNode.phConcentration.get(fa.getDestination()).get(id) > 0 &&
+						(grantEncounteredNode.getSocialProximity(fa.getDestination()) + grantEncounteredNode.getBetweennessUtility(fa.getDestination())) < 
+						(getSocialProximity(fa.getDestination()) + getBetweennessUtility(fa.getDestination()))) {
 					// exploit existing path
-					List<Tuple<Integer, Double>> currentPath = ((ForwardAnt) message).getCurrentPath();
-					currentPath.add(new Tuple<Integer, Double>(this.id, this.centrality.getValue(CentralityValue.CURRENT)));
-					insertMessage(message, grantEncounteredNode, currentTime, false, false);
-					toRemove.add(message);
+					List<Tuple<Integer, Double>> currentPath = ((ForwardAnt) fa).getCurrentPath();
+					currentPath.add(new Tuple<Integer, Double>(this.id, getCentrality(false)));
+					insertMessage(fa, grantEncounteredNode, currentTime, false, false);
+					toRemove.add(fa);
 				} 		
-				else if (grantEncounteredNode.bestForwarders.get(message.getDestination()) != null) {
+				else if (grantEncounteredNode.bestForwarders.get(fa.getDestination()) != null) {
 					
-					int bestForwarder = grantEncounteredNode.bestForwarders.get(message.getDestination()).getKey();
-					double bestForwarderUtility = grantEncounteredNode.bestForwarders.get(message.getDestination()).getValue();
-					double currentUtility = grantEncounteredNode.phConcentration.get(message.getDestination()).get(id) * 
-							(getSocialProximity(message.getDestination()) + getBetweennessUtility(message.getDestination()));
+					int bestForwarder = grantEncounteredNode.bestForwarders.get(fa.getDestination()).getKey();
+					double bestForwarderUtility = grantEncounteredNode.bestForwarders.get(fa.getDestination()).getValue();
+					double nodeUtility = grantEncounteredNode.phConcentration.get(fa.getDestination()).get(id) * 
+							(getSocialProximity(fa.getDestination()) + getBetweennessUtility(fa.getDestination()));
+					
 					
 					if (id == bestForwarder) {
 						// forward ForwardAnt via current best forwarder
-						List<Tuple<Integer, Double>> currentPath = ((ForwardAnt) message).getCurrentPath();
-						currentPath.add(new Tuple<Integer, Double>(this.id, this.centrality.getValue(CentralityValue.CURRENT)));
-						insertMessage(message, grantEncounteredNode, currentTime, false, false);
-						toRemove.add(message);
-					} 
-					else if ( currentUtility >= bestForwarderUtility) {
+						List<Tuple<Integer, Double>> currentPath = ((ForwardAnt) fa).getCurrentPath();
+						currentPath.add(new Tuple<Integer, Double>(this.id, getCentrality(false)));
+						insertMessage(fa, grantEncounteredNode, currentTime, false, false);
+						toRemove.add(fa);
+					}
+					
+					else if ( nodeUtility >= bestForwarderUtility) {
 						// update best forwarder & send ForwardAnt
-						grantEncounteredNode.bestForwarders.put(message.getDestination(), new Tuple<Integer, Double>(id, currentUtility));
-						List<Tuple<Integer, Double>> currentPath = ((ForwardAnt) message).getCurrentPath();
-						currentPath.add(new Tuple<Integer, Double>(this.id, this.centrality.getValue(CentralityValue.CURRENT)));
-						insertMessage(message, grantEncounteredNode, currentTime, false, false);
-						toRemove.add(message);
+						grantEncounteredNode.bestForwarders.put(fa.getDestination(), new Tuple<Integer, Double>(id, nodeUtility));
+						List<Tuple<Integer, Double>> currentPath = ((ForwardAnt) fa).getCurrentPath();
+						currentPath.add(new Tuple<Integer, Double>(this.id, getCentrality(false)));
+						insertMessage(fa, grantEncounteredNode, currentTime, false, false);
+						toRemove.add(fa);
 					}
 				}
 				else {
-					double currentUtility = grantEncounteredNode.phConcentration.get(message.getDestination()).get(id) * 
-							(getSocialProximity(message.getDestination()) + getBetweennessUtility(message.getDestination()));
-					double encounteredNodeUtility = grantEncounteredNode.phConcentration.get(message.getDestination()).get(message.getDestination()) *
-							(grantEncounteredNode.getSocialProximity(message.getDestination()) + grantEncounteredNode.getBetweennessUtility(message.getDestination()));
-					if (encounteredNodeUtility < currentUtility) {
+					double nodeUtility = grantEncounteredNode.phConcentration.get(fa.getDestination()).get(id) * 
+							(getSocialProximity(fa.getDestination()) + getBetweennessUtility(fa.getDestination()));
+					double encounteredNodeUtility = grantEncounteredNode.phConcentration.get(fa.getDestination()).get(fa.getDestination()) *
+							(grantEncounteredNode.getSocialProximity(fa.getDestination()) + grantEncounteredNode.getBetweennessUtility(fa.getDestination()));
+					if (encounteredNodeUtility <= nodeUtility) {
 						// initialize best forwarder & send ForwardAnt
-						grantEncounteredNode.bestForwarders.put(message.getDestination(), new Tuple<Integer, Double>(id, currentUtility));
-						List<Tuple<Integer, Double>> currentPath = ((ForwardAnt) message).getCurrentPath();
-						currentPath.add(new Tuple<Integer, Double>(this.id, this.centrality.getValue(CentralityValue.CURRENT)));
-						insertMessage(message, grantEncounteredNode, currentTime, false, false);
-						toRemove.add(message);
-					}
+						grantEncounteredNode.bestForwarders.put(fa.getDestination(), new Tuple<Integer, Double>(id, nodeUtility));
+						List<Tuple<Integer, Double>> currentPath = ((ForwardAnt) fa).getCurrentPath();
+						currentPath.add(new Tuple<Integer, Double>(this.id, getCentrality(false)));
+						insertMessage(fa, grantEncounteredNode, currentTime, false, false);
+						toRemove.add(fa);
+				  }
 				}
 			}
 		}
@@ -328,28 +379,26 @@ public class GrAnt extends Node {
 			if (totalMessages >= remainingMessages) {
 				return;
 			}
-			
+						
 			// if message has expired, delete it and proceed with next message
 			if(currentTime - message.getTimestamp() > message.getTTL()) {
 				toRemove.add(message);
 				continue;
 			}
-
+			
 			if (grantEncounteredNode.phConcentration.get(message.getDestination()).get(id) > 0 &&
 					grantEncounteredNode.getSocialProximity(message.getDestination()) < getSocialProximity(message.getDestination())) {
-
 				// exploit existing path
 				ForwardAnt fa = new ForwardAnt(message);
 				List<Tuple<Integer, Double>> currentPath = fa.getCurrentPath();
 				currentPath.add(new Tuple<Integer, Double>(grantEncounteredNode.getId(), grantEncounteredNode.getCentrality(false)));
-				currentPath.add(new Tuple<Integer, Double>(this.id, this.centrality.getValue(CentralityValue.CURRENT)));
+				currentPath.add(new Tuple<Integer, Double>(this.id, getCentrality(false)));
 				insertMessage(fa, grantEncounteredNode, currentTime, false, false);    
-				//toRemove.add(message);
 			}
 			else if (grantEncounteredNode.bestForwarders.get(message.getDestination()) != null) {
 				int bestForwarder = grantEncounteredNode.bestForwarders.get(message.getDestination()).getKey();
 				double bestForwarderUtility = grantEncounteredNode.bestForwarders.get(message.getDestination()).getValue();
-				double currentUtility = grantEncounteredNode.phConcentration.get(message.getDestination()).get(id) * 
+				double nodeUtility = grantEncounteredNode.phConcentration.get(message.getDestination()).get(id) * 
 						(getSocialProximity(message.getDestination()) + getBetweennessUtility(message.getDestination()));
 				
 				if (id == bestForwarder) {
@@ -357,32 +406,33 @@ public class GrAnt extends Node {
 					ForwardAnt fa = new ForwardAnt(message);
 					List<Tuple<Integer, Double>> currentPath = fa.getCurrentPath();
 					currentPath.add(new Tuple<Integer, Double>(grantEncounteredNode.getId(), grantEncounteredNode.getCentrality(false)));
+					currentPath.add(new Tuple<Integer, Double>(this.id, getCentrality(false)));
 					insertMessage(fa, grantEncounteredNode, currentTime, false, false);    
-					//toRemove.add(message);
 				}
-				else if (currentUtility >= bestForwarderUtility) {
+				
+				else if (nodeUtility >= bestForwarderUtility) {
 					// update best forwarder & send ForwardAnt
-					grantEncounteredNode.bestForwarders.put(message.getDestination(), new Tuple<Integer, Double>(id, currentUtility));
+					grantEncounteredNode.bestForwarders.put(message.getDestination(), new Tuple<Integer, Double>(id, nodeUtility));
 					// create new ForwardAnt and forward it to this node
 					ForwardAnt fa = new ForwardAnt(message);
 					List<Tuple<Integer, Double>> currentPath = fa.getCurrentPath();
 					currentPath.add(new Tuple<Integer, Double>(grantEncounteredNode.getId(), grantEncounteredNode.getCentrality(false)));
+					currentPath.add(new Tuple<Integer, Double>(this.id, getCentrality(false)));
 					insertMessage(fa, grantEncounteredNode, currentTime, false, false);    
-					//toRemove.add(message);
 				}
 			}
 			else {
 				if (grantEncounteredNode.getSocialProximity(message.getDestination()) < getSocialProximity(message.getDestination())) {
-					double currentUtility = grantEncounteredNode.phConcentration.get(message.getDestination()).get(id) * 
+					double nodeUtility = grantEncounteredNode.phConcentration.get(message.getDestination()).get(id) * 
 							(getSocialProximity(message.getDestination()) + getBetweennessUtility(message.getDestination()));
 					// initialize best forwarder
-					grantEncounteredNode.bestForwarders.put(message.getDestination(), new Tuple<Integer, Double>(id, currentUtility));
+					grantEncounteredNode.bestForwarders.put(message.getDestination(), new Tuple<Integer, Double>(id, nodeUtility));
 					// create new ForwardAnt and forward it to this node
 					ForwardAnt fa = new ForwardAnt(message);
 					List<Tuple<Integer, Double>> currentPath = fa.getCurrentPath();
 					currentPath.add(new Tuple<Integer, Double>(grantEncounteredNode.getId(), grantEncounteredNode.getCentrality(false)));
+					currentPath.add(new Tuple<Integer, Double>(this.id, getCentrality(false)));
 					insertMessage(fa, grantEncounteredNode, currentTime, false, false);  
-					//toRemove.add(message);
 				}
 			}
 		}
