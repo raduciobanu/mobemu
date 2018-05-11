@@ -46,7 +46,7 @@ public class Message implements Comparable<Message> {
         this.message = message;
         this.timestamp = timestamp;
         this.tags = new Context();
-        this.stats = new MessageStats(copies, id);
+        this.stats = new MessageStats(copies, source);
     }
 
     /**
