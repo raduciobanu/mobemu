@@ -62,7 +62,7 @@ public class Message implements Comparable<Message>, Cloneable {
         this.timestamp = timestamp;
         this.ttl = 7 * 24 * 3600 * 1000;	// default is one week
         this.tags = new Context();
-        this.stats = new MessageStats(copies, id);
+        this.stats = new MessageStats(copies, source);
     }
 
     /**
