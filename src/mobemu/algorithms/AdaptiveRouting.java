@@ -81,8 +81,9 @@ public class AdaptiveRouting extends Node {
      * Initial weights for (in this order) similarity, centrality, friendship,
      * strength, trust.
      */
-    double[] initialWeights = {0.05, 0.3, 0.5, 0.1, 0.05}; // UPB
+    //double[] initialWeights = {0.05, 0.3, 0.5, 0.1, 0.05}; // UPB
     //double[] initialWeights = {0.05, 0.3, 0.3, 0.1, 0.25}; // Sigcomm
+    double[] initialWeights = {0.2, 0.4, 0.1, 0.1, 0.2}; // HCMM
     /**
      * Algorithm version (1 - equal split, 2 - weighted split, 3 - equal
      * values).
