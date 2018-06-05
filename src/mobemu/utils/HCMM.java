@@ -888,7 +888,7 @@ public abstract class HCMM {
 		if (showRun) {
 			frame = new JFrame();
 			text = new JTextArea();
-			frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+			frame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
 			frame.setVisible(false);
 			text.setEditable(false);
 			component = new HCMMComponent(this);
