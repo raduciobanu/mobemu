@@ -4,12 +4,19 @@
  */
 package mobemu.utils;
 
+import java.awt.BorderLayout;
+import java.awt.event.WindowEvent;
 import java.io.BufferedWriter;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.Random;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+
+import javax.swing.JFrame;
+import javax.swing.JTextArea;
+
+import mobemu.HCMMComponent;
 
 /**
  *
@@ -126,6 +133,14 @@ public abstract class HCMM {
      * probability of remaining in a non-home cell
      */
     protected double remainingProb = 0;
+    /**
+     * set to true if the HCMM simulation should be shown graphically
+     */
+    protected boolean showRun = false;
+    /**
+     * sleep time between simulation steps
+     */
+    protected long sleepTime = 5;
     /*
      * internal data structures
      */
@@ -253,8 +268,20 @@ public abstract class HCMM {
         this.nsTrace = nsTrace;
     }
 
+    public void setShowRun(boolean showRun) {
+		this.showRun = showRun;
+    }
+
+    public void setSleepTime(long sleepTime) {
+		this.sleepTime = sleepTime;
+    }
+
     public int getNumHosts() {
         return numHosts;
+    }
+
+    public Host[] getHosts() {
+		return hosts;
     }
 
     public int getNumberOfRows() {
@@ -836,10 +863,49 @@ public abstract class HCMM {
         return (nowX == homeX && nowY == homeY);
     }
 
+	private String generateStatsString(double simTime, long contacts) {
+		String s = "";
+
+		s += "Simulation time: " + (long) simTime + " seconds";
+		s += System.getProperty("line.separator");
+		s += "Nodes: " + numHosts + " (" + numberOfGroups + " communities, " + numberOfTravelers + " travelers)";
+		s += System.getProperty("line.separator");
+		s += "Grid size: " + numberOfRows + "x" + numberOfColumns + " cells, " + (int) getGridWidth() + "x"
+				+ (int) getGridHeight() + " metres";
+		s += System.getProperty("line.separator");
+		s += "Contacts: " + contacts;
+
+		return s;
+	}
+
     /**
      * Runs the HCCM simulation.
      */
     protected void move() {
+		long contacts = 0;
+		JFrame frame = null;
+		JTextArea text = null;
+		HCMMComponent component = null;
+
+		if (showRun) {
+			frame = new JFrame();
+			text = new JTextArea();
+			frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+			frame.setVisible(false);
+			text.setEditable(false);
+			component = new HCMMComponent(this);
+			frame.getContentPane().add(component, BorderLayout.CENTER);
+			frame.getContentPane().add(text, BorderLayout.SOUTH);
+			frame.pack();
+			frame.setTitle("Simulation");
+
+			// Display the frame
+			int frameWidth = 700;
+			int frameHeight = 700;
+			frame.setSize(frameWidth, frameHeight);
+			frame.setVisible(true);
+		}
+
         boolean[][] isConnected = new boolean[numHosts][numHosts];
         boolean[] isConnectedWithAP = new boolean[numHosts];
 
@@ -963,6 +1029,17 @@ public abstract class HCMM {
         initializeData();
 
         for (simTime = 0.0; simTime < totalSimulationTime; simTime += stepInterval) {
+			if (showRun) {
+				component.repaint();
+				text.setText(generateStatsString(simTime, contacts));
+
+				try {
+					Thread.sleep(sleepTime);
+				} catch (InterruptedException e1) {
+					e1.printStackTrace();
+				}
+			}
+
             // reconfiguration mechanism
             if (simTime == nextReconfigurationTime) {
                 for (int i = 0; i < numberOfRows; i++) {
@@ -1532,6 +1609,7 @@ public abstract class HCMM {
                                 isConnected[i][j] = true;
                                 lastValues[i][j] = simTime;
                                 startContact(i, j, simTime);
+                                contacts++;
                             }
                         } else {
                             if (isConnected[i][j]) {
@@ -1586,6 +1664,11 @@ public abstract class HCMM {
             }
         }
 
+		if (showRun) {
+			frame.setVisible(false);
+			frame.dispatchEvent(new WindowEvent(frame, WindowEvent.WINDOW_CLOSING));
+		}
+
         if (printOut) {
             try {
                 out.write("Distances Travelled");
@@ -1636,10 +1719,10 @@ public abstract class HCMM {
     /**
      * Class representing an HCMM host.
      */
-    private class Host {
+    public static class Host {
 
-        double currentX;
-        double currentY;
+        public double currentX;
+        public double currentY;
         double relativeX;
         double relativeY;
         double goalRelativeX;

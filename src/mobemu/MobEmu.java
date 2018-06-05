@@ -37,7 +37,7 @@ public class MobEmu {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-    	Parser parser = new HCMM(30, 6 * 3600, 30 * 24 * 3600, 1.25f, 1.50f, 0.1f, 1000f, 1000f, 100, 100, 10.0, 0.7, 5, 5, 1.25f, 0.8f, 0);
+	Parser parser = new HCMM(30, 6 * 3600, 30 * 24 * 3600, 1.25f, 1.50f, 0.1f, 1000f, 1000f, 100, 100, 10.0, 0.7, 5, 5, 1.25f, 0.8f, 0, false, 0);
     	//se parseaza fisierul social.dat si upb2011.dat din traces/upb2011 si se adauga un contact in lista de contacte care e retinuta in clasa Trace
         //creandu se un trace la inceputul parsarii in metoda de parsare din clasa UPB, la 2011 nr. de device-uri e hardcodat la 22
         // print some trace statistics

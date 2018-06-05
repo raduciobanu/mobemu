@@ -47,12 +47,14 @@ public class HCMM extends mobemu.utils.HCMM implements Parser {
      * @param travelersSpeed speed of traveler nodes
      * @param remainingProbability probability of a node remaining in its home
      * cell
+     * @param showRun set to true if the simulation should be shown graphically
+     * @param sleepTime duration of sleep between simulation steps
      * @param seed random number generator seed
      */
     public HCMM(int devices, long simulationTime, long reconfigurationInterval,
             float minHostSpeed, float maxHostSpeed, float connectionThreshold, float gridWidth, float gridHeight,
-            int rows, int columns, double transmissionRadius, double rewiringProb, int groupsNumber,
-            int travelersNumber, double travelersSpeed, double remainingProbability, int seed) {
+            int rows, int columns, double transmissionRadius, double rewiringProb, int groupsNumber, int travelersNumber,
+            double travelersSpeed, double remainingProbability, int seed, boolean showRun, long sleepTime) {
         super(seed);
 
         trace = new Trace("HCMM");
@@ -63,7 +65,7 @@ public class HCMM extends mobemu.utils.HCMM implements Parser {
         runSimulator(devices, simulationTime, reconfigurationInterval, minHostSpeed,
                 maxHostSpeed, connectionThreshold, gridWidth, gridHeight, rows, columns,
                 transmissionRadius, rewiringProb, groupsNumber, travelersNumber,
-                travelersSpeed, remainingProbability);
+                travelersSpeed, remainingProbability, showRun, sleepTime);
         computeSocialNetwork();
         computeContext(devices);
     }
@@ -172,11 +174,13 @@ public class HCMM extends mobemu.utils.HCMM implements Parser {
      * @param travelersSpeed speed of traveler nodes
      * @param remainingProbability probability of a node remaining in its home
      * cell
+     * @param showRun set to true if the simulation should be shown graphically
+     * @param sleepTime duration of sleep between simulation steps
      */
     private void runSimulator(int devices, long simulationTime, long reconfigurationInterval,
             float minHostSpeed, float maxHostSpeed, float connectionThreshold, float gridWidth,
-            float gridHeight, int rows, int columns, double transmissionRadius, double rewiringProb,
-            int groupsNumber, int travelersNumber, double travelersSpeed, double remainingProbability) {
+            float gridHeight, int rows, int columns, double transmissionRadius, double rewiringProb, int groupsNumber,
+            int travelersNumber, double travelersSpeed, double remainingProbability, boolean showRun, long sleepTime) {
         setNumHosts(devices);
         setTotalSimulationTime(simulationTime);
         setReconfigurationInterval(reconfigurationInterval);
@@ -196,6 +200,9 @@ public class HCMM extends mobemu.utils.HCMM implements Parser {
         setNumberOfTravelers(travelersNumber);
         setTravelerSpeed(travelersSpeed);
         setRemainingProb(remainingProbability);
+
+        setShowRun(showRun);
+        setSleepTime(sleepTime);
 
         move();
 
