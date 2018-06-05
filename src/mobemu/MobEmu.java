@@ -38,7 +38,7 @@ public class MobEmu {
         Parser parser = new UPB(UPB.UpbTrace.UPB2011);
         //Parser parser = new UPB(UPB.UpbTrace.UPB2012);
     	//Parser parser = new Haggle(Haggle.HaggleTrace.CONTENT);
-    	//Parser parser = new HCMM(30, 48 * 3600, 30 * 24 * 3600, 1.25f, 1.50f, 0.1f, 1000f, 1000f, 100, 100, 10.0, 0.7, 5, 5, 1.25f, 0.8f, 0);
+	//Parser parser = new HCMM(30, 48 * 3600, 30 * 24 * 3600, 1.25f, 1.50f, 0.1f, 1000f, 1000f, 100, 100, 10.0, 0.7, 5, 5, 1.25f, 0.8f, 0, false, 0);
 
         // print some trace statistics
         double duration = (double) (parser.getTraceData().getEndTime() - parser.getTraceData().getStartTime()) / (Parser.MILLIS_PER_MINUTE * 60);
