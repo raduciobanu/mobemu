@@ -1,4 +1,4 @@
-package mobemu;
+package mobemu.utils;
 
 import java.awt.Color;
 import java.awt.Graphics;
@@ -6,8 +6,6 @@ import java.awt.Graphics2D;
 import java.awt.geom.Ellipse2D;
 
 import javax.swing.JComponent;
-
-import mobemu.utils.HCMM;
 
 public class HCMMComponent extends JComponent {
 

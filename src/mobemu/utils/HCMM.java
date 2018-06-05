@@ -16,8 +16,6 @@ import java.util.logging.Logger;
 import javax.swing.JFrame;
 import javax.swing.JTextArea;
 
-import mobemu.HCMMComponent;
-
 /**
  *
  * This mobility model is based on the one described in the scientific paper
