@@ -1558,6 +1558,14 @@ public abstract class HCMM {
                         }
                     }
 
+					if (selectedGoalCellX == 0) {
+						selectedGoalCellX = previousGoalCellX;
+					}
+
+					if (selectedGoalCellY == 0) {
+						selectedGoalCellY = previousGoalCellX;
+					}
+
                     // re-definition of the number of hosts in each cell
                     cells[previousGoalCellX - 1][previousGoalCellY - 1].numberOfHosts--;
                     cells[selectedGoalCellX - 1][selectedGoalCellY - 1].numberOfHosts++;
