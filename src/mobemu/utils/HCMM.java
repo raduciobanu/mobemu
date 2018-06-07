@@ -1563,7 +1563,7 @@ public abstract class HCMM {
 					}
 
 					if (selectedGoalCellY == 0) {
-						selectedGoalCellY = previousGoalCellX;
+						selectedGoalCellY = previousGoalCellY;
 					}
 
                     // re-definition of the number of hosts in each cell
