@@ -9,12 +9,15 @@ import java.util.*;
 import javax.sound.midi.SysexMessage;
 
 import jdk.net.NetworkPermission;
+import mobemu.algorithms.DropComputing.DropComputingStats;
 import mobemu.node.Battery;
 import mobemu.node.Context;
 import mobemu.node.Node;
-
+import mobemu.trace.Parser;
 
 import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.PrintStream;
 import java.io.PrintWriter;
 import java.io.UnsupportedEncodingException;
 import java.security.MessageDigest;
@@ -70,6 +73,11 @@ public class DropComputing extends Node {
 	private Map<Integer, List<Integer>> mapTaskIdExecutorId;
 	private Map<Integer, DropComputing> mapNodeIdExecutorNode;
 	private Map<Integer, Double> nodesRating;
+	
+	public Map<Integer, Double> getNodesRating() {
+		return nodesRating;
+	}
+	
 	private Map<Integer, Double> nodesTimerRating;
 	
 	private MessageDigest messageDigest;	
@@ -77,7 +85,7 @@ public class DropComputing extends Node {
 	private static int nodes = -1;
 	private static PrintWriter writer;
 	
-	private boolean useRating = true;
+	private boolean useRating;// = true;
 	public boolean isUseRating() {
 		return useRating;
 	}
@@ -123,11 +131,14 @@ public class DropComputing extends Node {
 	private static final int WIFI_SPEED = 5;
 	
 	private static boolean verifyNumberOfTaskExecutors = true;
-	private static int maxPercentageOfTaskExecutors = 0;
-	private static boolean corruptCompletedTasksFromEncounteredNodes = true;
-	private static boolean corruptTasksAtExecutors = false;
-	private boolean useWaitingTasks = true;
-	private boolean useHammingCode = true;
+	private static int maxPercentageOfTaskExecutors;// = 0;
+	private static boolean corruptCompletedTasksFromEncounteredNodes;// = true;
+	private static boolean corruptTasksAtExecutors;// = false;
+	private boolean useWaitingTasks;// = true;
+	private boolean useHammingCode;// = true;
+	
+	private double corruptionProbability = 0.9;
+	private boolean useDifferentPaths = false;
 	
 	private MutableBoolean correctOneBit;
 	
@@ -172,7 +183,7 @@ public class DropComputing extends Node {
 	 *            specifies whether a node employs other nodes for task
 	 *            computation or not
 	 */
-	public DropComputing(int id, int nodes, Context context, boolean[] socialNetwork, int dataMemorySize,
+	public DropComputing(boolean corruptAtExecutors, boolean corruptAtTransfer, boolean useWaitingTasks, int nrWaitingTasks, boolean useRating, int percentExecutors, boolean useHamming, int id, int nodes, Context context, boolean[] socialNetwork, int dataMemorySize,
 			int exchangeHistorySize, long seed, long traceStart, long traceEnd, DeviceType deviceType, long sampleTime,
 			boolean opportunistic, boolean useCloud) {
 		super(id, nodes, context, socialNetwork, dataMemorySize, exchangeHistorySize, seed, traceStart, traceEnd);
@@ -181,24 +192,33 @@ public class DropComputing extends Node {
 		this.useCloud = useCloud;
 		this.sampleTime = sampleTime;
 		
+		this.useRating = useRating;
+		this.useWaitingTasks = useWaitingTasks;
+		this.numberOfWaitingTasks = nrWaitingTasks;
+		maxPercentageOfTaskExecutors = percentExecutors;
+		this.useHammingCode = useHamming;
+		
 		if (useRating) {
 			this.rating = 100;
 			this.timerRating = this.timerRatingValue;
 			nodesRating = new HashMap<Integer,Double>();
+			nodesTimerRating = new HashMap<Integer,Double>();
+			
 			nodesRating.put(id, 100.0);
+			nodesTimerRating.put(id, this.timerRating*1.0);
 			int counterFriends = 0;
 			for( int i = 0; i < socialNetwork.length; i++) {
 				if(socialNetwork[i]) {
 					nodesRating.put(i, 100.0);
+					nodesTimerRating.put(i, this.timerRating*1.0);
 					counterFriends++;
 				}
 			}
 			System.err.println("Nodul " + id + " are " + counterFriends + " prieteni in retea!!");
-			nodesTimerRating = new HashMap<Integer,Double>();
 		}
 		if (useWaitingTasks) {
 			waitingTasks = new HashMap<Integer, List<Data>>();
-			numberOfWaitingTasks = 3; //il putem seta altfel la hamming
+			//numberOfWaitingTasks = 3; //il putem seta altfel la hamming
 		}
 		//trebuie indiferent de waitingTask sau hammingCode pentru ca e parametru in verifyHash si dupa ce se iese din functie se seteaza la false
 		correctOneBit = new MutableBoolean(false); 
@@ -216,6 +236,8 @@ public class DropComputing extends Node {
 			}catch(NullPointerException e){
 				e.printStackTrace();
 			}
+			corruptTasksAtExecutors = corruptAtExecutors;
+			corruptCompletedTasksFromEncounteredNodes = corruptAtTransfer;
 			if(useRating)
 				System.out.println("Se tine cont de ratingul nodului");
 			if(verifyNumberOfTaskExecutors && useWaitingTasks) {
@@ -228,6 +250,12 @@ public class DropComputing extends Node {
 			if(corruptCompletedTasksFromEncounteredNodes)
 				System.out.println("Taskurile se corup dupa ce au fost primite din lista de taskuri completate ale nodurilor intalnite");
 		
+			/*try {
+					System.setOut(new PrintStream(new FileOutputStream("output.txt")));
+				} catch (FileNotFoundException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}*/
 		}
 		
 		deviceInfo = DEVICE_FACTORY.getDevice(deviceType);
@@ -290,7 +318,7 @@ public class DropComputing extends Node {
 			majority = (nrOfZeros*100) / list.size();
 		
 		if(nrOfZeros > nrOfOnes)
-			DropComputingStats.nrOfTasksAcceptCorrupted++;
+			DropComputingStats.nrOfTasksAcceptedCorrupted++;
 		else if(nrOfZeros != 0)
 			DropComputingStats.nrOfCorruptedTasksButArrivedUncorrupted++;*/
 		
@@ -320,11 +348,10 @@ public class DropComputing extends Node {
 		byte[] enString2 = messageDigest.digest();
 	
 		boolean result = Arrays.equals(enString1, enString2);
-		/*if(result && correctOneBit.isValue()) {
-			System.err.println("taskul " + task.id + " a fost corupt dar s-a corectat cu hamming");
-			correctOneBit.setValue(false);
+		if(result && correctOneBit.isValue()) {
+			DropComputingStats.nrOfTasksHammingCorrection++;
 		}
-		if(!result && correctOneBit.isValue()) {
+		/*if(!result && correctOneBit.isValue()) {
 			System.err.println("taskul " + task.id + " a avut mai mult de o eroare, s-a corectat doar una");
 			correctOneBit.setValue(false);
 		}*/
@@ -443,11 +470,13 @@ public class DropComputing extends Node {
 
 				if (task.ownerID == id && ownTasks.getTasks().contains(task) && task.hasFinishedAtOtherNode() && !task.listOfSolvers.contains(task.ownerID) ) {	//adaugat aici pentru a verifica versiunea datelor din nodul parinte a taskului cu versiunile pe care le-am primit
 					
-					if( verifyNumberOfTaskExecutors && !verifyTaskExecutors(mapTaskIdExecutorId.get(task.id), task.mapNodeIdExecutorId.get(dcNode.id)) ){
+					if( verifyNumberOfTaskExecutors && !verifyTaskExecutors(mapTaskIdExecutorId.get(task.id), task.mapNodeIdExecutorId.get(dcNode.id), task.nrWaitingVersions) ){
 						//System.out.println("verify task executors failed");
 						continue;
 					}
-					
+				/*	
+					if(Collections.frequency(task.listOfNodesMeetByOwner, dcNode.id) >= 1)
+						continue;*/
 					//verific ratingul nodului care a executat taskul de la dcNode(AICII)
 					/*if( useRating && !verifyRating(task.mapNodeIdExecutorNode.get(dcNode.id))){
 						continue;
@@ -467,6 +496,7 @@ public class DropComputing extends Node {
 
 					}
 
+					//trebuie folosit daca are nodul un anume rating???aici
 					if (useRating) {
 						aggregateRatings(this.nodesRating, this.nodesTimerRating, dcNode.nodesRating, dcNode.id,
 								dcNode.nodesTimerRating);
@@ -481,9 +511,6 @@ public class DropComputing extends Node {
 					}*/
 					//task.mapNodeIdExecutorId.get(dcNode.id) ar trebui sa fie actualul executant al taskului chiar daca a mai fost suprascris, o calea a unui task poate fi rezolvata doar de un singur nod
 					
-					task.listOfNodesMeetByOwner.add(dcNode.id);
-					
-					
 					
 					
 					//	task.newMap.put(new SenderAndReceiver(dcNode.id, this.id), new ValueAndTime(task.map.get(dcNode.id), currentTime));
@@ -495,7 +522,14 @@ public class DropComputing extends Node {
 					
 					task.listOfVisitedNodes.add(this.id);
 						
-					verifyTaskPath(task, currentPath, this.id);
+					//verifyTaskPath(task, currentPath, this.id);
+					if (!verifyTaskPath(task, currentPath, this.id) && useDifferentPaths) {
+						task.newMap.remove(new SenderAndReceiver(dcNode.id, this.id));
+						//se sterge path-ul pe care a venit, ramanand caile pana in nodurile in care inca mai exista
+						deletePath(task.paths, this.id);
+						continue;
+					}
+					task.listOfNodesMeetByOwner.add(dcNode.id);
 					saveTasksMap(taskHistory, task.id, task.map);
 					
 				//	taskHistory.put(task.id, task.map);
@@ -518,9 +552,15 @@ public class DropComputing extends Node {
 							}
 
 						waitingTasks.put(task.id, list);
-							
-						if (waitingTasks.get(task.id).size() == task.nrWaitingVersions)
-								verifyWaitingTasks(task, taskHistory.get(task.id));
+						
+						if(task.nrWaitingVersions != numberOfWaitingTasks) {
+							System.err.println("ASTA VREAU");
+						}
+						if (waitingTasks.get(task.id).size() == task.nrWaitingVersions) {
+								verifyWaitingTasks(task, taskHistory.get(task.id), currentTime);
+								//dar e ca si cum taskuri ar fi fost executate imediat de dispozitiv
+								
+						}
 
 							System.out.println("\n\n");
 							/*if(useHammingCode && waitingTasksHammingCode.containsKey(task.id)) {
@@ -563,7 +603,8 @@ public class DropComputing extends Node {
 						if(task.id == 533){
 							int x = 0;
 						}
-					
+						//dar e ca si cum taskuri ar fi fost executate imediat de dispozitiv
+						DropComputingStats.processingLatency += (currentTime - task.timestamp - task.computeExecutionTime(deviceInfo));
 					}
 					
 					
@@ -591,10 +632,14 @@ public class DropComputing extends Node {
 						System.out.println(task.map);
 					}
 					
+					if (useRating && !verifyRating(dcNode.id)) {
+						//	System.err.println("Nodul " + dcNode.id + " a fost sarit pt ca are ratingul " + nodesRating.get(dcNode.id));
+							continue;
+					}
 					task.addEdge(dcNode.id, this.id);
 					addNodeInPath(task.paths, dcNode.id, this.id, task.id, task.newMap, task.mapNodeIdExecutorId.get(dcNode.id), task.ownerID, true);
 					if( useRating )
-					aggregateRatings(this.nodesRating, this.nodesTimerRating, dcNode.nodesRating, dcNode.id, dcNode.nodesTimerRating);
+						aggregateRatings(this.nodesRating, this.nodesTimerRating, dcNode.nodesRating, dcNode.id, dcNode.nodesTimerRating);
 					
 					completedTasks.add(task);
 					
@@ -602,10 +647,11 @@ public class DropComputing extends Node {
 					task.map.put(this.id, task.map.get(dcNode.id));
 					addValues(task.newMap, new SenderAndReceiver(dcNode.id, this.id), new ValueAndTime(task.map.get(dcNode.id), currentTime, task.mapNodeIdExecutorId.get(dcNode.id), dcNode.id));
 					//aici il corupt, si ii corup rezolvare
-					if( RAND.nextDouble() > 0.95 && corruptCompletedTasksFromEncounteredNodes && !useHammingCode ) {
+					if( RAND.nextDouble() < corruptionProbability && this.id % 3 == 0 && corruptCompletedTasksFromEncounteredNodes && !useHammingCode ) {
 						task.map.put(this.id, new Data(0));
+						DropComputingStats.corruptedTasks++;
 					}
-					if( RAND.nextDouble() > 0.95 && corruptCompletedTasksFromEncounteredNodes && useHammingCode ) {
+					if( RAND.nextDouble() < corruptionProbability && this.id % 3 == 0 && corruptCompletedTasksFromEncounteredNodes && useHammingCode ) {
 						int nrCorruptedPosition = 1 + RAND.nextInt(3);			// se poate corupte 1, 2 sau 3 pozitii
 						int[] corruptedData = new int[task.extendedData.length];
 						System.arraycopy(task.extendedData, 0, corruptedData, 0, task.extendedData.length);
@@ -620,6 +666,7 @@ public class DropComputing extends Node {
 						//System.out.println("s-a corupt pozitia " + position + " la taskul " + task.id);
 						
 						task.map.put(this.id, new Data(corruptedData));
+						DropComputingStats.corruptedTasks++;
 					}
 					task.mapNodeIdExecutorId.put(this.id, task.mapNodeIdExecutorId.get(dcNode.id));
 					task.mapNodeIdExecutorNode.put(this.id, task.mapNodeIdExecutorNode.get(dcNode.id)); //adica dcNode
@@ -645,18 +692,6 @@ public class DropComputing extends Node {
 					// update battery level
 					setBatteryOpportunisticExchange(this, dcNode, task.type, sampleTime);
 				}
-				
-				if (task.map.get(this.id) != null)	//in caz ca a salvat un task, se verifica daca a fost corupt sau nu
-					if (!verifyHashCollisions(task.taskData, task.map.get(this.id), task, correctOneBit)) {
-						if(correctOneBit.value == true)
-							//System.err.println("S-a corectat un singur bit, dar au fost si altii corupti");
-						correctOneBit.setValue(false);
-						DropComputingStats.corruptedTasks++;
-					}else if(correctOneBit.value == true) {
-						System.err.println("S-a corectat un bit si data a devenit corecta");
-						DropComputingStats.nrOfTasksHammingCorrection++;
-						correctOneBit.setValue(false);
-					}
 				
 			}
 
@@ -693,6 +728,11 @@ public class DropComputing extends Node {
 			
 			// if the two nodes are not balanced, balance their tasks
 			if (!isBalanced(this, dcNode)) {
+				
+				if (useRating && !verifyRating(dcNode.id)) {
+					//	System.err.println("Nodul " + dcNode.id + " a fost sarit pt ca are ratingul " + nodesRating.get(dcNode.id));
+						return ;
+					}
 				List<Task> currentTasks = new ArrayList<>();
 				List<Task> otherNodeTasks = new ArrayList<>();
 
@@ -886,7 +926,7 @@ public class DropComputing extends Node {
 			System.err.println("Nu s-a sters nicio cale");
 	}
 
-	private void verifyTaskPath(Task task, List<Integer> list, int id) {
+	private boolean verifyTaskPath(Task task, List<Integer> list, int id) {
 		// TODO Auto-generated method stub
 		Map<SenderAndReceiver, List<ValueAndTime>> newMap = task.newMap;
 		int executorId = -1,executorIndex = -1;
@@ -930,10 +970,15 @@ public class DropComputing extends Node {
 		
 		int index = executorIndex == -1 ? 0:executorIndex;
 		int corruptedNodeId = -1;
+		//boolean frequency = true;
+		int frequency = 0;
 		for(i = index; i < list.size() - 1; i++) {
 			try{
 				ValueAndTime valueAndTime = null;
-				
+				/*numara nodurile de la care au venit mai mult de 2 ori*/
+				if(Collections.frequency(task.listOfPartialVisitedNodes, list.get(i)) >= 2)
+						frequency++;
+				task.listOfPartialVisitedNodes.add(list.get(i));
 				List<ValueAndTime> values = newMap.get(new SenderAndReceiver(list.get(i), list.get(i+1)));
 				if(values.size() != 1) {
 					System.err.println("Trebuie verificat si timestampul pentru ca a venit de mai multe ori de la " + list.get(i) + " la " + list.get(i+1));
@@ -953,7 +998,7 @@ public class DropComputing extends Node {
 					
 					if(valueAndTime == null){
 						System.err.println("nu s a gasit un timestamp mai mic intre " + list.get(i) + " si " + list.get(i+1));
-						return ;
+						return false;
 					}	
 					if(valueAndTime.executorNodeId == -1) {
 						System.err.println("Ar trebui sa nu se mai intample acum!!");
@@ -964,6 +1009,7 @@ public class DropComputing extends Node {
 					if(valueAndTime.executorNodeId == -1)			//a venit o singura data de la executant la urmatorul in calea gasita dar atunci nu era rezolvat
 						continue;
 				}
+				
 				boolean verifyCorruption = verifyHashCollisions(task.taskData, valueAndTime.data, task, correctOneBit);
 				if( !verifyCorruption || (verifyCorruption && correctOneBit.value == true) ) {
 					/*chiar daca s-a corectat cu hamming nodul tot a corupt taskul si merita scaderea ratingului*/
@@ -984,8 +1030,10 @@ public class DropComputing extends Node {
 							corruptedNodeId = valueAndTime.currentNodeId;
 						}
 						
+						if(!useWaitingTasks && !verifyCorruption)
+							DropComputingStats.nrOfTasksAcceptedCorrupted++;
 					}		
-				}	
+				}
 			}catch(NullPointerException ex){
 				System.err.println("Lista de path-uri e goala?");
 				System.err.println("nu s a gasit cheie de la " + list.get(i) + " la " + list.get(i+1));
@@ -993,6 +1041,10 @@ public class DropComputing extends Node {
 				ex.printStackTrace();
 			}
 		}
+		
+		//aiciciicic
+		if(!useWaitingTasks && nrNodesWithCorruptedData == 0)
+			DropComputingStats.nrOfTasksAcceptedUncorrupted++;
 		
 		/*NU stiu ce a vrut sa insemne asta??corruptedVersion = 2*nrNodesWithCorruptedData > nrNodesWithCorruptedData ? true : false;
 		saveTaskVersions(task.map, task.id, corruptedVersion);
@@ -1009,6 +1061,7 @@ public class DropComputing extends Node {
 			nodesTimerRating.put(corruptedNodeId, timerRatingValue*1.0);
 			//corruptedNode.timerRating = timerRatingValue;
 		}
+		return frequency < 2;
 		
 	}
 
@@ -1260,19 +1313,25 @@ public class DropComputing extends Node {
 		
 		int numberOfCorruptedTasks = 0;
 		boolean verifyCorruption = verifyHashCollisions(task.taskData, task.map.get(encounteredId), task, correctOneBit);
-		if( !verifyCorruption || (verifyCorruption && correctOneBit.value == true) ) {
+		if( !verifyCorruption ) {//|| (verifyCorruption && correctOneBit.value == true) ) { aici conteaza doar daca a fost acceptat corupt
 			correctOneBit.setValue(false);
 			numberOfCorruptedTasks++;
+			//DropComputingStats.nrOfTasksAcceptedCorrupted++;
 			System.out.println("corrupted data from node " + encounteredId + " executed by " + task.mapNodeIdExecutorId.get(encounteredId));
+		}else{		
+			//DropComputingStats.nrOfTasksAcceptedUncorrupted++;
 		}
 		displayTaskHistory(task,numberOfCorruptedTasks==1,taskHistory.get(task.id));
+		
+		DropComputingStats.nrOfTasksAcceptExecutedByOthers++;
+		DropComputingStats.nrOfTasksExecutors += task.listOfSolvers.size();
 		
 		task.listOfNodesMeetByOwner.clear();
 		ownTasks.finishTask(task);
 		otherTasks.remove(task);	
 	}
 
-	private void verifyWaitingTasks(Task task, List<Map<Integer, Data>> list) {
+	private void verifyWaitingTasks(Task task, List<Map<Integer, Data>> list, long currentTime) {
 		// TODO Auto-generated method stub
 		//System.out.println("inainte!!" + dropComputing.waitingTasks.get(task.id));
 		this.majority = calculatingMajority(waitingTasks.get(task.id));
@@ -1286,7 +1345,7 @@ public class DropComputing extends Node {
 		}
 		
 		if(this.majority < 50) {
-			System.err.println("se poate sunt corupte altfel");
+			System.err.println("se poate la hamming; sunt corupte altfel");
 		}
 			
 		System.out.println("task " + task.id + " has enough versions at node " + this.id + " -- " + waitingTasks.get(task.id) );
@@ -1313,6 +1372,10 @@ public class DropComputing extends Node {
 			if( !verifyHashCollisions(task.taskData, data, task, correctOneBit) ){
 				/*aici se salveaza doar cele care au ajuns corupte, chiar si dupa incercarea de corectie cu hamming*/
 				numberOfCorruptedTask++;
+				if (correctOneBit.isValue() == true) {
+					correctOneBit.setValue(false);
+				}
+
 				/*int executorNodeId = mapTaskIdExecutorId.get(task.id).get(counter);
 				System.out.println("corrupted data from node " + task.listOfNodesMeetByOwner.get(counter) + " executed by " + executorNodeId );
 				System.out.println("data lui initiala " + currentData + "\nData primita: " + data);
@@ -1329,19 +1392,32 @@ public class DropComputing extends Node {
 						ex.printStackTrace();
 					}
 				}*/
+			}else if(correctOneBit.value == true) {		//adica datele au fost egale dupa corectie
+				DropComputingStats.nrOfTasksHammingCorrection++;
+				correctOneBit.setValue(false);
 			}
 		}
 		
-		if(numberOfCorruptedTask > 0)
-			System.err.println("Taskul " + task.id + " a fost primit cu " + numberOfCorruptedTask + " versiuni corupte");
+		if (numberOfCorruptedTask > 0)
+			System.err
+					.println("Taskul " + task.id + " a fost primit cu " + numberOfCorruptedTask + " versiuni corupte");
 		else {
 			System.err.println("Taskul " + task.id + " nu a fost primit corupt");
 		}
 		boolean acceptCorruptedVersion = false;
-		if(majority > 50.0 && 2*numberOfCorruptedTask > numberOfWaitingTasks)
+		if (majority > 50.0 && 2 * numberOfCorruptedTask > numberOfWaitingTasks)
 			acceptCorruptedVersion = true;
-			
+		if (acceptCorruptedVersion)
+			DropComputingStats.nrOfTasksAcceptedCorrupted++;
+		else
+			DropComputingStats.nrOfTasksAcceptedUncorrupted++;
+		
 		displayTaskHistory(task,acceptCorruptedVersion, list);
+		
+		
+		DropComputingStats.nrOfTasksAcceptExecutedByOthers++;
+		DropComputingStats.nrOfTasksExecutors += task.listOfSolvers.size();
+		DropComputingStats.processingLatency += (currentTime - task.timestamp - task.computeExecutionTime(deviceInfo));
 		
 		task.listOfNodesMeetByOwner.clear();
 		ownTasks.finishTask(task);
@@ -1372,7 +1448,7 @@ public class DropComputing extends Node {
 		// TODO Auto-generated method stub
 		
 		if(nodesRating.containsKey(dcNodeId)) {
-			//System.err.println("Intra aici!!");
+		//	System.err.println("Intra aici!!" + dcNodeId + nodesRating + nodesTimerRating);
 			nodesTimerRating.put(dcNodeId, nodesTimerRating.get(dcNodeId) - 1);
 			if(nodesRating.get(dcNodeId) >= 50 && nodesTimerRating.get(dcNodeId) <= 0 && nodesRating.get(dcNodeId) < 100) {
 				nodesRating.put(dcNodeId, Math.min(100.0, nodesRating.get(dcNodeId)+20));
@@ -1385,8 +1461,8 @@ public class DropComputing extends Node {
 			
 		}
 		
-		//return socialNetwork[dcNodeId];
-		return true;
+		return socialNetwork[dcNodeId];
+		//return false;
 	}
 
 	private void displayTaskHistory(Task task, boolean corruptedVersion, List<Map<Integer, Data>> list2) {
@@ -1408,8 +1484,7 @@ public class DropComputing extends Node {
 		for(int nodeId : task.listOfNodesMeetByOwner){
 			crt++;
 			if(useWaitingTasks){
-				executorId = mapTaskIdExecutorId.get(task.id).get(crt);
-				
+				executorId = mapTaskIdExecutorId.get(task.id).get(crt);			
 			}
 			else executorId = task.mapNodeIdExecutorId.get(id);
 			
@@ -1441,11 +1516,15 @@ public class DropComputing extends Node {
 		System.out.println("Taskul a ramas prezent in nodurile " + task.map.keySet());
 		//saveTaskVersions(task.map, task.id, corruptedVersion);
 		
-		if(list2.size() != numberOfWaitingTasks)
-			System.err.println("Imposible");
-		for( Map<Integer,Data> map : list2) {
+		//if(list2.size() != numberOfWaitingTasks)
+			//System.err.println("Imposible");
+		
+		
+		saveTaskVersions(list2.get(list2.size()-1), task.id, corruptedVersion);
+		/*se contorizeaza de mai multe ori aceleasi informatii, asa ca le salvez cu configuratia finala pentru ca nu se sterge pana atunci din map
+		 * for( Map<Integer,Data> map : list2) {
 			saveTaskVersions(map, task.id, corruptedVersion);
-		}
+		}*/
 		
 		
 		
@@ -1496,6 +1575,7 @@ public class DropComputing extends Node {
 				
 			if( !verifyHashCollisions(task.taskData, task.map.get(idNode), task, correctOneBit) ){
 				System.out.println("nodul " + idNode + " are data corupta(pe care trebuie sa o gasim propagata corupta)");
+				correctOneBit.setValue(false);
 				/*try{
 					DropComputing dc = task.mapNodeIdExecutorNode.get(idNode);
 					dc.rating -= 25;
@@ -1510,7 +1590,7 @@ public class DropComputing extends Node {
 		
 	}
 
-	private boolean verifyTaskExecutors(List<Integer> list, int executorID) {
+	private boolean verifyTaskExecutors(List<Integer> list, int executorID, int currentNumberOfWaitingVersions) {
 		// TODO Auto-generated method stub
 		
 		if(list == null)
@@ -1520,7 +1600,10 @@ public class DropComputing extends Node {
 		int numberOfOccurrences = Collections.frequency(list, executorID);
 
 		// strict < pentru ca se apeleaza inainte de a se  adauga in lista un nou task executat de executorID 
-		return numberOfOccurrences < Math.floor(numberOfWaitingTasks/(1 + 1.0*maxPercentageOfTaskExecutors/100));
+		if(Math.floor(currentNumberOfWaitingVersions/(1 + 1.0*maxPercentageOfTaskExecutors/100)) == 1)
+			return numberOfOccurrences <= 1;
+		
+		return numberOfOccurrences < Math.floor(currentNumberOfWaitingVersions/(1 + 1.0*maxPercentageOfTaskExecutors/100));
 		//sa asteptam mai multi executanti de taskuri in functie de cate variante ale taskului dorim sa asteptam sa primim rezolvate
 			
 	}
@@ -1728,6 +1811,7 @@ public class DropComputing extends Node {
 				task.solverBy = id;
 				task.listOfSolvers.add(id);
 				
+				
 				//se sterg din otherTasks nodurile executate
 				otherTasks.remove(task);
 				
@@ -1767,13 +1851,35 @@ public class DropComputing extends Node {
 					// aici adaugat coruperea dupa ce l-a rezolvat, dar trebuie corupt si la nodurile care il transportA
 					
 					completedTasks.add(task);
-					if(RAND.nextDouble() > 0.95 && corruptTasksAtExecutors) {
+					/*if(RAND.nextDouble() > 0.55 && this.id % 5 == 0 && corruptTasksAtExecutors) {
 						task.map.put(this.id, new Data(0));
+						DropComputingStats.corruptedTasks++;
+					}*/
+					if( RAND.nextDouble() < corruptionProbability && this.id % 3 == 0 && corruptTasksAtExecutors && !useHammingCode ) {
+						task.map.put(this.id, new Data(0));
+						DropComputingStats.corruptedTasks++;
+					}
+					if( RAND.nextDouble() < corruptionProbability && this.id % 3 == 0 && corruptTasksAtExecutors && useHammingCode ) {
+						int nrCorruptedPosition = 1 + RAND.nextInt(3);			// se poate corupte 1, 2 sau 3 pozitii
+						int[] corruptedData = new int[task.extendedData.length];
+						System.arraycopy(task.extendedData, 0, corruptedData, 0, task.extendedData.length);
+						int position;
+						while(nrCorruptedPosition > 0) {
+							position = 1 + RAND.nextInt(task.extendedData.length); //trebuie la mai multe pozitii
+							System.err.println("s-a corupt pozitia " + position + " din vectorul ede lungime " + task.extendedData.length + " la taskul " + task.id);
+							corruptedData[position-1] ^= 1;
+							nrCorruptedPosition--;
+						}
+						
+						//System.out.println("s-a corupt pozitia " + position + " la taskul " + task.id);
+						
+						task.map.put(this.id, new Data(corruptedData));
+						DropComputingStats.corruptedTasks++;
 					}
 				}
-				if(!verifyHashCollisions(task.taskData, task.map.get(this.id), task, correctOneBit)){
+				/*if(!verifyHashCollisions(task.taskData, task.map.get(this.id), task, correctOneBit)){
 					DropComputingStats.corruptedTasks++;
-				}
+				}*/
 			}
 			
 		}
@@ -1820,9 +1926,12 @@ public class DropComputing extends Node {
 	private boolean verifyTasks(SortedSet<Task> tasks, int idNode) {
 		// TODO Auto-generated method stub
 		int counter = 0;
+		boolean verification;
 		for(Task task : tasks){
-			if(!verifyHashCollisions(task.taskData, task.map.get(idNode), task, correctOneBit)){
+			verification = verifyHashCollisions(task.taskData, task.map.get(idNode), task, correctOneBit);
+			if(!verification || (verification && correctOneBit.isValue() == true) ){
 				counter++;
+				correctOneBit.setValue(false);
 			}
 		}
 		
@@ -2869,6 +2978,7 @@ public class DropComputing extends Node {
 
 		private Map<Integer, int[]> mapHamming;
 		
+		private List<Integer> listOfPartialVisitedNodes;
 		private boolean solvedByOwner;
 		private int solverBy;
 		private List<Integer> listOfSolvers;
@@ -2957,6 +3067,7 @@ public class DropComputing extends Node {
 			this.initialTime = Double.MIN_VALUE;
 			this.cloudUploadDuration = computeCloudUploadDuration();
 			
+			this.listOfPartialVisitedNodes = new ArrayList<Integer>();
 			this.map = new HashMap<Integer, Data>();
 			if (useHammingCode) {
 				if (type == TaskType.SMALL)
@@ -3312,6 +3423,7 @@ public class DropComputing extends Node {
 	 */
 	public static class DropComputingStats {
 
+		public static int nrOfTasksExecutors = 0;
 		public static int counter = 0;
 		public static int acceptGoodVersionInMajority = 0;
 		public static int acceptGoodVersionInMinority = 0;
@@ -3328,9 +3440,14 @@ public class DropComputing extends Node {
 		public static int nrOfNodesLowRating = 0;
 		public static int nrOfNodesHighRating = 0;
 		
-		public static int nrOfTasksAcceptCorrupted = 0;
+		public static int nrOfTasksAcceptedCorrupted = 0;
+		public static int nrOfTasksAcceptedUncorrupted = 0;
 		public static int nrOfCorruptedTasksButArrivedUncorrupted = 0;
 		public static int nrOfTasksHammingCorrection = 0;
+		
+		public static double processingLatency = 0;
+		public static int nrOfTasksAcceptExecutedByOthers = 0;
+		public static int nrOfTasksExecutedByOthers = 0;
 		/**
 		 * Total number of task groups.
 		 */
@@ -3414,6 +3531,14 @@ public class DropComputing extends Node {
 					+ (double) TaskType.getScalingFactor(TaskType.LARGE) * tasks[2];
 
 			return totalComputationDuration / sum;
+		}
+		
+		public static double getAverageUncorruptedReceivedTasks() { 
+			return (double) 100 * nrOfTasksAcceptedUncorrupted / (nrOfTasksAcceptedCorrupted + nrOfTasksAcceptedUncorrupted);
+		}
+		
+		public static double getAverageProcessingLatency() {
+			return processingLatency/(Parser.MILLIS_PER_MINUTE * 60 * nrOfTasksAcceptExecutedByOthers);
 		}
 	}
 }

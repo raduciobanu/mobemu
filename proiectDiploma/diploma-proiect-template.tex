@@ -1,4 +1,5 @@
 \documentclass[12pt,a4paper]{report}
+\usepackage{color}
 
 \usepackage[utf8]{inputenc} % pentru suport diacritice
 \usepackage[romanian]{babel} % setări pentru limba română 
@@ -7,10 +8,43 @@
 \usepackage[margin=2.54cm]{geometry}	% dimensiuni pagină și margini
 \usepackage{graphicx} % support the \includegraphics command and options
 
+
+\usepackage{algorithm}
+\usepackage{listings}
+\usepackage{adjustbox}
+\usepackage{algpseudocode}
+
+
+\definecolor{dkgreen}{rgb}{0,0.6,0}
+\definecolor{gray}{rgb}{0.5,0.5,0.5}
+\definecolor{mauve}{rgb}{0.58,0,0.82}
+
+\lstset{frame=tb,
+  language=Java,
+	float=H,
+  aboveskip=3mm,
+  belowskip=3mm,
+  showstringspaces=false,
+  columns=flexible,
+  basicstyle={\small\ttfamily},
+  numbers=left,
+  numberstyle=\tiny\color{gray},
+  keywordstyle=\color{blue},
+  commentstyle=\color{dkgreen},
+  stringstyle=\color{mauve},
+  breaklines=true,
+  breakatwhitespace=true,
+	stepnumber=1,
+  tabsize=3
+}
 % formatting sections and subsections
 \usepackage{textcase}
 \usepackage{titlesec}
-\titleformat{\chapter}{\large\bfseries\MakeUppercase}{\thechapter}{2ex}{}[\vspace*{-1.5cm}]
+\titleformat{\chapter}{%
+\large%
+\bfseries%
+%\MakeUppercase
+}{\thechapter}{2ex}{\MakeUppercase}[\vspace*{-1.5cm}]
 \titleformat*{\section}{\large\bfseries}
 \titleformat*{\subsection}{\large\bfseries}
 \titleformat*{\subsubsection}{\large\bfseries}
@@ -38,10 +72,6 @@
 \renewcommand{\footrulewidth}{0pt}
 \lhead{}\chead{}\rhead{}
 \lfoot{}\cfoot{\thepage}\rfoot{}
-
-\newenvironment{conditions}
-  {\par\vspace{\abovedisplayskip}\noindent\begin{tabular}{>{$}l<{$} @{${}={}$} l}}
-  {\end{tabular}\par\vspace{\belowdisplayskip}}
 
 \newcommand{\HeaderLineSpace}{-0.5cm}
 \newcommand{\UniTextRO}{UNIVERSITATEA POLITEHNICA DIN BUCUREȘTI \\[\HeaderLineSpace] 
@@ -135,12 +165,12 @@ COMPUTER SCIENCE DEPARTMENT\\}
 %%
 %%   Campurile de mai jos trebuie modificate de autor. Modificati doar continutul, nu si numele fiecarei definitii
 %%
-\newcommand{\ProjectTitleRO}{Titlul proiectului de diplomă (ex: Șablon proiect de diplomă)}
-\newcommand{\ProjectSubtitleRO}{Subtitlu (ex: versiunea 2018)}
-\newcommand{\ProjectTitleEN}{Diploma Project Title  (eg: Diploma project template)}
-\newcommand{\ProjectSubtitleEN}{Subtitle (eg: 2018 version)}
-\newcommand{\Name}{Ioana Popescu}
-\newcommand{\Advisor}{Prof. dr. ing. Andrei Ionescu}
+\newcommand{\ProjectTitleRO}{Consistenta datelor in rețele mobile colaborative ad-hoc bazate pe paradigma Drop Computing}
+\newcommand{\ProjectSubtitleRO}{version}
+\newcommand{\ProjectTitleEN}{Data consistency in Drop Computing paradigm: ad-hoc dynamic collaborative computing}
+\newcommand{\ProjectSubtitleEN}{version}
+\newcommand{\Name}{Tăbușcă Vlăduț-Constantin}
+\newcommand{\Advisor}{Șl.dr.ing. Ciobanu Radu-Ioan}
 \newcommand{\Year}{2018}
 
 % Setări document
@@ -179,145 +209,97 @@ The projects’ abstract will be elaborated in both Romanian and English. The re
 
 
 % Textul licentei incepe de aici 
-
-
-
 \chapter{Introducere}\pagestyle{fancy}
-% * <marios.choudary@gmail.com> 2018-02-28T11:38:18.106Z:
-% 
-% > INTRODUCERE
-% Am scos de aici referintele la font pentru a nu mai fi dependenti de Calibri. Personal, nici nu sunt sigur ca ajuta prea mult aceasta recomandare si mi se pare bun font-ul default din Latex (Computer Modern). Daca sunteti de-acord, va rog sa stergeti liniile comentate de mai jos, precum si cele referitoare la fontul Calibri din restul documentului.
-% 
-% ^.
-Parametrii de formatare recomandați pentru lucrare: 
-\begin{itemize}
- %\item Font recomandat: Calibri; Dimensiune font: 12; 
- \item Dimensiune font: 12; 
- \item Spațiere între linii: 1,5; Spațiere după paragraf: 8pt;
- \item Stil: Justified;
- \item Dimensiune pagină: A4; Margini: 2,54cm/ 2,54cm/ 2,54cm/ 2,54cm;
- %\item Heading1: Calibri, 14, bold, all caps;
- %\item Heading2: Calibri, 14, bold;
- %\item Heading3: Calibri, 12. 
- %\item Font pentru formule: Cambria Math, 12.
- \item Heading1: 14, bold, all caps;
- \item Heading2: 14, bold;
- \item Heading3: 12. 
- \item Font size pentru formule: 12.
-\end{itemize}
-În cadrul introducerii, este necesară abordarea următoarelor puncte care reprezintă de fapt familiarizarea cititorului (comisia, alți colegi sau experți în domeniu) cu tema proiectului, soluția propusa și cuprinsul/structura lucrării. Deși introducerea poate conține și unele elemente mai generale, se recomandă păstrarea unui limbaj tehnic, specific audienței care va citi lucrarea.
-
-În cadrul capitolelor următoare, veți regăsi o serie notații de forma \dezvoltare, \cercetare. Acest tip de formatare este utilizat exclusiv în acest template pentru a marca sfaturi și cerințe specifice pentru lucrări de diploma cu specific diferit. În pregătirea documentului vostru, nu veți utiliza aceste marcaje. 
-Elementele pe care trebuie să le abordați în introducere sunt descrise în cadrul subcapitolelor de mai jos. 
 \section{Context}
-O scurtă introducere a proiectului, motivație, explicație de ce este relevant domeniul proiectului.
+Rețelele mobile și sistemul cloud sunt printre cele mai folosite resurse de comunicare din zilele noastre, datorită dorinței de a accesa permanent și de pe orice dispozitiv informația. Această lucrare se bazează pe un nou concept, intitulat Drop computing, din cadrul rețelelor oportuniste. Această paradigmă oferă o alternativă pentru evitarea latențelor și costurilor ridicate ale cloud-ului prin utilizarea resurselor computaționale și a mobilității tuturor nodurilor pentru execuția și transferul cererilor unui singur nod. Fiecare nod, la rândul lui, poate primi rezolvarea unei cereri prin intermediul oricărui nod din rețea cu care intră în contact. Orice cerere computațională va purta în continuare denumirea de task. Astfel, un task se va propaga oportunist până la executant și apoi prin alte noduri intermediare până la proprietar. Această propagare oportunistă se referă la schimbul de task-uri realizat la întâlnirea dintre două noduri. Acest schimb fiind influențat de gradul de cunoaștere al nodului proprietar, de nivelul de altruism al nodului întâlnit, dar și de resurse computaționale precum baterie sau memorie. Aceste scenarii au deja rezultate deosebite în ceea ce privește gradul de utilizare al cloud-ului, procentul de reducere al costului fiind mult mai mare ca procentul cu care a scăzut performanța, acest lucru fiind detaliat în~\cite{DC}. Toate aceste rezultate s-au bazat pe următoarea presupunere: toate rezolvările care se interschimbă în rețea sunt corecte. Coruperea informațiilor atât în mod intenționat, cât și din cauza unor factori externi (e.g senzori defectați) determinând un comportament nedorit în toate exemple de utilizare ale acestor tipuri de rețele. Soluția propusă în această lucrare intervine în acest context de corupere, foarte plauzibil în viața reală, încercând să rezolve problema consistenței datelor.
+
 \section{Problema} 
-Care este problema pe care proiectul o va rezolva.
+Principala utilitate a soluției propuse este reprezentată de existența unui grad de siguranță în ceea ce privește corectitudinea informațiilor transferate între nodurile unei rețele oportuniste. În momentul în care este necesară rezolvarea unui task sau se descoperă o informație dorită la unul dintre nodurile cu care se intră în contact, trebuie să cunoașteam nivelul de încredere pe care îl atribuim acelui nod și, implicit, acelei rezolvări. Problema rezolvată fiind cea a consistenței datelor, a diferențierii datelor corupte de cele corecte și a generării unui grad de încredere fiecărui nod prezent în rețea. Totodată, o altă problemă abordată este legată de împărțirea task-urilor în rețea, astfel încât să se reușească un acces cât mai restricționat la cloud, nodurile trebuind să primească rezolvarea într-un timp util de la vecini.
+
 \section{Obiective}
-Care sunt obiectivele proiectului/soluției/abordării/ideii; Ce creșteri sau evoluții determină rezolvarea proiectului.
+Soluția descrisă în această lucrare își propune să ofere un nivel de încredere mai ridicat în ceea ce privește informațiile transferate și acceptate într-o rețea de tipul Drop Computing. În urma acestei implementări se crește procentajul de task-uri acceptate necorupte?, acesta fiind de cele mai multe ori maxim, înregistrându-se însă o latență mai ridicată la procesare și un procentaj mai mic de rezolvări dobândite cu ajutorul celorlalte noduri din rețea. Aceste evoluții sunt normale, dat fiind faptul că se realizează o selecție mai restrânsă de noduri utilizate, rezultatele task-urilor generate nu ajung să fie primite mai rapid deoarece posibilitățile de propagare a informației se diminuează, deci și șansele de a ajunge mai repede la proprietar. Soluția oferă o abordare realistă, bazată pe anumite trace-uri generate în funcție de mobilitatea și de interacțiunea dintre dispozitive mobile reale. Un alt obiectiv fiind legat de abordarea unor comportamente și limitări ale dispozitivelor mobile, astfel încât soluția propusă să se integreze cu succes în viața reală. Printre aceste abordări se numără și nivelul bateriei, memoria limitată sau timpul de contact scurt dintre dispozitive, aspecte ce pot accentua inconsistența datelor prin replicarea lor în noduri nepotrivite.
 \section{Soluția propusă} 
-Descrierea pe scurt a soluției implementate; ce abordare este propusă (nu detalierea utilitarelor și a tehnologiilor, ci abordarea și ideea propusă de către autor).
+Principalele soluții propuse în această lucrare sunt mecanismul de rating al nodurilor rețelei și sistemul de așteptare al versiunilor unui task înainte de a lua o decizie cu privire la corectitudinea informațiilor. Aceste mecanisme pot fi completate de diferite limitări în ceea ce privește calea parcursă de o versiune a task-ului, precum: procent diferit de executanți, o frecvență maximă a nodurilor parcurse, dar și o condiție de familiaritate ridicată între nodurile intermediare. Alături de transmiterea solitară a biților de date prin rețea, se implementează și un sistem de detecție și corecție al unor biți corupți utilizând codurile Hamming. În funcție de caracteristicile rețelei și de cantitatea de overhead permisă se simulează atât doar transmiterea datelor utile, cât și folosirea unor informații redundante alături de biții de date. Multiplele transferuri de informații care pot apărea în rețea sunt diferențiate după momentul de timp, categoria task-ului și după perechile de participanți ce interschimbă task-uri. Totodată, pentru generarea un overhead cât mai mic, se limitează atât numărul de mesaje, cât și perioadele în care acestea se propagă în rețea, a întregii rețele în fiecare nod, generând un overhead cât mai mic.??
 \section{Rezultatele obținute}
-Descriere pe scurt a rezultatelor obținute, eventual de ce acestea sunt importante față de alte soluții sau studii.
+...
+Ținând cont de limitările rețelelor mobile oportuniste cu privire la nivelul scăzut de overhead permis, dar și lipsa unui sistem de administrare central, am creat statistici relevante care să măsoare atât punctele tari, cât și punctele slabe ale implementării propuse. Punctele tari fiind reprezentate de numărul ridicat de informații corecte acceptate la destinație alături de identificarea corectă a nodurilor corupte. Cel mai reprezentativ rezultat fiind cel în care, în ciuda numărului majoritar de versiuni corupte, existente în acel moment în toată rețeaua, nodul destinatar acceptă o versiunea corectă. Acest rezultat reprezintă dovada evidentă a filtrării nodurilor corupte și a acceptării unor versiuni ce au parcurs o rută evaluată sigură în mod corect. Punctele slabe sunt identificate prin latența de procesare al unui task ce se încearcă a fi rezolvat cu ajutorul nodurilor întâlnite. Acest dezavantaj este caracteristic întregului concept de Drop Computing, însă, odată cu filtrarea anumitor noduri și cu așteptarea mai multor versiuni, este normal să se accentueze deoarece se diminuează numărul de noduri cu care se interschimbă informații. Provocarea implementării acestui mecanism de așteptare fiind de a păstra în continuare un procentaj ridicat de task-uri executate de nodurile rețelei și distribuite către beneficiar într-un timp util(trebuie zis ce inseamna timp util?)). 
+
 \section{Structura lucrării}
-Un paragraf în care fiecare dintre secțiunile următoare este prezentată în 1-2 fraze, punând accentul pe elementele cele mai semnificative din fiecare secțiune.
+Lucrarea se deschide cu capitolul~\ref{motivatie}, acesta sintetizează numeroase utilități ale paradigmei de Drop Computing oferind și 3 exemple concrete din viața reală. În continuare, capitolul~\ref{metodeExistente} descrie paradigmele din care a evoluat Drop Computing, iar în final se analizează mecanismele de replicare a informațiilor prezentate în diverse lucrări, la diferite conferințe de specialitate.(sa le citez?). Descrierea mecanismelor de realizare a consistenței este împărțită între capitole ~\ref{solutiaPropusa} și ~\ref{detalii}. Primul, din cele două menționate, descrie o abordare teoretică în funcție de nevoile rețelei, în timp ce al doilea capitol detalii necesitatea unor rationamente prin prezentarea unor scheme grafice, dar și a unor algoritmi descriși în pseudocod. Capitolul~\ref{evaluare} prezintă un set de grafice care analizează, pe diferite scenarii de corupere și de realizare a consistenței, 3 metrici care sunt dezbătute la inceput de capitol.
+Capitolul~\ref{concluzii} sumarizează implementarea întregului proiect și analizează rezultatele obținute dezbătând atât punctele tari, cât și limitările pe care acestea le sugerează. În final, capitolul~\ref{bibliografie} este format din toate intrările bibliografice ce au fost citate în aceată lucrare. Pentru o mai bună înțelegere, a unor aspecte ce vor fi descrise în continuare, se vor face trimiteri la fragmente de cod, grafice și informații optionale ce au fost adăugate în capitolul~\ref{anexe}. 
 
 
+\chapter{Motivație} \label{motivatie}
 
-\chapter{Analiza Cerințelor / Motivație}
-\dezvoltare Acest capitol va analiza cerințele produsului din prisma potențialilor clienți și a scenariilor de utilizare preconizate, urmând a fi generată o lista de funcționalități. 
+Aplicațiile mobile de astăzi oferă funcționalități din ce în ce mai ample și mai inovatoare pentru utilizatorii finali. În ciuda resurselor de calcul impresionante ale unui telefon inteligent, toate aceste aplicații se bazează pe suportul cloud-ului pentru a oferi utilizatorului cea mai bună interacțiune. Din cauza numeroaselor interacțiuni cu cloud-ul apar anumite limitări și provocări în ceea ce privește nivelul de încărcare al rețelei, întrucât chiar și pentru o conexiune între două dispozitive aflate în aceeași proximitate se așteaptă răspuns de la cloud.
 
-\cercetare Acest capitol va introduce motivația realizării proiectului propus.
+\subsection{Rețele mobile și Drop Computing}
+Interacțiunea cu un sistem cloud este benefică și necesară pentru dispozitive cu o putere locală de calcul limitată, dar și costisitoare atât ca infrastructură, cât și ca timp de așteptare al răspunsurilor. Pentru a restrânge această interacțiune, trebuie limitată cantitatea de date trimise către platformele cloud prin mutarea unor părți de prelucrare a datelor la marginea rețelei, mult mai aproape de unde au fost generate informațiile. În cadrul unei rețele formate din dispozitive mobile, pentru a avea acces la date sau putere de calcul, un dispozitiv(denumit în continuare nod) va face un request (o cerere) către anumite servere din cloud. Pentru a evita latențele ridicate ale cloud-ului, dar și costurile importante de găzduire, există așa numita paradigmă de "Edge Computing". Această paradigmă se referă la existența anumitor routere, switch-uri sau set-top-box-uri, în aceeași rețea cu dispozitivele mobile, ce pot să facă caching la datele primite de la Cloud sau care pot chiar resolva task-uri, fără a mai fi nevoie să se trimită request-uri în cloud. Astfel, atunci când un dispozitiv necesită folosirea anumitor date sau calcule computațional intensive, întreabă mai întâi nodurile edge dacă au datele sau pot rezolva task-urile respective, iar în caz afirmativ datele vor fi preluate de la acestea fără a mai realiza conexiunea cu sistemul cloud.
 
-Aplicațiile mobile de astăzi oferă funcționalități din ce în ce mai ample și mai inovatoare pentru utilizatorii finali. În ciuda resurselor de calcul impresionante al unui telefon inteligent, toate aceste aplicații se bazează pe suportul cloud-ului pentru a oferi utilizatorului cea mai bună interacțiune. Datorită numeroaselor interacțiuni cu cloud-ul apar anumite limitări și provocări în ceea ce privește nivelul de încărcare al rețelei întrucât chiar și pentru o conexiune între două dispozitive aflate în aceeași proximitate se așteaptă răspuns de la cloud.
+Extinzând modelul de "Edge Computing", pentru a îmbunătăți și mai bine atât latența, cât și costurile, ceea ce fac dispozitivele edge, pot la fel de bine să facă și nodurile mobile. Astfel, paradigma Drop Computing sugerează ca fiecare nod mobil să poată face caching pentru datele și rezultatele provenite din cloud, ce pot fi necesare și valorificate de alte noduri. Alături de date provenite direct de la cloud, fiecare nod poate reține în memoria locală, atât informațiile complete calculate de alt vecin, cât și task-urile de rezolvat ale nodurilor cu care a intrat în contact. Toată această multiplicare a informațiilor în rețea va ajuta la un timp de răspuns mult mai bun atunci când o informație va fi cerută de celelalte noduri mobile din rețea. Totodată, datorită mobilității nodurilor, datele propagate oportunist pot ajunge de la destinatar către expeditor și în situația când nu există o legătură directă între aceștia, nefiind conectați la Internet. Rezultatele obținute din această abordare au sugerat o importantă aplicabilitate în viața reală, identificându-se un impact major în scăderea încărcării unei platforme cloud, în timp ce interacțiunea utilizatorului cu dispozitivul mobil nu a fost afectată sesizabil în materie de timp de așteptare\cite{DC}.
 
-Interacțiunea cu cloud este benefică și necesară pentru o putere locală de calcul limitată, dar și costisitoare atât ca infrastructură, cât și ca timp de așteptare al răspunsurilor. Pentru a restrânge această interacțiune trebuie limitată cantitatea de date trimise către platformele cloud prin mutarea unor părți de prelucrare a datelor la marginea rețelei, mult mai aproape de unde au fost generate informațiile. În cadrul unei rețele formate din dispozitive mobile pentru a avea acces la date sau putere de calcul, un dispozitiv, denumit în continuare nod, va face un request(o cerere) către anumite servere din Cloud. Pentru a evita latențele ridicate ale Cloud-ului, dar și costurile importante de găzduire, există așa numita paradigmă de "Edge Computing". Această paradigmă se referă la existența anumitor routere, switch-uri sau set-top-box-uri, în aceeași rețea cu dispozitivele mobile, ce pot să facă caching la datele primite de la Cloud. Astfel, atunci când un device necesită folosirea anumitor date sau calcule computațional intensive, întreabă mai întâi nodurile edge dacă au datele respective, iar în caz afirmativ datele vor fi preluate de la acestea fără a mai realiza conexiunea cu Cloud-ul.
-
-Extinzând modelul de "Edge Computing", pentru a îmbunătăți și mai bine atât latența, cât și costurile, ceea ce fac dispozitivele edge, pot la fel de bine să facă și nodurile mobile. Astfel, paradigma Drop Computing sugerează ca fiecare nod mobil să poată face caching pentru datele și rezultatele provenite din Cloud, ce pot fi necesare și valorificate de alte noduri. Alături de date provenite direct de la cloud, fiecare nod poate reține în memoria locală, atât informațiile complete calculate de alt vecin, cât și task-urile de rezolvat ale nodurilor cu care a intrat în contact. Toată această multiplicare a informațiilor în rețea va ajuta la un timp de răspuns mult mai bun atunci când o informație va fi cerută de celelalte noduri mobile din rețea. Totodată, datorită mobilității nodurilor, datele propagate oportunist pot ajunge de la destinar către expeditor și în situația când nu există o legătură directă între aceștia, nefiind conectați la Internet. Rezultatele obținute din această abordare au sugerat o importantă aplicabilitate în viața reală, identificându-se un impact major în scăderea încărcării unei platforme cloud, în timp ce interacțiunea utilizatorului cu device-ul mobil nu a fost afectată sesizabil în materie de timp de așteptare.
-
-Motivația realizării acestei lucrări a existat datorită multiplelor scenarii din viața reală ale căror desfășurare este influențată prin mecanismele de aducere a datelor și a resurselor computaționale mai aproape de utilizatorul final. În continuare voi prezenta câteva scenarii uzuale ce vor beneficia de existența unui sistem complet care implementează caracteristicile acestor paradigme. Să analizăm mulțimile de oameni adunate având un scop comun, de exemplu vizionarea unui important meci de fotbal pe un stadion cu un număr de locuri impresionant. Presupunând că majoritatea participanților dețin un telefon mobil, dacă jumatate sau mai putin dintre ei au nevoie să folosească conexiunea 3G/4G/Wifi în același moment de timp, serviciul oferit va fi unul fragmentat ce conduce la o interacțiune neplăcută. Chiar dacă stadionul oferă semnal WiFi în mai multe puncte, conectarea unui număr de ordinul miilor la același access point duce la o împărțire foarte intensă a lungimii de bandă având ca rezultat o conexiune foarte lentă. Ținând cont de faptul că o asemenea mulțime ar putea fi interesată de lucruri similare accesate pe Internet, precum aflarea rezultatului la un alt meci sau programul mijloacelor de transport în comun, rețelele oportuniste au o puternică utilitate. Astfel, în schimbul conexiunilor cu access pointurile din stadion sau stațiile GSM din aria respectivă, dispozitivele se pot conecta între ele până când se întâlnește un nod cu informația căutată. Un nod mobil poate deține informația fie printr-o descărcare directă folosind 3G/4G/WiFi, fie printr-o salvare a informațiilor primite de la nodurile întâlnite. Acest exemplu identifică în rețelele oportuniste o alternativă viabilă pentru soluții ca WiFi,GSM în momentul în care infrastructura acestora nu poate rezolva un număr impresionant de cereri, sau a fost distrusă în anumite porțiuni.
+\subsection{Cazuri de utilizare}
+Motivația realizării acestei lucrări este evidețiată de multiple scenarii din viața reală ale căror desfășurare este influențată prin mecanismele de aducere a datelor și a resurselor computaționale mai aproape de utilizatorul final. În continuare, vom prezenta câteva scenarii uzuale ce vor beneficia de existența unui sistem complet care implementează caracteristicile paradigmelor introduse în această secțiune. Un prim exemplu presupune mulțimi de oameni adunați cu un scop comun, cum ar fi vizionarea unui important meci de fotbal pe un stadion cu un număr impresionant de locuri. Presupunând că majoritatea participanților dețin un telefon mobil, dacă jumătate au nevoie să utilizeze conexiunea 3G/4G/Wi-Fi în același moment de timp, serviciul oferit va fi unul fragmentat ce va conduce la o interacțiune neplăcută. Chiar dacă stadionul oferă semnal Wi-Fi în mai multe puncte, conectarea unui număr de ordinul miilor la același access point duce la o împărțire foarte intensă a lungimii de bandă, având ca rezultat o conexiune foarte lentă. Ținând cont de faptul că o asemenea mulțime ar putea fi interesată de lucruri similare accesate pe Internet, precum aflarea rezultatului la un alt meci sau programul mijloacelor de transport în comun, o paradigmă precum Drop Computing are o puternică utilitate. Astfel, în schimbul conexiunilor cu access point-urile din stadion sau stațiile GSM din aria respectivă, dispozitivele se pot conecta între ele până când se întâlnește un nod cu informația căutată. Un nod mobil poate deține informația fie printr-o descărcare directă folosind 3G/4G/Wi-Fi, fie printr-o salvare a informațiilor primite de la nodurile întâlnite. Acest exemplu identifică rețelele oportuniste ca o alternativă viabilă pentru soluții precum Wi-Fi,GSM în momentul în care infrastructura acestora nu poate rezolva un număr mare de cereri, sau nu funcționează corect în anumite porțiuni.
 % un paragraf cam mare?
-Un alt scenariu de folosire potrivită a paradigmei Drop Computing este reprezentat de implementarea aplicațiilor mobile CPU-intensive. De exemplu o aplicație de editare fotografii prezintă o serie de operații complexe care pe măsură ce numărul utilizatorilor crește necesită o infrastructura cloud puternică pentru partea de backend. Pentru o bună interacțiune a utilizatorilor, indiferent de puterea de calcul al dispozitivului ce rulează aplicația, menținerea unei platforme cloud puternice necesită atât costuri ridicate cât și multă muncă din partea dezvoltatorilor. În această situație folosind rețele de vecini formate și aflate într-o continuă schimbare în jurul dispozitivului mobil, pentru distribuirea calculelor computațional intensive, generăm o mai bună interacțiune a utilizatorului cu aplicația. Datorită comunicării cu dispozitivele întâlnite se reduce latența cererilor și răspunsurilor frecvente către sau dinspre cloud.
+
+Un alt scenariu de folosire potrivită a paradigmei Drop Computing este reprezentat de implementarea aplicațiilor mobile CPU-intensive. De exemplu, o aplicație de editare fotografii prezintă o serie de operații complexe care, pe măsură ce numărul utilizatorilor crește, necesită o infrastructură cloud puternică pentru partea de backend. Pentru o bună interacțiune a utilizatorilor, indiferent de puterea de calcul a dispozitivului ce rulează aplicația, menținerea unei platforme cloud puternice necesită atât costuri ridicate, cât și multă muncă din partea dezvoltatorilor. În această situație, folosind rețele de vecini formate și aflate într-o continuă schimbare în jurul dispozitivului mobil pentru distribuirea calculelor computațional intensive, rezultă o mai bună interacțiune a utilizatorului cu aplicația. Datorită comunicării cu dispozitivele întâlnite și utilizarea lor pentru a aduce date de la cloud sau pentru a realiza calcule mai rapid, se reduce latența cererilor și răspunsurilor frecvente către sau dinspre cloud.
 % tot aici exemplu cu realizari militare
 
-Una dintre cele mai importante situații reale în care folosirea rețelelor oportuniste reprezintă un beneficiu important este reprezentată de organizarea în cadrul unor calamități naturale. În multe situații de criză, în urma unor dezastre naturale sau alte împrejurări care determină prăbușirea unor elemente de infrastructură(stâlpuri căzute, cabluri rupte, switchuri distruse), atât comunicarea între membrii echipajului de salvare, cât și comunicarea cu victimele implicate este crucială. În prezent oamenii cel mai adesea comunică folosind dispozitive mobile inteligente, trimițând informații despre starea lor către cei dragi prin intermediul aplicațiilor ce necesită acces la Internet. O actuală soluție se bazează pe folosirea rețelelor oportuniste, astfel se creează o nouă infrastructură suprapusă peste cea distrusă în care componentele neafectate se comportă precum nodurile mobile dintr-o rețea oportunistă. Având ca scop realizarea unei conexiuni neîntrerupe folosirea oricărui dispozitiv mobil al unei victime, sau al persoanelor aflate în regiunea restrânsă în care s-a produs dezastrul crește șansele de a găsi cât mai repede persoanele care au nevoie de ajutor. Ținând cont de faptul că modelul de mobilitate al nodurilor în cazul unor astfel de evenimente este mult mai predictibil, persoanele posesoare de dispozitive deplansându-se către zonele de refugiu din apropiere, împărțirea datelor în rețea se poate face mult mai eficient ținând cont în special de nodurile care rămân blocate și ale căror date devin obligatoriu de transferat. Astfel informații obligatorii precum locația nodului sunt purtate oportunist și reușesc să ajungă la echipajul de salvare mult mai repede, în momente în care timpul poate însemna viața. Aceste aplicații trebuie să fie prezente întotdeauna pe dispozitivele mobile, iar scenariile privind infrastructura să fie simulate periodic atât pentru a se familiariza utilizatorii cu folosirea lor, cât și pentru a testa transmiterea de date. Datele corecte sunt cele mai importante, iar orice informație recepționată cu o valoare eronată poate avea consecințe nefericite în cadrul unei situații de urgență.
+Una dintre cele mai importante situații reale în care folosirea rețelelor mobile oportuniste de la baza unei infrastructuri de tip Drop Computing, reprezintă un beneficiu important este reprezentată de organizarea în cadrul unor calamități naturale. În multe situații de criză, în urma unor dezastre naturale sau a altor împrejurări care determină prăbușirea unor elemente de infrastructură (stâlpuri căzute, cabluri rupte, switch-uri distruse), atât comunicarea între membrii echipajului de salvare, cât și comunicarea cu victimele implicate este crucială. În prezent, oamenii cel mai adesea comunică folosind dispozitive mobile inteligente, trimițând informații despre starea lor către cei dragi prin intermediul aplicațiilor ce necesită acces la Internet. O actuală soluție se bazează pe folosirea rețelelor oportuniste, astfel creându-se o nouă infrastructură suprapusă peste cea distrusă, în care componentele neafectate se comportă precum nodurile mobile dintr-o rețea oportunistă. Având ca scop realizarea unei conexiuni neîntrerupe, folosirea oricărui dispozitiv mobil al unei victime sau al persoanelor aflate în regiunea restrânsă în care s-a produs dezastrul crește șansele de a găsi cât mai repede persoanele care au nevoie de ajutor. Ținând cont de faptul că modelul de mobilitate al nodurilor în cazul unor astfel de evenimente este mult mai predictibil (persoanele posesoare de dispozitive deplansându-se către zonele de refugiu din apropiere), împărțirea datelor în rețea se poate face mult mai eficient ținând cont în special de nodurile care rămân blocate și ale căror date devin obligatoriu de transferat. Astfel, informații obligatorii precum poziția geografică a nodului sunt purtate oportunist și reușesc să ajungă la echipajul de salvare mult mai repede, în momente în care timpul poate însemna viața. Aceste aplicații trebuie să fie prezente întotdeauna pe dispozitivele mobile, iar scenariile privind infrastructura să fie simulate periodic atât pentru a se familiariza utilizatorii cu folosirea lor, cât și pentru a testa transmiterea de date. Datele corecte sunt cele mai importante, iar orice informație recepționată cu o valoare eronată poate avea consecințe nefericite în cadrul unei situații de urgență.
 
-Din ceea ce am prezentat în paragrafele anterioare, atât în lucrarea Drop Computing~\cite{DC}, cât și în alte lucrări din literatura de specialitate, este identificată problema consistenței datelor în momentul în care o dată sau un task este împrăștiat/ă prin rețea. Acest lucru conduce la următoarea întrebare: cum știe un nod că datele de care are nevoie, pe care i le oferă alt nod mobil, sunt corecte, nefiind corupte sau modificate intenționat de niciun nod care le-a deținut la un moment dat? Această necesitate științifică exprimată în domeniul rețelelor oportuniste a fost principala motivație pentru alegerea acestei teme ca și lucrare de licență. Așadar, pentru a evita situația folosirii de date corupte voi prezenta anumite moduri/mecanisme de realizare a consistenței datelor alături de posibilitatea ca un nod mobil să sesize primirea unei date corupte. În același timp, există necesitatea de a cunoaște un mod de împărțire a datelor pe nodurile rețelei astfel încât să se păstreze consistența și, totodată, rețeaua să fie acoperită cât mai bine pentru a nu fi nevoie de request-uri frecvente către Cloud sau nodurile edge.
+\subsection{Necesitate}
+Din ceea ce am prezentat în paragrafele anterioare, atât în lucrarea Drop Computing~\cite{DC}, cât și în alte lucrări din literatura de specialitate, este identificată problema consistenței datelor în momentul în care informații sau task-uri sunt împrăștiate prin rețea. Acest lucru conduce la următoarea întrebare: cum știe un nod că datele de care are nevoie, pe care i le oferă alt nod mobil, sunt corecte, nefiind corupte sau modificate intenționat de niciun nod care le-a deținut la un moment dat? Această necesitate științifică exprimată în domeniul rețelelor mobile este principala motivație pentru această lucrare de licență. Așadar, pentru a evita situația folosirii de date corupte, vom prezenta anumite mecanisme de realizare a consistenței datelor alături de posibilitatea ca un nod mobil să sesize primirea unor date corupte. În același timp, există necesitatea de a cunoaște un mod de împărțire a datelor pe nodurile rețelei astfel încât să se păstreze consistența și, totodată, rețeaua să fie acoperită cât mai bine pentru a nu fi nevoie de request-uri frecvente către cloud sau nodurile edge.
 
-Concluzionând, este foarte important ca tot acest mecanism de caching și împărțire a datelor realizat de toate nodurile mobile din rețeaua creată să poată oferi un anumit grad de siguranță în ceea ce privește posibilitatea primirii unor informații corupte de la nodurile cu care intrăm în contact. Fiecare nod trebuie să aibă posibilitatea să recunoască o dată primită modificată și să poată ajuta cu această informație alte noduri la cunoașterea gradului de încredere al nodurilor întâlnite. Astfel, cu ajutorul unor mecanisme ce urmează a fi prezentate în această lucrare, consider că se rezolvă o problemă identificată în cadrul acestor rețele mobile, fără a folosi anumite presupuneri ce nu se pot regăsi niciodată în viața reală precum mobilitate scăzută, timp constant de contact, sau o memorie nelimitată a nodurilor implicate.
+Concluzionând, este foarte important ca tot acest mecanism de caching și împărțire a datelor realizat de toate nodurile mobile din rețeaua creată să poată oferi un anumit grad de siguranță în ceea ce privește posibilitatea primirii unor informații corupte de la nodurile cu care se intră în contact. Fiecare nod trebuie să aibă posibilitatea să recunoască date corupte și neconsistente și prin diseminarea acestor informații, să ajungă la un nivel ridicat de cunoaștere a gradului de încredere în fiecare nod din rețea. Astfel, cu ajutorul unor mecanisme ce urmează a fi prezentate în această lucrare, considerăm că se rezolvă o problemă identificată în cadrul rețelelor formate în majoritate din dispozitive mobile, fără a folosi anumite presupuneri ce nu se pot regăsi niciodată în viața reală (precum mobilitate scăzută, timp constant de contact, sau o memorie nelimitată a nodurilor implicate).
 
-Dacă proiectul de licență face parte dintr-un proiect mai amplu (de exemplu un proiect complex, la care lucrează 2 studenți (ex: 1 student la front-end-ul aplicației, 1 student la back-end-ul aplicației), în acest capitol va fi explicat pe scurt ansamblul proiectului și ce parte din proiect este adresată de lucrarea propusă. 
-
-Criterii pentru calificativul \textit{Ne\textit{Satisfăcător}}: 
-\begin{itemize}
-	\item \dezvoltare Cerințele sunt imaginate de student pe baza unei analize a pieței;
-	\item \cercetare Nu se oferă o motivație valida.
-\end{itemize}
-
-Criterii pentru calificativul \textit{Satisfăcător}: 
-\begin{itemize}
-	\item \dezvoltare Există un interviu, un client, analiza cerințelor este elaborată pe baza interviului;
-	\item \cercetare Motivația este doar personala.
-\end{itemize}
-
-
-Criterii pentru calificativul \textit{Bine}: 
-\begin{itemize}
-	\item	 \dezvoltare Proces iterativ pe baza unor interviuri cu mai mulți clienți, dezvoltare MVP, reevaluare cerințe;
-	\item	 \cercetare Motivația este legata de o necesitate științifica / tehnica explicită.
-\end{itemize}
-
-
-\chapter{Studiu de Piață / Metode Existente}
-\dezvoltare Ce soluții similare există pe piață? Care sunt limitările lor / pentru ce cazuri de utilizare sau pentru ce tip de clienți produsele existente pe piață nu răspund cerințelor? Care sunt indicatorii pe baza cărora sunt evaluate aceste produse, de către potențiali clienți, și unde sunt lipsurile/ care este oportunitatea generată de lipsurile acestea?
-\cercetare Metode existente (sau ``State of the Art'') se referă, de regulă, la nivelul curent de dezvoltare: care este starea curentă a domeniului, unde ne găsim, care este contextul. Care sunt soluțiile actuale prezente în literatura de specialitate și care sunt limitările lor? Ce direcții de explorare sunt recomandate în literatura de specialitate? Literatura de specialitate se refera la articole științifice recente, publicate în reviste cu factor de impact mare, sau în volumele unor conferințe de top, sau în cărți.
-\chapter{Metode Existente}
+\chapter{Metode Existente} \label{metodeExistente}
 \section{Mobile Ad Hoc Networks(MANET)}
-Foarte mulți cercetători și-au reorientat atenția și studiul în domeniul rețelelor, astfel pe lângă studiul intens legat de rețelele centralizate, cum este Internetul și rețelele celulare, aceștia s-au orientat către studiul rețelelor descentralizate fără fir. Este vorba despre așa numitele rețele ad-hoc\cite{MITArticle}. Acestea sunt rețele formate pe loc, la nevoie și nu au nevoie de o infrastructura existentă și complexă, așa cum presupune Internetul, putând avea aplicații în detecția distribuită, robotică, posibil chiar și în comunicațiile personale.
+Foarte mulți cercetători și-au reorientat atenția și studiul în domeniul rețelelor, astfel că, pe lângă studiul intens legat de rețelele centralizate, precum Internetul și rețelele celulare, aceștia s-au orientat către studiul rețelelor descentralizate fără fir. Este vorba despre așa numitele rețele ad-hoc\cite{MITArticle}. Acestea sunt rețele formate pe loc, la nevoie, și nu necesită existența unei infrastructuri solide și complexe, așa cum presupune Internetul, putând avea aplicații în detecția distribuită, robotică, posibil chiar și în comunicațiile personale.
 
-Principala diferență dintre aceste rețele este reprezentată de faptul că în cadrul Internetului toată responsabilitatea direcționării traficului de date aparține unor dispozitive speciale, denumite rutere, acestea fiind programate în privința împărțirii pachetelor, cu toate formele de filtrare pe care ni le dorim, in timp ce în cadrul rețelelor ad-hoc nu există stații de bază și nu există dispozitive care să monitorizeze performanța rețelelor ca un intreg. O trăsătură importantă a tuturor rețelelor ad hoc este aceea că au loc schimbări constante ale topologiei rețelei, acest lucru devind o problemă din cauza faptului că dispozitivele au o autonomie cât se poate de limitată. Participanții din cadrul unor astfel de rețele nu pot transmite o cantitate de date in funcție de schimbările de topologie, indiferent de distanța care îi separă.
+Principala diferență dintre aceste rețele este reprezentată de faptul că în cadrul Internetului toată responsabilitatea direcționării traficului de date aparține unor dispozitive speciale, denumite routere, acestea fiind programate în privința împărțirii pachetelor, cu toate formele de filtrare pe care ni le dorim. În schimb, în cadrul rețelelor ad-hoc, nu există stații de bază și nu există dispozitive care să monitorizeze performanța rețelelor ca un intreg. O trăsătură importantă a tuturor rețelelor ad-hoc este aceea că au loc schimbări constante în topologia rețelei, acest lucru devenind o problemă din cauza faptului că dispozitivele mobile au o autonomie cât se poate de limitată. Participanții din cadrul unor astfel de rețele nu pot transmite orice cantitate de date pentru a se acomoda cu schimbările de topologie, indiferent de distanța care îi separă.
 
-Pentru aceste rețele schimbul de fișiere sau de date joacă un rol important, care implică mulți utilizatori. Pentru a facilita împărțirea datelor se folosește ideea de replicare a datelor\cite{CDRA}, dar considerentele de care trebuie ținut seama în aceste rețele complică acești algoritmi de replicare. Frecventele partiționări ale rețelei datorită mobilității nodurilor sau puterea limitată a bateriei conduc la o reducere a disponibilității datelor in rețea, de aceea un algoritm eficient de replicare trebuie să gasească soluții pentru toate aceste limitări ale rețelei. Așadar problemele de care trebuie ținut cont sunt următoarele:
+Pentru aceste rețele schimbul de fișiere sau de date joacă un rol important care implică mulți utilizatori. Pentru a facilita împărțirea datelor se folosește ideea de replicare a datelor\cite{CDRA}, dar considerentele de care trebuie ținut seama în aceste rețele complică acești algoritmi de replicare. Frecventele partiționări ale rețelei din cauza mobilității nodurilor sau puterea limitată a bateriei conduc la o reducere a disponibilității datelor în rețea. De aceea, un algoritm eficient de replicare trebuie să găsească soluții pentru toate aceste limitări ale rețelei. Așadar, problemele de care trebuie ținut cont sunt următoarele:
 \begin{itemize}
 	\item\textbf{Consumul de putere} \hfill \\
-	Dacă unui nod cu o baterie redusa ii sunt replicate multe bucati de date, dupa putin timp el se va opri si nu va mai putea oferi niciun serviciu. De aceea trebuie verificat periodic nivelul de putere al fiecărui nod și datele să fie replicate doar in cele cu suficientă putere.
+	Dacă unui nod cu o baterie redusă îi sunt replicate multe bucăți de date, după puțin timp el se va opri și nu va mai putea oferi niciun serviciu. De aceea, trebuie verificat periodic nivelul de putere al fiecărui nod și datele trebuie să fie replicate doar în cele cu suficientă putere.
 	\item\textbf{Mobilitatea nodurilor} \hfill \\
-	Algoritmul de replicare trebuie să suporte o predicție a mobilității astfel dacă un nod e posibil să părăsească rețeaua(să fie la o distanță neaccesibilă), datele stocate pe acest nod să fie transferate pe un alt nod a cărei predictie sugerează că se va afla cel putin un anumit timp in rețea.
+	Algoritmul de replicare trebuie să suporte o predicție a mobilității și, astfel, dacă un nod e posibil să părăsească rețeaua (să ajungă la o distanță neaccesibilă), datele stocate pe acest nod trebuie să fie transferate pe un alt nod a cărei predicție sugerează că se va afla cel puțin un anumit timp in rețea.
 	\item\textbf{Timpul de răspuns} \hfill \\
-	Timpul este un factor crucial pentru multe aplicatii, de aceea trebuie avut in vedere ca accesul la o data cerută să fie făcut de la cel mai apropiat nod care o deține.
+	Timpul este un factor crucial pentru multe aplicații și, de aceea, trebuie avut în vedere ca accesul la o data cerută să fie făcut de la cel mai apropiat nod care o deține.
 	\item\textbf{Mecanism de consistență} \hfill \\
-	Dacă o data este read-only, performanța poate fi imbunătățită prin replicarea datei in toate nodurile(aici intervenind insă resursele limitate ale rețelei). Însă dacă o data este si modificată in mod frecvent, alte replici devin invalide, astfel este necesar un mecanism care să verifice și să mențină consistența datelor in retea.
+	Dacă o data este read-only performanța poate fi îmbunătățită prin replicarea datei în toate nodurile (aici intervenind însă resursele limitate ale rețelei). Însă, dacă o dată este și modificată în mod frecvent, alte replici devin invalide, fiind necesar un mecanism care să verifice și să mențină consistența datelor în rețea.
 \end{itemize}
-Din ce am prezentat până acum se poate observa nevoia de a evolua de la MANET, la un alt tip de rețele în care să 
-nu mai fie nevoie de stocarea informațiilor de rutare și răspândirea lor in rețea in mod frecvent, deoarece aceasta desfăsurare nu este deloc fezabile în cadrul rețelelor foarte mari. În concluzie, rețelele mobile ad hoc(MANET-urile) au evoluat în mod natural în așa numitele rețele oportuniste, a căror prezentare o voi face în secțiunea următoare.
+Din ce am prezentat până acum se poate observa nevoia de a evolua de la MANET la un alt tip de rețele în care să nu mai fie nevoie de stocarea informațiilor de rutare și răspândirea lor in rețea în mod frecvent, deoarece această desfășurare nu este deloc fezabilă în cadrul rețelelor foarte mari. În concluzie, rețelele mobile ad-hoc (MANET-urile) au evoluat, în mod natural, în așa numitele rețele oportuniste, a căror prezentare o voi face în secțiunea următoare.
 \section{Rețele oportuniste}
-Principala incadrare a acestui tip de rețele se poate oferi spunând că acestea sunt un tip de rețele tolerante la intârzieri(Delay Tolerant Networks) și, totodată, o extensie a rețelelor mobile ad hoc. Cea mai importantă diferență față de MANETs? o constituie faptul că rețele oportuniste se bazează pe o mobilitate foarte ridicată a nodurilor implicate, generând între ele rute foarte dinamice. Mai mult decât atât, datorită faptului că majoritatea conexiunilor nu sunt stabile și se întâmplă la momente de timp neregulate, de cele mai multe ori nu există o cale completă între sursă si destinație(transmițător si destinatar). Acest tip de rețele se bazează pe o paradigmă denumită store-carry-forward. Această denumire este una sugestivă întrucât un nod sursă care dorește să transmită un mesaj îl stochează local, apoi îl poartă prin rețea, urmând ca în final să îl livreze la destinație în cazul în care întâlnește nodul destinator. Dacă între proprietarul mesajului și destinatar nu se creează un contact, mesajul este transmis către un nod care prezintă mai multe șanse de a transporta mesajul la destinație sau cât mai aproape de destinație, în cel mai optim timp.
+Principala încadrare a acestui tip de rețele se poate oferi spunând că sunt un tip de rețele tolerante la întârzieri (Delay Tolerant Networks) și, totodată, o extensie a rețelelor mobile ad-hoc. Cea mai importantă diferență față de MANET-uri o constituie faptul că rețelele oportuniste se bazează pe o mobilitate foarte ridicată a nodurilor implicate, generând între ele rute foarte dinamice. Mai mult decât atât, din cauza faptului că majoritatea conexiunilor nu sunt stabile și se întâmplă la momente de timp neregulate, de cele mai multe ori nu există o cale completă între sursă si destinație (transmițător și destinatar). Acest tip de rețele se bazează pe o paradigmă denumită store-carry-forward. Această denumire este una sugestivă întrucât un nod sursă care dorește să transmită un mesaj îl stochează local, apoi îl poartă prin rețea, urmând ca în final să îl livreze la destinație în cazul în care întâlnește nodul destinator. Dacă între proprietarul mesajului și destinatar nu se creează un contact, mesajul este transmis către un nod care prezintă mai multe șanse de a transporta mesajul la destinație sau cât mai aproape de destinație, în cel mai optim timp.
 
-Oportunitatea se referă la faptul că un nod poate trimite un mesaj doar in momentul in care nodurile intermediare apar in suprafața de conectivitate, această suprafață depinzând de tehnologia folosită(ex. Bluetooth, Wireless, GSM).  Totodată, rețelele oportuniste se bazează pe altruismul nodurilor, astfel fiecare nod trebuie să vadă și interesul altor noduri de a le transporta mesajele pentru a ajunge mai rapid la destinație, împărțind datele cât mai mult prin rețea crește probabilitatea mesajelor de a ajunge la destinație, în timp ce probabilitatea ca mesajele să atingă nodul destinație într-un timp mult prea mare, scade. Există două tipuri de comunicare oportunistă, anume rutare și diseminare. În timp ce primul tip presupune comunicarea cu un singur destinatar identificat cu un id unic, cel de-al doilea tip nu se mai referă la o comunicație punct-la-punct. Diseminarea se referă la faptul că nodurile pot genera date pentru o anumită categorie, în același timp ele putându-se și abona la diferite categorii de conținut de la care vor aștepta date. 
-Figura~\ref{fig:pic1} sugerează un alt use-case al rețelelor oportuniste dezbătut în ultimii ani și anume data and computation offloading.
+Oportunitatea se referă la faptul că un nod poate trimite un mesaj doar în momentul în care nodurile intermediare apar în suprafața de conectivitate, această suprafață depinzând de tehnologia folosită(ex. Bluetooth, Wireless, GSM). Totodată, rețelele oportuniste se bazează pe altruismul nodurilor, fiecare nod ținând cont și de interesul vecinilor de a le transporta mesajele pentru a ajunge cât mai rapid la destinație. Astfel, împărțind datele cât mai dinamic prin rețea crește probabilitatea de a ajunge la destinație, în timp ce probabilitatea ca datele să atingă nodul destinație într-un timp mult prea mare, scade. Există două tipuri de comunicare oportunistă, acestea fiind: rutare și diseminare. În timp ce primul tip presupune comunicarea cu un singur destinatar identificat cu un id unic, cel de-al doilea tip nu se mai referă la o comunicație punct-la-punct. Diseminarea se referă la faptul că nodurile pot genera date pentru o anumită categorie, în același timp ele putându-se și abona la diferite categorii de conținut de la care vor aștepta date. 
+Figura~\ref{fig:pic1} sugerează o altă întrebuințare a rețelelor oportuniste dezbătută în ultimii ani și anume: \textit{data and computation offloading}.
 \begin{figure}[th]
 \centering
 \includegraphics[width=3in]{pics/ONs.png}
   \caption{Scenariul descărcării oportuniste}
   \label{fig:pic1}
 \end{figure}
-Ideea de bază constă în faptul că offloading-ul poate fi mult mai benefic în momentul în care un număr mare de noduri aflate în aceeași comunitate sau în comunități apropiate, fiind situate într-o compactă arie fizică, doresc să descarce aproape aceași informație în aproximativ același timp de la serverele centrale. Așadar, fiecare nod are posibilitatea de a primi informația dorită de la un nod cu care s-a întâlnit, care la rândul lui are informația fie de la alte noduri cu care a avut contact în comunitate, fie folosim rețeaua celulară.(ex. stadionul de fotbal)
+Ideea de bază constă în faptul că \textit{offloading-ul} poate fi mult mai benefic în momentul în care un număr mare de noduri aflate în aceeași comunitate sau în comunități apropiate (fiind situate într-o arie fizică compactă), doresc să descarce aproape aceeași informație în aproximativ același timp de la serverele centrale. Așadar, fiecare nod are posibilitatea de a primi informația dorită de la un nod cu care s-a întâlnit, care la rândul lui are informația fie de la alte noduri cu care a avut contact în comunitate, fie folosim rețeaua celulară.
 
-În literatura de specialitate întâlnim numeroși algoritmi de rutare în rețele oportuniste, fiecare având avantaje și dezavantaje în funcție de caracteristicile rețelei. Majoritatea mecanismelor de a împărți date în rețelele oportuniste se bazează pe distribuția de date Epidemic, care presupune că în momentul în care două noduri se întâlnesc primul nod își transferă datele la nodul întâlnit.  Acesta din urmă le salvează pe cele pe care nu le deține deja salvate dintr-o întâlnire anterioară și îi transferă și el propriile date. Punctele tari ale acestui mecanism sunt reprezentate de faptul că numărul mare de copii din rețea reduce întârzierea de transmitere, oferă o rată maximă mesajelor generate de a ajunge la destinație, fiind în același timp și cel mai simplu de implementat. În schimb punctele slabe sunt reprezentate de nevoia ca nodurile să aibă o memorie nelimitată, cât și de inundarea? rețelei cu mesaje, ceea ce face că în această formă să fie practic imposibil de folosit în viața reală. Așadar, implementările acestei distribuții au folosit un număr limitat de mesaje pentru a putea preveni aglomerarea rețelei, dar și din cauza faptului că toate nodurile vor avea o memorie limitată. Spray and Wait~\cite{SprayAndWait} este un astfel de algoritm care deși limitează numărul de mesaje care pot fi trimise in rețea, păstrează o rată ridicată de reușită. Acest algoritm presupune permiterea unui număr limitat si predefinit de copii pe care un mesaj al unui anumit nod le poate avea în rețea. Astfel identificăm două faze, si anume faza de împrăștiere și faza de așteptare. În prima fază fiecare nod primește câte o copie a mesajului în ordinea în care sunt întâlnite, până se ating numărul de copii permise, apoi începe faza a doua, de așteptare, în care nodurile ce dețin copia mesajului așteaptă întâlnirea nodul destinație, deoarece doar lui mai pot să il transfere. Deși această versiune nu garantează o rată maximă de reușită, valoarea ei este una ridicată ținând cont că rezolvă și o problemă importantă, anume congestia rețelei. 
+În literatura de specialitate întâlnim numeroși algoritmi de rutare în rețele oportuniste, fiecare având avantaje și dezavantaje în funcție de caracteristicile rețelei. Majoritatea mecanismelor de a împărți date în rețelele oportuniste se bazează pe distribuția de date Epidemic, care presupune că în momentul în care două noduri se întâlnesc primul nod își transferă toate datele la nodul întâlnit.  Acesta din urmă le salvează pe cele pe care nu le deținea deja dintr-o întâlnire anterioară și îi transferă și el propriile date. Punctele tari ale acestui mecanism sunt reprezentate de faptul că numărul mare de copii din rețea reduce întârzierea de transmitere, oferă o rată maximă mesajelor generate de a ajunge la destinație, fiind în același timp și cel mai simplu de implementat. În schimb, punctele slabe sunt reprezentate de nevoia ca nodurile să aibă o memorie nelimitată, cât și de inundarea rețelei cu mesaje, ceea ce face că în această formă să fie practic imposibil de folosit în viața reală. Așadar, implementările acestei distribuții au folosit un număr limitat de mesaje pentru a putea preveni aglomerarea rețelei, dar și din cauza faptului că toate nodurile vor avea o memorie limitată. Spray and Wait~\cite{SprayAndWait} este un astfel de algoritm care, deși limitează numărul de mesaje ce pot fi trimise în rețea, păstrează o rată ridicată de reușită. Acest algoritm presupune un număr limitat și predefinit de copii pe care un mesaj al unui anumit nod le poate avea în rețea. Astfel, identificăm două faze, și anume, faza de împrăștiere și faza de așteptare. În primă fază, fiecare nod primește câte o copie a mesajului în ordinea în care sunt întâlnite, până se ating numărul de copii permise, apoi începe faza a doua, de așteptare. În această fază, nodurile ce dețin copia mesajului așteaptă întâlnirea nodul destinație, deoarece doar acestuia îl mai pot transfera. Deși această versiune nu garantează o rată maximă de reușită, valoarea ei este una ridicată ținând cont că rezolvă o problemă importantă, și anume congestia rețelei. 
 \section{Mobile Edge Computing}
-În zilele noastre, utilizatorii de dispozitive mobile inteligente sunt dependenți de execuția și stocarea unor operații intensive pe acestea. Majoritatea serviciilor precum: Facebook, Amazon, Google, dar și conținutul de pe Youtube sau Twitter este salvat in cloud, astfel pentru a realiza interacțiunea dorită cu aceste aplicații informațiile cerute de utilizator trebuie descărcate local. Pentru a face acest lucru cât mai optim trebuie să aducem cloudul cât mai aproape de utilizator și de marginea rețelei, altfel soluțiile sunt mult mai scumpe și dificile. Pentru aceste cerințe ale utilizatorilor se introduce idee de Mobile Edge Computing(MEC) care presupune că resursele necesare stocării, calculării, cât și rețelisticii sunt integrate alături de stațiile de bază, mult mai aproape de utilizatorul final. Așadar aplicațiile ce presupun un calcul intensiv și o latență semnificativă pot fi găzduite la marginea rețelei, datele lor fiind propagate mult mai ușor și rapid către destinatar, acest aspect fiind evidențiat și in Figura~\ref{fig:pic0}~\footnote{Această imagine a fost preluată de pe site-ul \cite{MECPicture} }.
+În zilele noastre, utilizatorii de dispozitive mobile inteligente sunt dependenți de execuția unor operații intensive pe acestea. Majoritatea serviciilor oferite de diverse companii, precum: Facebook, Amazon, Google, dar și conținutul de pe Youtube sau Twitter este salvat în cloud. Astfel, pentru a realiza interacțiunea dorită cu aceste aplicații informațiile cerute de utilizator trebuie descărcate local. Pentru o interacțiune cât mai plăcută, trebuie să aducem cloud-ul cât mai aproape de utilizator și de marginea rețelei, alte soluții legate de infrastructura sistemului cloud fiind mult mai scumpe și dificil de implementat. Pentru aceste cerințe ale utilizatorilor se introduce idee de Mobile Edge Computing (MEC), idee ce presupune ca resursele necesare atât stocării, calculării, cât și rețelisticii să fie integrate alături de stațiile de bază, mult mai aproape de utilizatorul final. Așadar, aplicațiile ce presupun un calcul intensiv și o latență semnificativă pot fi găzduite la marginea rețelei, datele lor fiind propagate mult mai ușor și rapid către destinatar, acest aspect fiind evidențiat și in Figura~\ref{fig:pic0}~\footnote{Această imagine a fost preluată de pe site-ul \cite{MECPicture} }.
 \begin{figure}[th]
 \centering
 \includegraphics[width=3in]{pics/mobile-edge-computing.jpg}
   \caption{\emph{Exemplificarea cloud-urilor formate la marginea rețelei}}
   \label{fig:pic0}
 \end{figure}
-Într-o altă paradigmă numită Internet Of Things procesarea datelor este făcută de dispozitive aflate în aceeași rețea cu mașinăriile care au generat datele, astfel cu mecanisme de caching datele de pe cloud sunt accesate cu o latență scăzută datorită faptului că ele sunt transferate mai aproape de punctul de interes grație rețelelor Content Delivery(CDNs). Mobile Edge Computing-ul\cite{MecSurvey} sugerează folosirea unei scălari a comunicației pe orizontală în detrimentul unei scalări verticale de infrastructură cloud în momentul în care modelul de date din cloud nu mai este fezabil. Această paradigmă oferă un mediu de calcul extrem de distribuit folosit atât pentru dezvoltarea de aplicații și servicii, cât și pentru stocarea și procesarea datelor cât mai aproape de dispozitivele mobile. O aplicație poate fi divizată în mai multe sub-taskuri și împărțită prin rețea astfel o parte din sub-taskuri să fie rezolvate într-un cloud format local, la marginea rețelei, fie transmis la cloudul regional atât timp cât latența și precizia rămân în limitele dorite.
-Așa cum reiese și din cele prezentate mai sus, conceptul de MEC se concentrează pe anumite metrici importante, cum ar fi latența și lățimea de bandă ridicată necesară comunicării. Aceste aspecte se îmbunătățesc prin limitarea transferului de date la serverele MEC, decât la serverele centralizate care prezintă un cost ridicat de întârziere. De asemenea, consumul de putere este o importantă grijă, astfel taskurile intens computaționale sunt mutate de la resursele dispozitivului utilizatorului către sisteme externe cu resurse puternice. Toate aceste îmbunătățiri vin cu un cost ridicat de implementare, deoarece atât crearea infrastructurii pentru MEC, cât și mentenanța ei necesită un important buget. 
-.....
+
+Într-o altă paradigmă, Internet Of Things, procesarea datelor este făcută de dispozitive aflate în aceeași rețea cu mașinăriile care au generat datele, astfel cu mecanisme de caching datele de pe cloud sunt accesate cu o latență scăzută datorită faptului că ele sunt transferate mai aproape de punctul de interes grație rețelelor Content Delivery (CDNs). Mobile Edge Computing-ul\cite{MecSurvey} sugerează folosirea unei scalări a comunicației pe orizontală în detrimentul unei scalări verticale de infrastructură cloud, în momentul în care modelul de date din cloud nu mai este fezabil. Această paradigmă oferă un mediu de calcul extrem de distribuit, folosit atât pentru dezvoltarea de aplicații și servicii, cât și pentru stocarea și procesarea datelor mult mai aproape de dispozitivele mobile. O aplicație poate fi divizată în mai multe sub componente care să fie împărțite independent prin rețea. Astfel, o parte din cerințe poate ajunge să fie rezolvată fie într-un cloud format local, la marginea rețelei, fie de sistemul cloud central atât timp cât latența și precizia rămân în limitele dorite.
+
+Așa cum reiese și din cele prezentate mai sus, conceptul de Mobile Edge Computing se concentrează pe anumite metrici importante, cum ar fi: latența și lățimea de bandă ridicată necesară comunicării. Aceste aspecte se îmbunătățesc prin limitarea transferului de date către serverele centrale, transfer ce prezintă un cost ridicat de întârziere, sprijinind astfel folosirea resurselor aflate la marginea rețelei. De asemenea, consumul de putere reprezintă o importantă grijă, prin urmare task-urile intens computaționale sunt mutate de la resursele dispozitivului utilizatorului către sisteme externe cu resurse puternice. Toate aceste îmbunătățiri vin cu un cost ridicat de implementare, deoarece atât crearea infrastructurii pentru sistemul computațional local, cât și mentenanța lui necesită un important buget. 
+
 \section{Drop Computing}
-Paradigma de Drop Computing\cite{DC} presupune descentralizarea computing-ului peste rețele cu mai multe nivele, prin combinarea tehnologiilor cloud si wireless peste o mulțime socială formată din dispozitive mobile si de margine. Astfel, în loc ca fiecare request de date sau calcule să fie direcționat către cloud, Drop Computing folosește dispozitivele din proximitate pentru un acces mai rapid si eficient. Nevoia pentru această paradigmă vine din insuficiența modelului cloud clasic care deja devine nepotrivit în marea ascensiune a scenariului Internet of Things. Când un număr mare de dispozitive comunică între ele, toate sunt nevoite să trimită request-uri către cloud, să aștepte răspunsul si apoi să-l proceseze, chiar dacă aceste dispozitive sunt chiar și la câțiva pași distanța.
-Ca o concluzie principalul scop al acestei opțiuni este să minimizeze consumul de energie, să reducă costurile operaționale și chiar să măreasca performanțele rețelelor mobile comparativ cu celelalte modele, atât ca timp, cât și ca nivel de siguranță.
+Paradigma de Drop Computing\cite{DC} presupune descentralizarea computing-ului peste rețele cu mai multe nivele, prin combinarea tehnologiilor cloud si wireless peste o mulțime socială formată din dispozitive mobile si de margine. Astfel, în loc ca fiecare cerere de date sau calcule să fie direcționată către cloud, Drop Computing folosește dispozitivele din proximitate pentru un acces mai rapid și mai eficient. Nevoia pentru caracteristicile aceastei paradigme vine din insuficiența modelului cloud clasic, model care deja devine nepotrivit în marea ascensiune a scenariului Internet of Things. Când un număr mare de dispozitive comunică între ele, toate sunt nevoite să trimită cereri către cloud, să aștepte răspunsul și apoi să-l proceseze, chiar dacă aceste dispozitive sunt chiar și la câțiva pași distanță unele față de altele.
+Ca o concluzie, principalul scop al acestei paradigme este să minimizeze consumul de energie, să reducă costurile operaționale și chiar să mărească performanțele rețelelor mobile comparativ cu celelalte modele, atât ca timp, cât și ca nivel de siguranță.
 	
 \begin{figure}[th]
 \centering
@@ -325,23 +307,23 @@ Ca o concluzie principalul scop al acestei opțiuni este să minimizeze consumul
   \caption{Viziunea Drop Computing}
   \label{fig:pic2}
 \end{figure}
-Așa cum sugerează și Figura~\ref{fig:pic2}\footnote{Aceasta imagine a fost preluată din articolul\cite{DC}} de mai sus, viziunea Drop Computing este de a extinde până la extrem modelul edge cloud, în loc de a avea dispozitive de margine fixe care să facă legătura cu cloud-ul, avem un cloud de margine. Acesta fiind o rețea dinamică ad hoc formată din dispozitive mobile aflate într-un anumit perimetru. Principala noutate a acestei paradigme provine din faptul că mobilitatea nodurilor(a dispozitivelor mobile) este văzută ca o caracteristică(feature) și nu ca o problemă ca până acum. Astfel conexiunile sociale între dispozitive, mai exact între persoanele purtătoare și posesoare de dispozitive mobile, sunt utilizate pentru a calcula atât nivelul de încredere, cât si nivelul de reușită atunci când se folosesc resursele altor noduri. Concluzionând, distribuirea si salvarea datelor de către nodurile din rețea care au o importantă probabilitate de întâlnire cu dispozitivele ce necesită acele informații reprezintă un important beneficiu prin faptul că datele sunt aduse mult mai aproape de utilizator, interacțiunea cu cloud-ul nemaifiind atât de intensă.
+Așa cum sugerează și Figura~\ref{fig:pic2}\footnote{Această imagine a fost preluată din articolul\cite{DC}} de mai sus, viziunea Drop Computing este de a extinde până la extrem modelul edge cloud. Astfel, în loc de a avea dispozitive de margine fixe care să facă legătura cu cloud-ul, avem un cloud de margine. Acesta reprezentând o rețea dinamică ad-hoc formată din dispozitive mobile aflate într-un anumit perimetru. Principala noutate a acestei paradigme provine din faptul că mobilitatea nodurilor este considerată o caracteristică, o calitate și nu este văzută ca o problemă, așa cum a fost percepută până acum. Astfel, conexiunile sociale între dispozitive, mai exact între persoanele purtătoare și posesoare de dispozitive mobile, sunt utilizate pentru a calcula atât nivelul de încredere, cât și nivelul de reușită atunci când se folosesc resursele altor noduri. Concluzionând, distribuirea și salvarea datelor de către nodurile din rețea care au o probabilitate mare de întâlnire cu dispozitivele ce necesită acele informații, reprezintă un important beneficiu datorită faptului că datele sunt aduse mult mai aproape de utilizator, interacțiunea cu cloud-ul nemaifiind atât de intensă.
 \section{MobEmu}
-MobEmu~\cite{MobEmuArticle} este un simulator de rețele oportuniste care poate repeta o urmă(trace, comportament) care este fie rezultatul unei măsuratori din viața reală, fie este rezultat/ă în urma rulării unui model sintetic de mobilitate. Acestor date urmează să li se aplice un algoritm de rutare și diseminare creat de utilizator.
-În timp ce modelul fizic presupune analiza unui experiment în care participanții poartă diferite dispozitive care înregistrează interacțiunile dintre ei ca moment de timp și durata contactului, modelele sintetice sunt modele matematice care pot simula diferite comportamente ale nodurilor. Dacă Shortest Path Map-Based model~\cite{ShortestPathMapBased} alege viteza de deplasare a nodurilor random, urmatoarea poziție o alege random dintr-o listă de puncte valide de pe hartă. În continuare, utilizează un algoritm de calcul pentru cel mai scurt drum dintre două puncte precum Dijkstra și găsește cel mai scurt drum până la destinație, ținând cont și de anumite direcții valide(e.g care să nu treacă prin ziduri). 
+MobEmu~\cite{MobEmuArticle} este un simulator de rețele oportuniste care poate repeta un comportament, un trace care este fie rezultatul unei măsurători din viața reală, fie este rezultat în urma rulării unui model sintetic de mobilitate. Pe aceste rezultate putându-se aplica orice algoritm de rutare și diseminare creat de utilizator.
+În timp ce modelul fizic presupune analiza unui experiment în care participanții poartă diferite dispozitive care înregistrează interacțiunile dintre ei, ca moment de timp și durata contactului, modelele sintetice sunt modele matematice ce pot simula diferite comportamente ale nodurilor. Dacă modelul Shortest Path Map-Based~\cite{ShortestPathMapBased} alege viteza de deplasare a nodurilor în mod aleator, următoarea poziție o alege aleator dintr-o listă de puncte valide, calculate de pe hartă. În continuare, acest model utilizează un algoritm de calcul pentru cel mai scurt drum dintre două puncte, precum Dijkstra, găsind cel mai scurt drum până la destinație, în funcție și de anumite direcții valide (e.g care să nu treacă prin ziduri). 
 
-Pentru a putea rula și testa soluțiile care au stat la baza acestei lucrări am folosit MobEmu, un simulator scris in Java a cărui funcționalitate o voi descrie in continuare. În primul rând, acest framework oferă posibilitatea alegerii între mai multe tipuri de parsere: de la cele care simuleaza modelele sintetice până la cele care analizează datele colectate de diferite dispozitive din facultate. La fiecare moment de timp, de când s-a măsurat trace-ul si până când s-a terminat, se verifică orice contact care apare între cel puțin două noduri. În momentul în care a avut loc un contact se poate folosi un algoritm de rutare și diseminare, unul dorit și implementat de utilizator. 
-În al doilea rând, MobEmu permite ca utilizatorul să controleze la fiecare moment de timp generarea de mesaje a unui nod către alte noduri, dar și numărul lor, prioritatea, Time-To-Live, numărul total de copii pe care îl permite in rețea. Totodată, simulatorul calculează comunitatea din care face parte fiecare nod utilizând algoritmul k-CLIQUE sau alți algoritmi care utilizează detecția bazată pe euristici cognitive. 
+Pentru a putea rula și testa soluțiile care au stat la baza acestei lucrări am folosit MobEmu, un simulator scris in Java a cărui funcționalitate o voi descrie in continuare. În primul rând, acest framework oferă posibilitatea alegerii între mai multe tipuri de parsere: de la cele care simulează modelele sintetice, până la cele care analizează datele reale colectate de diferite dispozitive aflate în contact. La fiecare moment de timp, de când s-a măsurat trace-ul și până când s-a terminat, se verifică orice contact care apare între oricare două noduri. În momentul în care a avut loc un contact se poate folosi orice algoritm de rutare și diseminare preferat și implementat de utilizator. 
+În al doilea rând, MobEmu permite ca utilizatorul să controleze la fiecare moment de timp generarea de mesaje a unui nod către alte noduri, dar și numărul lor, prioritatea, Time-To-Live, numărul total de copii pe care le permite în rețea. Totodată, simulatorul calculează comunitatea din care face parte fiecare nod utilizând algoritmul k-CLIQUE sau alți algoritmi care utilizează detecția bazată pe euristici cognitive. 
 
-În final se oferă statistici cu privire la numărul de mesaje care au ajuns la destinație, timpul în care acestea s-au propagat prin rețea, numărul de comunități create, latența și costul transportului, toate acestea fiind influențate de anumite setări pe care le poate face utilizatorul precum memoria fiecărui nod, viteza cu care mesajele se pot transmite, dar și nivelul de altruism al nodurilor.
-Pe lângă acest simulator, mai există și altele care se comportă în mod asemănator, cel mai cunoscut fiind ONE(Opportunistic Network Environment)~\cite{OneArticle} disponibil tot in java și care modelează mobilitatea nodurilor, contactele inter noduri, dar și rutarea pachetelor. Fiecare nod este reprezentat de un modul principal care la rândul lui se poate conecta la diferite submodule precum: energia consumată, mobilitatea, memoria, descriind astfel capabilitățile și atributele nodului ONE. Decizia de a folosi MobEmu a venit în urma unor avantaje pe care acesta le oferă, și anume: suport pentru detectarea comunităților de noduri, folosirea conexiunilor din rețelele sociale, modelarea altruismului, permițând în același timp și simularea unor comportamente în care mesajele nu sunt propagate către o singură destinație. Aceste avantaje consider că se mapează mult mai bine pe situațiile reale, în care posesorii dispozitivelor inteligente pot respecta un anumit pattern de mobilitate sau de conținut cerut în funcție de relațiile sociale, dar și de comunitatea din care fac parte in acel moment.  
+În final se oferă statistici cu privire la numărul de mesaje care au ajuns la destinație, timpul în care acestea s-au propagat prin rețea, numărul de comunități create, latența și costul transportului. Toate aceste informații fiind influențate de anumite setări pe care le poate face utilizatorul, precum memoria fiecărui nod, viteza cu care mesajele se pot transmite, dar și nivelul de altruism al nodurilor.
+Pe lângă acest simulator, mai există și altele care se comportă în mod asemănator, cel mai cunoscut fiind ONE (Opportunistic Network Environment)~\cite{OneArticle} disponibil tot in Java și care modelează mobilitatea nodurilor, contactele inter noduri, dar și rutarea pachetelor. În cadrul lui, fiecare nod este reprezentat de un modul principal care la rândul lui se poate conecta la diferite submodule precum: energia consumată, mobilitatea, memoria, descriind astfel capabilitățile și atributele nodului ONE. Decizia de a folosi MobEmu a venit în urma unor avantaje pe care acesta le oferă, și anume: suport pentru detectarea comunităților de noduri, folosirea conexiunilor din rețelele sociale, modelarea altruismului, permițând în același timp și simularea unor comportamente în care mesajele nu sunt propagate către o singură destinație. Aceste avantaje am considerat că se mapează mult mai bine pe situațiile reale, în care posesorii dispozitivelor inteligente pot respecta un anumit tipar de mobilitate sau de conținut accesat, atât datorită relațiilor sociale generale, cât și datorită comunității din care fac parte in acel moment.  
 \section{Metode de realizare a consistenței datelor}
 \subsection{Disponibilitatea datelor și nevoia de replicare a datelor}
-Majoritatea paradigmelor descrise anterior sugerează ideea de a avea conexiune oriunde ne-am afla și la orice moment de timp. Acest lucru devine o necesitate în anumite situații critice precum dezastrele naturale sau acțiuni militare, atunci când infrastructura de comunicație are de suferit. Disponibilitatea datelor se referă la reușirea transmiterii datelor de la sursă către destinație într-un interval de timp rezonabil, optim. Replicarea datelor este o tehnică de asigurare a disponibilității datelor prin realizarea de copii ale datelor și propagarea lor prin diferite noduri din rețea. Astfel, prin această tehnică se reușește un schimb mai bun de date datorită faptului că timpul de răspuns la cererile multiple poate fi îmbunătățit prin distribuirea procesării cererilor pe mai multe noduri. În momentul în care în rețea datele sunt prezente doar la un singur nod acest lucru nu este benefit, putând chiar avea rezultate mai slabe, dar prin copierea datelor în mai multe noduri acest procedeu reușește să evite o supraîncărcare a rutelor de comunicație către un unic nod. 
+Majoritatea paradigmelor descrise anterior sugerează ideea de a avea conexiune, între dispozitiv și locația informației dorite, oriunde ne-am afla și la orice moment de timp. Acest lucru devine o necesitate în anumite situații critice precum dezastrele naturale sau acțiuni militare, momente în care infrastructura de comunicație poate avea de suferit. Disponibilitatea datelor se referă la reușirea transmiterii datelor de la deținător și până la destinatat într-un interval de timp rezonabil, optim. Replicarea datelor este o tehnică de asigurare a disponibilității datelor prin realizarea de copii ale datelor și propagarea lor prin diferite noduri din rețea. Astfel, prin această tehnică, se reușește un schimb mai bun de date datorită faptului că timpul de răspuns la cererile multiple poate fi îmbunătățit prin distribuirea procesării cererilor pe mai multe noduri. În momentul în care în rețea datele sunt prezente doar la un singur nod acest lucru nu este benefit, putând chiar avea rezultate mai slabe în cazul în care numeroase noduri încearcă să descarce informațiile de la el și nu se mai folosește deloc cloud-ul. În schimb, prin copierea datelor în mai multe noduri din rețea, se evită o supraîncărcare a rutelor de comunicație către un unic nod, crescând astfel șansele ca informația să ajungă repede la doritor. 
 \subsection{Problemele algoritmilor de replicare}
-Replicarea datelor reduce numărul de întârzieri al cererilor înregistrate, cu toate acestea folosirea acestui mecanism poate duce și la o durată mai mare a anumitor întârzieri. Acest lucru se poate întâmpla datorită faptului că disponibilitatea datelor scade în momentul în care multe noduri aflate într-o mică proximitate duplică același set de date, în timp ce alte date nu sunt replicate de niciun nod. O soluție la această problemă ar putea fi duplicarea datelor în noduri care au un număr setat de hopuri între ele, nu se întâlnesc într-o anumită vecinătate. Această soluție simplă prezintă anumite dezavantaje, iar cel mai important este acela că se poate înregistra un timp mai mare de întârziere pentru o anumită desfășurare a cererilor, adică ceea ce trebuia să repare în totalitate, rezolvă doar parțial. Problema apare datorită faptului că într-o anumită proximitate nu vom putea duplica datele care au procentaj ridicat de accesare. Din această cauză, dar și datorită mobilității nodurilor o schemă statică de alocare a duplicatelor într-o topologie dinamică nu este posibilă.
+Replicarea datelor reduce numărul de întârzieri al cererilor înregistrate, cu toate acestea folosirea acestui mecanism poate duce și la o durată mai mare a anumitor întârzieri. Acest lucru se poate întâmpla datorită faptului că disponibilitatea datelor scade în momentul în care multe noduri aflate într-o mică proximitate duplică același set de date, în timp ce alte date nu sunt replicate de niciun nod. O soluție la această problemă ar putea fi duplicarea datelor în noduri care au un număr setat de hop-uri între ele, nu se întâlnesc într-o anumită vecinătate. Această soluție simplă prezintă anumite dezavantaje, iar cel mai important este acela că se poate înregistra un timp mai mare de întârziere pentru o anumită desfășurare a cererilor, adică ceea ce trebuia să repare în totalitate, rezolvă doar parțial. Problema apare datorită faptului că într-o anumită proximitate nu vom putea multiplica datele care au procentaj ridicat de accesare. Din această cauză, dar și datorită mobilității nodurilor o schemă statică de alocare a duplicatelor într-o topologie dinamică nu este posibilă.
 \subsection{Predicția mobilității nodurilor}
-Mobilitatea nodurilor este principala îngrijorare când vine vorba despre un algoritm de replicare a datelor, deoarece este considerată principala cauză a partiționării rețelei. Așadar, dacă un nod(adică posesorul unui dispozitiv mobil) se deplasează în afara zonei de acțiune pentru o anumită vecinatate, nu va mai putea oferi servicii nodurilor din perimetrul ce tocmai l-a părăsit. Se observă că se poate păstra disponibilitatea datelor în acea proximitate la același nivel dacă se poate prezice o eventuală deplasare a nodurilor, având ca scop duplicarea datelor de interes de la acele noduri la cele mai apropiate care sunt în continuare în acea suprafață. Pushpalatha. M et al\cite{DesignDRA} fac anumite presupuneri înainte de a expune un algoritm de predicție și anume: nodurile din rețea sunt simetric conectate, rețeaua nu este partiționată și fiecare nod poate măsura intensitatea semnalului pe care îl primește. Ecuația de transmisie Friss\cite{Friss} este folosită pentru a calcula intensitea semnalului recepționat având următoarea formă : 
+Când vine vorba despre un algoritm de replicare a datelor, mobilitatea nodurilor este principala îngrijorare în momentul testarii implementării deoarece este considerată principala cauză a partiționării rețelei. Așadar, dacă un nod se deplasează în afara zonei de acțiune pentru o anumită vecinatate, nu va mai putea oferi servicii nodurilor din perimetrul ce tocmai l-a părăsit. Se observă că se poate păstra disponibilitatea datelor în acea proximitate la același nivel dacă se poate prezice o eventuală deplasare a nodurilor, având ca scop duplicarea datelor de interes de la acele noduri la cele mai apropiate care sunt în continuare în acea suprafață. Pushpalatha. M et al\cite{DesignDRA} fac anumite presupuneri înainte de a expune un algoritm de predicție și anume: nodurile din rețea sunt simetric conectate, rețeaua nu este partiționată și fiecare nod poate măsura intensitatea semnalului pe care îl primește. Ecuația de transmisie Friss\cite{Friss} este folosită pentru a calcula intensitea semnalului recepționat având următoarea formă : 
 \begin{equation}
 P_{r} = P_{t} * A_{r} * A_{t} * \lambda^2 / (4 * \pi * d)^2
 \end{equation}
@@ -349,10 +331,10 @@ unde:
 $
 P_{r}		-	\;puterea\; la\; receptor;\quad
 P_{t}  	- \;puterea\; la\; transmisie;\quad
-A_{r}   - \;amplificarea\; antenei\; la\; recepție;\\
+A_{r}   - \;amplificarea\; antenei\; \\la\; recepție;
 A_{t} 	- \;amplificarea\; antenei\; la\; transmisie;\quad
 \lambda - \;lungimea\; de\; unda;\quad
-d 			- \;distanța\; dintre\; noduri.\\
+d 			- \;distanța\; dintre\; noduri. \\
 $
 Prin urmare, derivând ecuația de mai sus în cele două puncte se estimează valoarea distanței ca fiind egală cu:
 \begin{equation}
@@ -364,285 +346,432 @@ $
 k -\;constanta\quad
 P_{r} -\;puterea\; la\; receptor \\
 $
-Fiecare nod trimite în mod periodic un mesaj de tip Hello, estimând distanța până la respectivul nod, iar pentru a estima mobilitatea unui nod se măsoară puterea semnalului dintre două mesaje Hello succesive. Apoi se estimează distanța dintre două noduri la două momente diferite de timp comparându-se cu o valoarea setată între distanța minimă de transmisie și distanța minimă de transmisie. Dacă diferența estimată este aproape de 0 atunci nodurile nu se vor mișca, dar dacă mai mare sau egală cu valoarea de referință se începe procesul de căutare a unor noduri potrivite pentru a reține date replicate în nodul care a fost prezis că va parăsi zona curentă de transmisie. Totodată ținând cont de necesitățile acestor tipuri de rețele și anume o latență cât mai mică și o încărcare mică a rutelor de comunicație, acest algoritm este destul de costisitor și nepotrivit, datorită faptului că acele mesaje periodice de Hello inundă rețeaua, dar și pentru că presupunerile de la început sugerează un comportament greu de mapat cu situațiile din viața reală, unde nu vom găsi doar noduri simetric conectate.
+Fiecare nod trimite în mod periodic un mesaj de tip \textit{Hello}, estimând distanța până la respectivul nod, iar pentru a estima mobilitatea unui nod se măsoară puterea semnalului dintre două mesaje \textit{Hello} succesive. În următorul pas, se estimează distanța dintre două noduri la două momente diferite de timp comparându-se cu o valoare setată ca valoare între distanța minimă și distanța maximă de transmisie dintre două noduri. Dacă diferența estimată este aproape de 0 atunci nodurile nu se vor mișca. Dacă, în schimb, este mai mare sau egală cu valoarea de referință se începe procesul de căutare a unor noduri potrivite pentru a reține atât datele replicate de alții, cât și datele proprii din memoria nodului care a fost prezis că va parăsi zona curentă de transmisie. Totodată, ținând cont de necesitățile acestor tipuri de rețele (o latență cât mai mică și o încărcare mică a rutelor de comunicație), acest algoritm este destul de costisitor și nepotrivit datorită faptului că acele mesaje periodice de Hello inundă rețeaua, dar și pentru că presupunerile de la început sugerează un comportament greu de comparat cu situațiile din viața reală, unde nu vom găsi doar noduri simetric conectate.
 \subsection{Consistența datelor}
-În rețelele mobile prezentate anterior, mobilitatea nodurilor creează partiționări frecvente ale rețelei. Astfel, o organizare(management) a consistenței datelor devine o problemă crucială. Takahiro Hara et al. ~\cite{hara2009consistency} prezintă diferite condiții de consistență ale datelor replicate în MANET, clasificând nivelurile de consistență în funcție de cerințele aplicațiilor. În această lucrare se presupune existența unui mediu în care fiecare dispozitiv poate accesa datele din alte stații, replicându-le astfel în propriul spațiu de memorie. Rețeaua este divizată în mai multe regiuni și consistența datelor replicate este realizată în funcție de regiune. Cazurile care sunt prezentate în această lucrare au la bază două tipuri de dispozitive din cadrul rețelei: unul cu caracteristici speciale, denumit proxy, care fie au memorie nelimitată, fie cunosc cum sunt împărțite replicile în rețea; celelalte sunt dispozitive simple ce își cunosc doar propriile replici. Nivelurile de consistență prezentate sunt caracterizate de următoarele: consistență globală, consistență bazată pe locație, pe timp, sau pe stație. Așadar, ca rezultat general, se afirmă că este mult mai benefic, în termeni de rată de succes și încărcare a traficului, alegerea unui protocol de consistență locală în detrimentul unei consistenței globale.(Protocolul 5.3.1 - e mult de scris nu stiu cum sa rezum)
-Nithiyalakshmi et al.\cite{nithiyalakshmi2014data} propun tehnici distribuite de replicare a datelor pentru a echilibra compromisurilor dintre întârzierea interogărilor și disponibilitatea datelor. Metoda One-to-One Optimization(OTOO) folosește fiecare nod mobil care colaborează doar cu nodul vecin pentru a decide ce informație va găzdui. Astfel, fiecare nod calculează o valoare a frecvenței accesului combinat la informația respectivă, salvând datele în ordinea ascendentă a acestor valori. Tehnica de replicare compune elementul de date replicat în funcție de frecvența de acces a elementelor de date, menținându-se astfel coerența datelor.
+În rețelele mobile prezentate anterior, mobilitatea nodurilor creează partiționări frecvente ale rețelei. Astfel, o organizare a datelor în privința asigurării consistenței devine o problemă crucială. Takahiro Hara et al. ~\cite{hara2009consistency} prezintă diferite condiții de consistență ale datelor replicate în MANET-uri, clasificând nivelurile de consistență în funcție de cerințele aplicațiilor. În această lucrare se presupune existența unui mediu în care fiecare dispozitiv poate accesa datele din alte noduri, replicându-le astfel în propriul spațiu de memorie. Rețeaua este divizată în mai multe regiuni și consistența datelor replicate este realizată în funcție de regiune. Cazurile care sunt prezentate în această lucrare au la bază două tipuri de dispozitive din cadrul rețelei: unul cu caracteristici speciale, denumit proxy, care fie are memorie nelimitată, fie cunoaște cum sunt împărțite replicile în rețea, celelalte fiind dispozitive simple ce își cunosc doar propriile replici. Nivelurile de consistență prezentate sunt caracterizate de următoarele atribute: consistență globală, consistență bazată pe locație, pe timp, sau pe stație. Așadar, ca rezultat general, se afirmă că este mult mai benefic, în termeni de rată de succes și încărcare a traficului, alegerea unui protocol de consistență locală în detrimentul unei consistenței globale.
+Nithiyalakshmi et al.\cite{nithiyalakshmi2014data} propun tehnici distribuite de replicare a datelor pentru a echilibra compromisurile dintre întârzierea interogărilor și disponibilitatea datelor. Metoda One-to-One Optimization (OTOO) folosește fiecare nod mobil care colaborează doar cu nodul vecin pentru a decide ce informație va găzdui. Astfel, fiecare nod calculează o valoare a frecvenței accesului combinat la informația respectivă, salvând datele în ordinea ascendentă a acestor valori. Tehnica de replicare compune elementul de date replicat în funcție de frecvența de acces a elementelor de date, menținându-se astfel coerența datelor.
 
-Pentru a menține eficient și sigur coerența cache\cite{knaesel2009high} în cadrul dispozitivelor mobile sunt folosite două tehnici în mod preponderent: notificarea privind o înregistrare invalidă sau notificarea unei înregistrări valide. În timp ce prima tehnică este folosită când mai puțin de 50\% din datele de pe serverul staționar au fost schimbate, a doua tehnică se folosește pentru a reduce cantitatea de date transferate prin rețeaua wireless în momentul în care mai mult de 50\% din datele de pe server au suferit modificări. În prezent datele vin de la server, dar pot veni și de la alți clienți, dispozitive care se comportă ca un server. Pe măsură ce se folosește o abordare pesimistă, toate datele solicitate ajung să fie transmise prin rețea, serverele neștiind ce informații sunt stocate pe dispozitivele mobile. Așadar, se folosește un timestamp protocol pentru a asigura consistența și consecvența datelor salvate local, putând spune cu ajutorul valorii timestampului dacă data primită este mai nouă sau mai veche față de copia deja deținută. Una dintre preocupările și provocările în cadrul unui sistem distribuit o reprezinta sincronizarea și menținerea unor generatoare de timestamp globale. Folosind această tehnică, sincronizarea, ceasurile generatorilor de timestamp se poate realiza folosind Network Time Protocol(NTP), un protocol disponibil în rețeaua TCP/IP, al cărui rezultat garantează un nivel ridicat de consistență a datelor updatate.
+Pentru a menține eficient și sigur coerența cache\cite{knaesel2009high}, în cadrul dispozitivelor mobile, sunt folosite două tehnici în mod preponderent: notificarea privind o înregistrare invalidă sau notificarea unei înregistrări valide. În timp ce prima tehnică este folosită când mai puțin de 50\% din datele de pe serverul staționar au fost schimbate, a doua tehnică se folosește pentru a reduce cantitatea de date transferate prin rețeaua wireless în momentul în care mai mult de 50\% din datele de pe server au suferit modificări. În prezent, datele vin de la server, dar pot veni și de la alți clienți, dispozitive, care se comportă ca un server. Pe măsură ce se folosește o abordare pesimistă, toate datele solicitate ajung să fie transmise prin rețea, serverele neștiind ce informații sunt stocate pe dispozitivele mobile. Așadar, se folosește un timestamp protocol pentru a asigura consistența și consecvența datelor salvate local, putând spune cu ajutorul valorii timestamp-ului dacă data primită este mai nouă sau mai veche față de copia deja deținută. Una dintre principale preocupări și provocări din cadrul unui sistem distribuit o reprezintă sincronizarea și menținerea unor generatoare de timestamp globale. Folosind această tehnică, sincronizarea ceasurile generatorilor de timestamp se poate realiza folosind Network Time Protocol (NTP), un protocol disponibil în rețeaua TCP/IP, al cărui rezultat garantează un nivel ridicat de consistență a datelor modificate.
 
-Așa cum reiese și din cele prezentate anterior, consistența datelor în aceste rețele este privită diferit față de ceea ce voi prezenta în această teză. Termenul de consistență este folosit în situațiile în care datele suferă anumite modificări, scrieri și se pune problema renunțării la toate replicările existente ale acelor date pentru a nu genera rezultate nedorite, influențate de folosirea unei versiuni anterioare a acelor date. Totuși, consistența datelor trebuie realizată la orice moment de timp și în orice împrejurare ținând cont de toate posibilitățile de incoerență, iar modificarea intenționată a unor informații este, poate, cea mai frecventă alterare a coerenței datelor. Ținând cont de caracteristicile acestui tip de rețele mobile, consider că această abordare legată de consistența datelor are aplicabilitate în numeroase scenarii din viața reală deoarece situațiile întâlnite în Internet în care datele se corup de diverși răufăcători pot fi întâlnite și în cadrul rețelelor oportuniste. (Aici: teste cu privire la gradul de corupere, cât de multe date se corup în medie într-o rețea din cauze intentionate)  
+Așa cum reiese și din cele prezentate anterior, consistența datelor în aceste rețele mobile este privită diferit față de ceea ce vom prezenta în această teză. Termenul de consistență este folosit în situațiile în care datele suferă anumite modificări, scrieri și se pune problema renunțării la toate replicările existente ale acelor date pentru a nu genera rezultate nedorite, influențate de folosirea unei versiuni anterioare, incoerente ale actualelor date. Totuși, consistența datelor trebuie realizată la orice moment de timp și în orice împrejurare ținând cont de toate posibilitățile de incoerență, iar modificarea intenționată a unor informații este, poate, cea mai frecventă alterare a coerenței datelor. Astfel, în această teză se dezvoltă scenarii de corupere, dar și de împiedicare și detectare a oricărei compenente, din cadrul unui task, ce a fost coruptă în urma distribuirii prin rețea. Ținând cont de caracteristicile acestui tip de rețele mobile, considerăm că această abordare legată de consistența datelor are aplicabilitate în numeroase scenarii din viața reală deoarece modificarea intenționată a informațiilor poate fi realizată la orice moment de timp, informațiile destinate altor noduri circulând oportunist pe la cât mai mulți intermediari.
 
+\chapter{Soluția Propusă} \label{solutiaPropusa}
+%Capitolul conține o privire de ansamblu a soluției ce rezolvă problema, prin prezentarea structurii / arhitecturii acesteia. În funcție de tipul lucrării acest capitol poate conține diagrame (clase, distribuție, workflow, entitate-relație), demonstrații de corectitudine pentru algoritmii propuși de autor, abordări teoretice (modelare matematică), structura hardware, arhitectura aplicației.
 
-!!!Cerinta - Sunt descrise tehnologii alternative. Sunt analizate cantitativ și calitativ, folosite benchmarkuri și teste efectuate de student. Analiza este rezumată prin tabele și grafice.!!!
-
-!!!legat de ONE!!!
-As putea pune in comparatie aici drop computing fata de versiunea standard de folosire a cloudului, cu scenariile dezbatute in paperul DC??
-\ambele În încheierea acestui capitol se dorește descrierea tehnologiilor folosite în lucrare, cu alternative și cu argumente convingătoare calitative și cantitative.  
-
-
-Criterii pentru calificativul \textit{Ne\textit{Satisfăcător}}: 
-\begin{itemize}
-	\item \dezvoltare Sunt analizate superficial câteva produse de pe piață; 
-	\item \cercetare analiza literaturii limitata la grupuri de cercetare din România;
-	\item \ambele Sunt descrise tehnologiile folosite în lucrare. 
-\end{itemize}
-
-Criterii pentru calificativul \textit{Satisfăcător}:
-\begin{itemize}
-	\item \dezvoltare Există un interviu, un client, analiza cerințelor este elaborată pe baza interviului.
-	\item \cercetare analiza literaturii de specialitate din lume, fără poziționarea precisă a lucrării în peisajului domeniului studiat;
-	\item \ambele Sunt descrise câteva tehnologii alternative pentru fiecare din tehnologiile folosite în lucrare. Există o argumentare referitoare la alegere.
-\end{itemize}
-
-Criterii pentru calificativul \textit{Bine}:
-\begin{itemize}
-	\item \dezvoltare Proces iterativ pe baza unor interviuri cu mai mulți clienți, dezvoltare MVP, reevaluare cerințe;
-	\item \cercetare analiza literaturii de specialitate din lume, cu poziționarea precisă a lucrării în peisajul actual al domeniului studiat; 
-	\item \ambele Sunt descrise tehnologii alternative. Sunt analizate cantitativ și calitativ, folosite benchmarkuri și teste efectuate de student. Analiza este rezumată prin tabele și grafice.
-\end{itemize}
-
-\section{Indicații formatare figuri}
-
-Figurile utilizate în document vor fi centrate și numerotate (de exemplu Figura~\ref{fig:pic1}). 
-Orice figură ce nu este realizată de către autorul lucrării va fi în mod obligatoriu citată fie la final (de exemplu Figura ~\ref{fig:pic2} este preluată din documentul \cite{}), fie cel puțin într-o notă de subsol (a se vedea Figura~\ref{fig:pic2}). Orice figură ce depășește ca dimensiune 50\% dintr-o pagină, va fi mutată la anexe. Toate figurile din cadrul tezei vor fi referite în text. Exemplu: Figura~\ref{fig:pic1} prezintă o schemă de principiu pentru un amplificator inversor cu AO. 
-
-\begin{figure}[th]
-\centering
-\includegraphics{pics/Pic1.png}
-  \caption{Amplificator inversor}
-  \label{fig:pic1}
-\end{figure}
-
-\newpage
-
-\begin{figure}[th]
-\centering
-\includegraphics{pics/Pic2.png}
-  \caption[Amplificator de instrumentație cu 3 AO-uri]{Amplificator de instrumentație cu 3 AO-uri\protect\footnotemark}
-  \label{fig:pic2}
-\end{figure}
-\footnotetext{© http://www.ece.tamu.edu/sspalermo/ecen3205/Secton\%201III.pdf}
-
-\chapter{Soluția Propusă}
-Capitolul conține o privire de ansamblu a soluției ce rezolvă problema, prin prezentarea structurii / arhitecturii acesteia. În funcție de tipul lucrării acest capitol poate conține diagrame (clase, distribuție, workflow, entitate-relație), demonstrații de corectitudine pentru algoritmii propuși de autor, abordări teoretice (modelare matematică), structura hardware, arhitectura aplicației.
-
-În acest capitol voi prezenta o descriere detaliată a caracteristicilor pe care le-am adăugat în cadrul unui framework oportunist, numit MobEmu, în ceea ce privește consistența datelor și a task-urilor ce sunt schimbate în cadrul rețelelor oportuniste. 
+În acest capitol voi prezenta o descriere de ansamblu a caracteristicilor pe care le-am adăugat în cadrul framework-ului oportunist MobEmu, pentru a asigura consistența datelor și a task-urilor ce sunt schimbate în cadrul rețelelor oportuniste. 
 %aici ma gandeam sa descriu pe scurt fiecare subcapitol, momentan e doar primul
-Secțiunea introductivă, \ref{introducere}, prezintă o sumarizare a comportamentului framework-ului pentru a se putea înțelege interacțiunea pe care am avut-o cu acesta, respectiv modificările pe care le-am realizat în cadrul lui. Secțiunea \ref{dropcomputing} descrie implementarea paradigmei Drop Computing în cadrul MobEmu.
-
-\section{Introducere} \label{introducere}
-MobEmu este un framework folosit pentru parsarea unor trace-uri de mobilitate urmat de simularea unor algoritmi de rutare și diseminare a datelor respectând caracteristicile rețelelor oportuniste. Principalele componente care se identifică sunt:  clasa \textit{Trace} și clasa \textit{Node}, care la rândul lor prezintă mai multe caracteristici precum: \textit{Context, Parser, Contact} pentru clasa \textit{Trace} și \textit{Altruism, Battery, Message, Topic, etc} pentru componenta \textit{Node}.
-
-Componenta \textit{Trace} conține o listă de \textit{Contacte} ce deține informații necesare stabilirii unui istoric al contactelor, precum momentul de timp de început și sfârșit al contactului, dar și tipul contactului în funcție de tehnologia de detecție(e.g Bluetooth, WiFi). Pentru obținerea unui obiect de tip \textit{Trace} trebuie rulat un \textit{Parser}, o inferfață ce oferă următoarele informații: preferința nodului, conexiunile sociale(Facebook, Twitter) ale fiecărui nod, numărul de noduri din rețea și datele obiectului \textit{Trace} prin metodele: \textit{getContextData(), getSocialNetwork(), getNodesNumber(), getTraceData}(are rost sa zic asta??). Această interfața are mai multe implementări în cadrul simulatorului, dintre care am utilizat clasa \textit{UPB} ce parsează datele unor trace-uri realizate în facultate în anii 2011 și 2012, și clasa \textit{HCMM} care este un generator de contacte utilizând un model sintetic, matematic ce simulează diferite comportamente ale nodurilor în funcție de anumite restricții impuse.
-
-Un obiect de tip \textit{Node} conține toate informațiile necesare unui dispozitiv aflat într-o rețea oportunistă în care poate să ruleze algoritmi de rutare și diseminare a datelor. Principalele informații sunt legate de caracteristici interne precum id-ul care este unic, nivelul bateriei, lista propriilor mesaje, dar și cantitatea de memorie care este disponibilă pentru mesajele primite de la nodurile întâlnite ce nu îl au ca beneficiar pe el. Această memorie reprezintă punctul central în cadrul implementării paradigmei store-carry-and-forward și cu cât este mai mare cresc șansele la o rată de succes ridicată în cadrul rețelei. Alături de această memorie, se definește separat memoria mesajelor generate de fiecare nod în parte deoarece vor fi tratate diferit, nefiind șterse până la finalizarea respectivelor acțiuni, în timp ce pentru memoria de date se implementează o politică de înlocuire de cache în momentul în care devine neîncăpătoare pentru noi mesaje. 
-Informațiile se continuă cu detalii despre contactele din noduri(noduri unice întâlnite, durata contactului cu un anumit nod într-o anumită perioadă), comunitatea locală detectată, cât și statistici cu privire la numărul de mesaje schimbate în rețea. 
-
-Clasa \textit{Node} este o clasă abstractă și este extinsă de orice algoritm care vrea să aducă o nouă abordare în rutarea și diseminare oportunistă, implementând metoda abstractă \textit{onDataExchange()}. În continuare voi prezenta pe scurt comportamentul simulatorului în momentul în care două noduri se întâlnesc, iar mai apoi voi detalia implementarea caracteristicilor paradigmei Drop Computing\cite{DC}. În momentul în care în urma parsării datelor dintr-un trace se identifică o conexiune validă între două noduri la un moment de timp, se salvează referințe către nodul observator și nodul observat și în cazul în cazul unei noi conexiuni se apelează metoda \textit{exchangeData()}. Dacă un contact între aceleași două noduri nu este deja în progres, posibil în urma unor diferențe ale intervalelor de eșantionare ale fiecărui dispozitiv, se apelează metoda \textit{onDataExchange()} care primește ca parametrii nodul întâlnit, durata contactului și momentul de timp curent. 
+%Secțiunea introductivă, \ref{introducere}, prezintă o sumarizare a comportamentului framework-ului pentru a se putea înțelege interacțiunea %pe care am avut-o cu acesta, respectiv modificările pe care le-am realizat în cadrul lui. 
+Secțiunea introductivă, \ref{dropcomputing}, descrie implementarea paradigmei Drop Computing, în cadrul MobEmu, fără niciun mecanism de realizare a consistenței. In continuare, secțiunea \ref{solutieConsistenta}, împreună cu toate subsecțiunile prezente, detaliază modificările aduse și rezultatele obținute în urma soluțiilor propuse și implementate.??nu prezint rezultatele
 
 \section{Implementarea Drop Computing} \label{dropcomputing}
-Pentru întelegerea implementării voi descrie trei mari componente: funcția \textit{onTick()}, apelată la fiecare moment de timp din trace, de fiecare nod, funcția \textit{onDataExchange()} apelată la orice întâlnire între noduri de fiecare în parte și în final simularea comportamentului cloud-ului.
+Pentru întelegerea implementării, voi descrie două mari componente, conform~\cite{MobEmuArticle},  și anume: ce se întâmplă la fiecare moment de timp din intervalul în care s-a măsurat trace-ul și comportamentul generat de orice întâlnire dintre două noduri sau mai multe noduri. Mai întâi, vom începe prin introducerea noțiunilor de task și subtask, concepte pentru care am realizat mecanismele de consistență.
 
-Metoda \textit{onTick()} este folosită pentru a implementa logica care este independentă de contactele din cadrul rețelei. Astfel, la fiecare moment de timp fiecare nod realizează următoarele operații:
+Tot efortul computațional necesar pentru o anumită interacțiune sau cerere solicitată de un utilizator, posesor al unui dispozitiv mobil, este împărțit în task-uri. Fiecare task poate fi executat atât local, cât și descărcat, deja executat, de la nodurilor întâlnite. Dacă un nod nu poate executa propriul task din lipsa resurselor necesare (putere de calcul, nivel minim al bateriei, acces la Internet), acesta este distribuit prin nodurile întâlnite, în cât mai multe dispozitive mobile ce dispun de cât mai multe resurse. Denumirea de subtask-uri este atribuită cerințelor ce sunt dependente unele de altele, astfel un task principal mai complex este împărțit în mai multe părți ce alcătuiesc un grup de subtask-uri. Pe măsură ce subtask-urile se execută, rezultatele sunt salvate așteptându-se rezolvările tuturor componentelor grupului din care fac parte, putând astfel oferi prin reuniunea lor un răspuns cerinței inițiale formulate. 
+
+%Metoda \textit{onTick()} este folosită pentru a implementa logica care este independentă de contactele din cadrul rețelei. 
+Așadar, la fiecare moment de timp, iterând de la momentul inițial de începere al trace-ului și până în momentul finalizării înregistrărilor cu un anumit timestamp, fiecare nod realizează următoarele operații:
 \begin{itemize}
 	\item dacă nu mai are taskuri proprii de executat generează noi taskuri.
 	\item dacă are taskuri de executat și suficientă baterie extrage primul task în ordine descrescătoare a priorității și începe execuția.
-	\item în cazul în care era un task propriu se așteaptă terminarea întregului set de taskuri proprii și apoi se elimină din listă, deoarece se consideră că un task conține multe alte subtaskuri care nu sunt independente.
-	\item în cazul în care nu e autorul taskului îl adaugă într-o listă de taskuri completate ce va fi schimbată cu nodurile întâlnite.
-	\item dacă se setează doar utilizarea cloudului mai intâi se incarcă taskurile generate, apoi se așteaptă descărcarea taskurilor completate.
-	\item toate taskurile care nu au fost executate într-un timp setat se vor încărca în cloud pentru rezolvare.
+	\item execuția unui task nu se termină întotdeauna printr-un singur apel de funcție, acesta putând fi parțial executat de mai multe noduri în funcție și de categoria task-ului, dar și de caracteristicile dispozitivelor mobile folosite.
+	\item în cazul în care era un task propriu se așteaptă terminarea întregului set de taskuri proprii și apoi se elimină din listă, deoarece se consideră că un task conține multe alte subtask-uri care nu sunt independente.
+	\item în cazul în care nu e autorul taskului îl adaugă într-o listă de task-uri completate ce va fi schimbată cu nodurile întâlnite.
+	%\item dacă se setează doar utilizarea cloudului mai intâi se incarcă taskurile generate, apoi se așteaptă descărcarea taskurilor completate.
+	%\item toate taskurile care nu au fost executate într-un timp setat se vor încărca în cloud pentru rezolvare.
 \end{itemize}
 
-
-Criterii pentru calificativul \textit{Ne\textit{Satisfăcător}}: 
+În momentul în care un nod mobil a detectat un alt dispozitiv în zona sa de acoperire, această informație fiind parsată din trace-urile folosite, se realizează un schimb de informații în funcție de mai mulți factori. Ținând cont de nivelul bateriei, timpul de contact, altruismul sau gradul de cunoaștere dintre cele două noduri, fiecare în parte inițiază următoarele operații:
+%Iterând de la momentul de timp inițial și până la momentul final al trace-ului metoda este apelată la fiecare contact, de ambele noduri implicate. Operațiile ce se realizează în cadrul acestei metode fiind următoarele:
 \begin{itemize}
-	\item	Descriere în limbaj natural.
+	\item se verifică dacă nodul întâlnit este de tipul Drop Computing (framework-ul permițând folosirea mai multor algoritmi de rutare?), în caz afirmativ salvându-se o instanță de acest tip.
+	\item în cazul în care cele două noduri au un nivel minim al bateriei necesar pentru interacțiune se începe schimbul de mesaje.
+	\item parcurgând lista de task-uri completate ale nodului întâlnit, se verifică cele care au ca proprietar nodul curent, apoi acestea se salvează local și se sterg din nodul purtător.
+	\item dacă cele două noduri întâlnite au un anume grad de cunoaștere (au mai avut un număr setat de conexiuni sau sunt în aceeași rețea socială) se schimbă și task-uri completate ale altor noduri (acest lucru crescând șansele ca un nod să primească oportunist propriile task-uri completate de la nodurile întâlnite).
+	\item se compară listele cu task-uri ce nu sunt încă rezolvate și în cazul în care timpii de calcul necesar rezolvării ambelor grupuri de task-uri nu sunt aproximativ egali se realizează echilibrarea datelor.
+	\item echilibrarea se realizează prin schimb de task-uri între nodurile implicate ținându-se cont atât de puterea de calcul al fiecărui nod, cât și de proprietarii fiecărui task (nodurile care le-au generat și încă așteaptă rezolvarea lor)
+	\item ținând cont tot de gradul de cunoaștere, task-urile schimbate sunt fie replicate (fiind păstrate și în memoria nodului inițial pentru a le putea oferi și altor noduri ce pot avea șanse mai mari de contact cu posesorul), fie pur și simplu transferate nodului întâlnit (gradul de cunoaștere fiind foarte ridicat, astfel nodul local își creează(creându-și) spațiu pentru noi task-uri).
 \end{itemize}
 
-Criterii pentru calificativul \textit{Satisfăcător}: 
+\iffalse
+În cazul în care se precizează și folosirea sistemului cloud interacțiunea cu acesta are loc în felul următor:
 \begin{itemize}
-	\item	Descriere + diagrame de baze de date, workflow, clase, algoritmi. 
+	\item nodul coordonator, cel cu id-ul 0, așteaptă primirea unor task-uri de la toate nodurile și pe măsură ce se primesc acesta declanșează execuția pe o mașină virtuală disponibilă
+	\item dacă se depistează toate mașinile virtuale ocupate, nodul coordonator salvează task-urile într-o coadă de așteptare și pe măsură ce o mașină virtuală devine liberă i se rezervă noi task-uri de rezolvat
+	\item pentru orice task care a fost împărțit oportunist și nu a reușit să ajungă rezolvat la proprietar, într-un timp setat la generare, va fi trimis spre rezolvare în cloud și va fi șters din memoria locală dedicată task-urilor propuse rezolvării.
 \end{itemize}
+\fi
 
-Criterii pentru calificativul \textit{Bine}: 
+\section{Păstrarea consistenței datelor în Drop Computing} \label{solutieConsistenta}
+
+\subsection{Simularea coruperii datelor}	\label{simulareaCoruperii}
+
+Coruperea datelor se realizează în două momente distincte de timp: fie după ce task-ul a fost executat, prin coruperea versiunii de la executant, fie în momentului schimbului de task-uri completate, prin coruperea versiunii de la nodul care a primit un nou task completat. Din cele două variante, se poate observa că prima atrage după sine propagarea unei versiuni corupte în toate nodurile întâlnite de executant, în timp ce în al doilea scenariu, coruperile task-ului pot avea loc doar pe anumite trasee de la executant către proprietar. Așadar, în momentul în care coruperea se desfășoară la executant toate versiunile ce vor fi împrăștiate de acesta vor fi corupte, deoarece un task odată corupt nu mai poate fi corectat. Singura șansă în acest scenariu rămâne posibilitatea ca un task să aibă mai mulți executanți în rețea care să nu corupă la rândul lor informația, dând posibilitatea task-ului să ajungă la proprietar pe o cale în care s-a respectat integritatea informațiilor. 
+În concluzie, coruperea datelor se realizează doar pentru task-uri executate și se corupe doar versiunea deținută de nodul respectiv, celelalte versiuni din rețea rămânând intacte, cu precizarea că toate nodurile ce vor primi task-ul de la nodul în cauză, îl vor primi corupt.
+%???Coruperea datelor se realizează în acel map, pentru a putea delimita nodurile care dețin task-ul corupt de nodurile care dețin task-ul consistent. 
+
+\subsection{Salvarea traseului unui task}
+
+În momentul în care un task completat ajunge din nou la proprietar e important de știut calea exactă pe care el a venit pentru a identifica cu succes adevăratele noduri ce au generat coruperi de informații. Task-ul circulă în rețea sub două forme: mai întâi neexecutat, apoi ca task completat de la executant, prin nodurile întâlnite ulterior, către proprietar. În acest fel intervin anume detalii cu privire la numeroasele posibilități de transfer de date între două noduri (același task poate fi transferat atât completat, cât și necompletat sau poate fi schimbat la momente de timp diferite datorită posibilității nodului de a șterge task-ul din memoria proprie în momentul transferului). Aceste posibilăți de transfer, cât și altele ce vor fi descrise în continuare, au fost identificate atât prin simularea mobilității nodurilor, cât și analizând anumite date reale (înregistrate în urma interacțiunii dintre mai multe dispozitive mobile pe parcursul unor zile).
+
+Pentru a salva exclusiv nodurile prin care a trecut versiunea descărcată de nodul proprietar, am folosit o listă ce reține fiecare cale parcursă de fiecare task la orice moment de timp. Adăugarea unei următoare destinații ar trebui să găsească o cale unică parcursă de acel task până în acel moment. Acest lucru se bazează pe faptul că se șterge calea pe care a venit un task la un nod ce nu îl mai deține în memoria locală, iar un nod ce deține deja task-ul în același stadiu (executat sau neexecutat) nu îl mai descarcă. Au existat situații în care s-au găsit mai multe căi care se terminau cu id-ul nodului apelant, dar întotdeauna s-a șters o singură cale, explicațiile fiind următoarele:
 \begin{itemize}
-	\item 	Descriere + diagrame de baze de date, workflow, clase, algoritmi + descrierea unui proces prin care s-a realizat arhitectura/structura soluției.
+	\item un nod poate accepta și o versiune de task neexecutat chiar dacă deținea deja versiunea execută, în acest scenariu ștergându-se doar calea pe care a venit neexecutant.
+	\item în cadrul balansării nodurilor se pot accepta și propriile task-uri care au ajuns neexecutate la nodul întâlnit; ștergându-se în acest scenariu ambele căi ar fi fost o mare eroare deoarece niciun nod nu își șterge propriile task-uri din memorie, rezolvându-le cu propriile resurse dacă nu a reușit să le primească completate într-un timp util (sau până are nevoie de ele??).
+	\item ștergerea căii ce conține doar proprietarul task-ului ducând la imposibilitatea de salvare a noilor căi ce pornesc de la sursă (în momentul transferului căutându-se calea care se termină la nodul transmițător).
 \end{itemize}
 
-\section{Indicații formatare formule}
-Formulele matematice utilizate în document vor fi centrate în pagină și numerotate. 
+\subsection{Caracteristicile versiunilor așteptate} %un nume mai potrivit
 
-\begin{equation}
-(x+a)^n = \sum_{k=0}^{n}\left(\begin{array}{c}n\\k\\\end{array}\right)x^ka^{n-k}
-\end{equation}
+Pentru a mări șansele ca un task să fie primit corect de către proprietar am implementat un sistem de așteptare pentru mai multe versiuni ale aceluiași task înainte de a lua o decizie în ceea ce privește corectitudinea datelor recepționate. Așadar, în memoria fiecărui nod se păstrează câte un map ce reține datele task-ului completat primite la momente de timp diferite și încă un map ce reține o listă cu executantul acelei versiuni pentru fiecare task primit în parte. 
 
-\begin{equation}
-f(x) = a_0 + \sum_{n=1}^{\infty}\left(a_n \cos\frac{n\pi x}{L} + b_n\sin\frac{n\pi x}{L}\right)
-\end{equation}
-
-
-
-\chapter{Detalii de implementare}
-În plus fata de capitolul precedent acesta conține elemente specifice ale rezolvării problemei care au presupus dificultăți deosebite din punct de vedere tehnic. Pot fi incluse configurații, secvențe de cod, pseudo-cod, implementări ale unor algoritmi, analize ale unor date, scripturi de testare. De asemenea, poate fi detaliat modul în care au fost utilizate tehnologiile introduse in capitolul 3.
-
-
-Criterii pentru calificativul \textit{Ne\textit{Satisfăcător}}: 
+Alături de această condiție legată de numărul de versiuni pe care trebuie să le aștepte un nod pentru a selecta majoritatea se poate adăuga atât un procent de executanți diferiți, cât și un procent de noduri diferite de la care se vor accepta rezolvări. Aceste noi caracteristici au sens doar dacă numărul de versiuni așteptate este diferit de 1 și pot ajuta la creșterea consistenței datelor datorită următoarelor lucruri:
 \begin{itemize}
-	\item	Sunt prezentate pe scurt scheme și pseudo-cod.
+	\item acceptând versiunile executate de noduri diferite cresc șansele ca informațiile să nu fie corupte orice scenariu de corupere s-ar folosi (dacă datele au fost corupte de nodul executant, fără limitarea impusă legată de executanți diferiți, task-ul va fi propagat corupt pe toate căile de la acel executant până la proprietar)
+	\item acceptând versiuni de la un număr cât mai diferit de noduri permite ca task-ul să aibe un drum cât mai diversificat de la executant și până să ajungă din nou la proprietar (această îmbunătățire are loc doar în scenariul în care datele nu sunt corupte la executant, ci doar de nodurile care îl primesc deja completat).
 \end{itemize}
-Criterii pentru calificativul \textit{Satisfăcător}: 
+
+\subsection{Implementarea sistemului de rating al nodurilor} \label{ratingSection}
+
+Pentru a putea clasifica cumva nodurile întâlnite am implementat un sistem de rating al lor folosind informații despre istoricul lor. Într-o rețea mobilă se poate observa că anumite noduri sunt mai predispuse la coruperea datelor ca altele, atât datorită unor factori externi, cât și în mod intenționat. Astfel, pentru a preveni o răspândire cât mai mare a datelor corupte e bine să avem informații despre acele noduri ale căror șanse de corupere sunt ridicate și să încercăm pe cât posibil evitarea lor (replicarea atât a task-urilor executate, cât și a task-urilor propuse rezolvării nu va mai avea loc într-un nod cu un rating scăzut).
+
+Fiind vorba despre o rețea descentralizată nu putem avea o caracteristă \textit{rating} a fiecărui nod care să fie modificată pe măsură ce se observă coruperea unei informații de către un nod. Cel puțin modificarea acestei informații nu poate fi făcută global, deoarece nu putem să-i accesăm propria caracteristică nodului întâlnit și să ne asteptăm ca aceasta să fie informația corectă. Fiecare nod, corupt sau corect, având acces la acest câmp va putea să își modifice propriul rating la parametrii ideali, caracteristica devenind neconcludentă în momentul în care două noduri se întâlnesc. Așadar, pentru a implementa acest detaliu al nodului într-un mod cât mai realist am păstrat în memoria fiecărui nod o listă de rating-uri pentru fiecare nod întâlnit, aceste informații schimbându-se la fiecare contact cu un alt nod. Aceste informații se schimbă atât în momentul în care se schimbă task-uri completate, cât și în momentul în care se face schimb de task-uri propuse rezolvării. În acest fel, se acoperă întreaga rețea cu informații despre rating-ul tuturor nodurilor implicate și se poate evita schimbul de date cu nodurile ce au un rating nesatisfăcător deoarece acestea pot propaga versiuni corupte în toată rețeaua.
+%ajungând date la acel nod se crește posibilitatea de corupere a datelor și propagare a acelei replici în cât mai multe noduri.
+
+%mai e detectarea unui nod corupt si scaderea ratingului
+Scăderea rating-ului unui nod se realizează dupa momentul în care se primesc toate versiunile așteptate la/de nodul proprietar. În urma stabilirii unei majorități se consideră versiunea sau versiunile minoritare primite ca fiind corupte. (nu fac asta, dar as putea daca vreau sa consider ca la final nodul nu stie cum ar arata task-ul executat corect) Parcurgând traseul versiunilor minoritare se verifică consistența task-ului de la executant către proprietar, verificându-se exact versiunea schimbată la momentul ... de fiecare două noduri. În momentul în care se descoperă prima inconsistență se salvează id-ului nodului transmițător (sau emițător), urmând ca ratingul acestui nod să fie scăzut în cadrul nodului care a primit task-ul. Dacă nodul respectiv nu avea încă o informație despre id-ul nodului găsit, se salvează o valoare a ratingului specifică unei singure coruperi și se începe propagarea acestei informații, odată cu celelalte task-uri deținute, la fiecare contact cu nodurile întâlnite. Scăderea ratingului se realizează doar pentru nodul la care se descoperă prima inconsistență deoarece, în ambele scenarii de corupte, versiunea o dată coruptă se va propaga așa până la proprietar, nodurile intermediare nefiind responsabile de corupere. Problema și întrebarea care se pune aici este legată de încercarea anumitor noduri de a corupe un task care este deja corupt, în această situație fiind utilă o scădere de rating, chiar dacă versiunea era deja coruptă, se pot salva celelalte task-uri care ar ajunge la un nod predispus la coruperi.   (pot trimite si corupe doar hash-ul si astfel pe 256 de biti corup random biti și nu ar mai fi la fel si majoritatea s-ar crea mult mai repede cu )   
+
+%!!sa transmit hash-ul in retea, corupt random un bit și văd daca la final e acelasi hash cu datele pe care le am
+\subsection{Funcția de hash} \label{hash}
+Presupunând că atât mesajele cât și task-urile pot deține orice informație de orice tip, modificările la care pot fi supuse în timpul propagării prin rețea pot genera un comportament nedorit. Astfel, orice bit de informație corupt poate influența atât rezultatul pe care nodul sursă îl generează, cât și toate celelalte decizii pe care nodurile întâlnite ce au nevoie de acele date trebuie să le facă.
+
+Pentru a verifica și detecta orice fel de modificare adusă datelor originale, în timp ce au trecut pe la diverse noduri din rețea, am folosit algoritmul de hash SHA-256~\cite{sha256}. Funcțiile de hash sunt funcții matematice neinversabile ce au un domeniu de definiție foarte amplu și care generează valori în domenii limitate, fixe. SHA-256 este o astfel de funcție care indiferent de lungimea input-ului reușește să genereze un output de 256 de biți. Mai mult decât atât, acest algoritm nu permite aflarea unei valori diferite de cea inițială care să aibe aceeași valoare a funcției într-un timp rezonabil (timp mai mic decât folosind forța brută), ceea ce poartă denumirea de funcție rezistentă la coliziuni. Până în acest moment nu au fost realizate atacuri asupra acestui algoritm care să calculeze mai puțin de $2^H$ posibilități, unde $H$ este jumătatea lungimii cheii (128 de biți în cazul lui SHA-256), acest număr fiind obținut pe baza paradoxului zilelor de naștere~\cite{birthdayParadox}. 
+
+În această lucrare am folosit clasa \textit{MessageDiggest} din Java care prezintă implementarea mai multor algoritmi de hash, printre care și cel prezentat anterior și anume SHA-256. Informația este procesată folosind metoda \textit{update}, iar finalizarea output-ului este realizată în urma apelulul metodei \textit{digest}. După finalizarea rezultatului starea obiectului este resetată automat la cea inițială prin apelul metodei \textit{reset}, acest lucru putând fi făcut oricând și de dezvoltator, prin același apel de funcție, în orice moment intermediar. Astfel, alături de informații se calculează și un hash al lor, urmând ca în final să se compare cele două hash-uri, cel care a fost propagat prin rețea și cel al informației proprii. În caz de nepotrivire se marchează existența unei coliziuni și se depistează nodul care a produs începerea coruperii.  
+
+\section{Coduri de detecție si corecție Hamming} \label{hamming}
+
+Codurile Hamming fac parte dintr-o familie de coduri de detecție și corecție a erorilor. Spre deosebire de codurile de paritate ce pot doar detecta un număr impar de biți modificați, codurile Hamming reușesc să realizeze atât detecția de până la două erori, cât și corecția unei singure erori. Pentru implementarea unui astfel de sistem, pe lângă biții de date trebuie adăugați și, așa numiții, \textit{biți de paritate}. Aceștia reprezintă informație redundantă ce contribuie la restabilirea corectă a datei originale chiar și în cazul unei coruperi.
+\iftrue
+\begin{figure}[th]
+\centering
+\includegraphics[width=3in]{pics/hamming.png}
+  \caption[Procentul biților de paritate]{Procentul biților de paritate\protect\footnotemark}
+  \label{fig:pic3}
+\end{figure}
+\footnotetext{© https://ocw.cs.pub.ro/courses/\_media/eim/curs/$03$.intro-radio.pdf}
+\fi
+
+Așa cum sugerează și figura~\ref{fig:pic3} procentul de overhead generat de acești biți de paritate atinge valori ideale (cât mai mici), pe măsură ce cantitatea de date este mai mare. Astfel, dacă nu este fezabil să folosim pentru doar 8 biți de date, generând un overhead de 50\% de date, folosirea pe o cantitate mai mare de date va genera un overhead foarte mic. De exemplu, pentru 256-502 biți de date se adaugă doar 9 biți de paritate, reprezentând undeva între 1-3\% din informația utilă. Numărul biților de paritate se calculează pe baza următoarei formule: $2^r > d + r + 1$, unde \textit{r} este numărul de biți redundanți, iar \textit{d} este numărul de biți de date. Noua informație se construiește prin punerea biților de paritate de pozițiile puteri ale lui 2, în timp ce restul pozițiilor sunt completate cu biții de date. Fiecare bit de paritate este calculat în felul următor:
 \begin{itemize}
-	\item	Descriere sumara a implementării, prezentarea unor secvențe nerelevante de cod, scheme, etc. 
+	\item parcurgând lista de biți de date se transformă indicele fiecărei poziții în binar
+	\item fie $2^n$ poziția bitului de paritate
+	\item se selectează biții de date a cărui indice are bitul \textit{n+1} cel mai puțin semnificativ setat în reprezentarea binară
+	\item se aplică operația \textit{XOR} între biții selectați și valoarea se salvează pe poziția de paritate curentă
+	\item astfel fiecare bit de date este inclus într-un set unic de biți de paritate
 \end{itemize}
-Criterii pentru calificativul \textit{Bine}: 
+
+Respectând pașii descriși mai sus am creat noua informație formată atât din biți de date, cât și din biți de paritate. Simularea coruperii datelor este puțin diferită în acest context deoarece o singură corupere ar aduce întotdeauna un procentaj de 100\% al task-urilor primite corect. Atât datele simple, cât și datele extinse sunt grupate în clasa \textit{Data} și în funcție de parametrul de simulare (care poate permite sau nu utilizarea codurilor Hamming). În acest caz, coruperea are loc tot urmărind cele două scenarii prezentate în Subsecțiunea~\ref{simulareaCoruperii}, însă numărul biților corupți este ales random dintre 1,2 sau 3 pentru a nu permite corectarea biților la orice moment de timp. Pentru a putea afla poziția bitului corupt este nevoie de informația generată și de numărul biților de paritate. Se reia raționamentul de la generarea biților redundanți doar că toate calculele se realizează pe informația extinsă: biții de date și cei de paritate. Întervenind în calcule și valoarea biților de paritate rezultatul ar trebui să fie reprezentarea binară a lui 0 (în cazul în care nu s-a corupt niciun bit), altfel dacă rezultatul este diferit de 0, reprezentarea zecimală a lui reprezintă poziția bitului corupt. Modificând bitul cel mai nesemnificativ de pe acea poziție va rezulta data originală, dacă bitul de paritate al întregii date este schimbat. Dacă bitul de paritate pentru întreaga informație nu este schimbat și poziția rezultată nu este 0, înseamnă că s-au detectat mai mulți biți corupți și nu se poate realiza corecția.
+
+\chapter{Detalii de implementare}	\label{detalii}
+
+În acest capitol, vom detalia atât modul în care au fost implementate componentele introduse în capitolul~\ref{solutiaPropusa}, cât și limitarea altor abordări pe care le-am avut pe parcursul implementării. Secțiunea introductivă, \ref{introducere}, prezintă o sumarizare a implementării framework-ului MobEmu pentru a se putea înțelege interacțiunea pe care am avut-o cu acesta, respectiv modificările pe care le-am realizat în cadrul lui. 
+Urmând ca, secțiunea \ref{algoritmi}, împreună cu toate subsecțiunile ei, să detalieze algoritmii necesari identificați și descriși în capitolul precedent.
+ 
+\section{Descriere framework MobEmu} \label{introducere}
+MobEmu~\cite{MobEmuArticle} este un framework folosit pentru parsarea unor trace-uri de mobilitate, pentru simularea unor algoritmi de rutare și diseminare a datelor, iar în final se generează statistici cu privire la caracteristicile rețelei (rata de succes, latență, numărul de contacte etc.). Principalele componente care se identifică sunt:  clasa \textit{Trace} și clasa \textit{Node}, care la rândul lor prezintă mai multe caracteristici precum: \textit{Context, Parser, Contact} pentru componenta \textit{Trace} și \textit{Altruism, Battery, Message, Topic, etc} pentru componenta \textit{Node}.
+
+Componenta \textit{Trace} conține o listă de \textit{Contacte} ce deține informații necesare stabilirii unui istoric al contactelor, precum momentul de timp de început și sfârșit al contactului, dar și tipul contactului în funcție de tehnologia de detecție(e.g Bluetooth, WiFi). Pentru obținerea unui obiect de tip \textit{Trace} trebuie rulat un \textit{Parser}, o inferfață ce oferă următoarele informații: preferința nodului, conexiunile sociale (Facebook, Twitter) ale fiecărui nod, numărul de noduri din rețea și datele obiectului \textit{Trace} prin metodele: \textit{getContextData(), getSocialNetwork(), getNodesNumber(), getTraceData()}(are rost sa zic asta??). Această interfață are mai multe implementări în cadrul simulatorului, dintre care am utilizat clasa \textit{UPB} ce parsează datele unor trace-uri realizate în facultate în anii 2011 și 2012, și clasa \textit{HCMM} care este un generator de contacte utilizând un model sintetic, matematic ce simulează diferite comportamente ale nodurilor în funcție de anumite restricții impuse.
+
+Un obiect de tip \textit{Node} conține toate informațiile necesare unui dispozitiv aflat într-o rețea oportunistă în care poate să ruleze algoritmi de rutare și diseminare a datelor. Principalele informații sunt legate de caracteristici interne precum id-ul care este unic, nivelul bateriei, lista propriilor mesaje, dar și cantitatea de memorie care este disponibilă pentru mesajele primite de la nodurile întâlnite (mesaje ce sunt destinate altor noduri). Această memorie reprezintă punctul central în cadrul implementării paradigmei store-carry-and-forward și cu cât este mai mare, cu atât cresc șansele la o rată de succes ridicată în cadrul rețelei. Alături de această memorie, se definește separat memoria mesajelor generate de fiecare nod în parte deoarece vor fi tratate diferit, nefiind șterse până la finalizarea respectivelor acțiuni. În timp ce, pentru memoria de date se implementează o politică de înlocuire, precum cea a memoriei cache, în momentul în care devine neîncăpătoare pentru acceptarea de noi mesaje. 
+Informațiile deținute într-un obiect de tip \textit{Node} se continuă cu detalii despre contactele dintre noduri(noduri unice întâlnite, durata contactului cu un anumit nod într-o anumită perioadă), comunitatea locală detectată, cât și statistici cu privire la numărul de mesaje schimbate în rețea. 
+
+Clasa \textit{Node} este o clasă abstractă și este extinsă de orice algoritm care vrea să aducă o nouă abordare în rutarea și diseminare oportunistă, implementând metoda abstractă \textit{onDataExchange()}. În continuare, vom prezenta pe scurt comportamentul simulatorului în momentul în care două noduri se întâlnesc, iar în următoarea secțiune se va detalia implementarea mecanismelor de consistență din cadrul paradigmei Drop Computing\cite{DC}. În momentul în care în urma parsării datelor dintr-un trace se identifică o conexiune validă între două noduri (contactul durează minim o anumită perioadă), se salvează referințe către nodul observator și nodul observat și în cazul unei noi conexiuni se apelează metoda \textit{exchangeData()}. Dacă un contact între aceleași două noduri nu este deja în progres, posibil în urma unor diferențe ale intervalelor de eșantionare ale fiecărui dispozitiv, se apelează metoda \textit{onDataExchange()}. Metoda primește ca parametrii nodul întâlnit, durata contactului și momentul de timp curent, urmând ca în implementarea ei să se regăsească toată logica referitoare la schimbul de informații. 
+
+\section{Detalierea algoritmilor de realizare a consistenței}  \label{algoritmi}
+Replicarea aceluiași task în mai multe noduri se realizează prin intermediul aceluiași obiect în Java, astfel nu se poate simula coruperea datelor în cadrul câmpului \textit{Data} din cadrul unui obiect de tipul \textit{Task}. În acest fel orice modificare adusă de un nod unui task ar fi fost resimțită în toate nodurile în care acesta a fost replicat chiar și înainte de a fi modificat. Prin urmare, se salvează în cadrul fiecărui obiect \textit{Task} un map în care sunt salvate toate locațiile în care este prezent fiecare task împreună cu valoarea datelor deținute de acele noduri.
+
+Alături de map-ul care reține datele unui task, am folosit încă un map în cadrul clasei \textit{Task} care să facă legătura între id-ul nodului în care este prezent și executantul acelei versiuni, în cazul în care este vorba de un task completat. În momentul în care se interschimbă atât task-uri completate, cât și task-uri încă neexecutate, se salvează valoarea din map asociată id-ului nodului vizitat într-o nouă intrare în map ce are valoarea cheii egală cu id-ul noului nod posesor. În cazul task-urilor neexecutate nu se salvează id-ul executantului întrucât acesta încă nu există și se poate suprascrie o informație importantă deținută despre acel nod (map-ul dintre id-nod și id-executant poate conține o valoare pentru acel nod deoarece se poate ca acel nod să fi primit o versiune completată a aceluiași task, ulterior să o transfere mai departe și în cele din urmă să mai accepte și o versiune încă necompletată). Este foarte importantă identificarea corectă a executanților replicilor deoarece în urma depistării unei versiuni corupte trebuie identificat nodul executant și parcursă calea de la executant până la proprietar în vederea stabilirii nodurilor corupte. 
+
+\subsection{Necesitatea adaugării timestamp-ului}
+În clasa \textit{Task} se reține o listă cu toate căile parcurse de task de la proprietar, din momentul generării task-ului și până la momentul curent de timp. La rândul lor, căile sunt reprezentate printr-o listă de noduri pe care task-ul a parcurs-o în ordine. La început această listă este inițiată cu nodul proprietat, și ulterior se adaugă fiecare nod vizitat. În momentul în care un nod transmite un task completat sau necompletat nodului întâlnit și nu este îndeplinită condiția de familiariate cu acesta, se duplică calea existentă și se adaugă în lista de drumuri după ce se adaugă id-ul noului nod întâlnit. Acest lucru este necesar deoarece adăugarea unei noi căi se face căutând calea ce se termină cu id-ul nodului ce transferă informație, iar în situația descrisă anterior, task-ul încă mai este păstrat în memoria nodului și acesta poate să îl transfere și la viitoarele interacțiuni cu alte noduri. Adăugarea unui nod în această listă de căi se face întotdeauna prin generarea unei noi căi, copia celei deja existente, la care se adaugă noul nod. Această adăugare are loc în metoda \textit{onDataExchange()} indiferent de momentul de timp în care un task se schimbă (completat, neexecutat sau din nou la proprietar), iar pentru a șterge o anumită cale se apelează metoda separată \textit{deletePath()}(aceasta primește ca parametri lista de drumuri și id-ul nodului care nu mai poate disemina task-ul). Task-urile transferate sunt salvate într-o listă, iar în situația în care este îndeplinită condiția de familiaritate pe lângă ștergerea din memoria nodului în care au fost prezente, se șterg și căile pe care acestea au sosit până la respectivele noduri.
+
+\begin{figure}[th]
+\centering
+\includegraphics[width=4in]{pics/Timestamp.pdf}
+  \caption[ca]{Necesitate timestamp}
+  \label{fig:timestamp}
+\end{figure}
+
+Pentru a reține toate versiunile de task-uri care se trimit între aceleași două noduri se folosește încă un map în care cheile sunt reprezentate de valori de tipul \textit{SenderAndReceiver}, având ca valori \textit{List$<$ValueAndTime$>$}. Clasa \textit{SenderAndReceiver} are ca și caracteristici id-urile nodurilor emițător și receptor, iar în cadrul ei sunt suprascrise metodele \textit{hashcode()} și \textit{equals()} pentru a se putea accesa informația din map când se creează un nou obiect de tipul \textit{SenderAndReceiver} cu același emițător și receptor. Astfel, în momentul în care se parcurge calea pe care a ajuns un task completat la proprietar, trebuie verificate versiunile corecte de task-uri ce au fost schimbate de nodurile intermediare până la proprietar. Clasa \textit{ValueAndTime} reține informația task-ului transmis alături de momentul de timp la care a avut loc transmiterea, dar și de id-ul nodului care a executat acea versiune (dacă este vorba de o versiune neexecutată i se atribuie ca valoare un indicele nevalid -1).
+
+În figura~\ref{fig:timestamp} este exemplificat un scenariu de transfer între noduri în care folosirea timestamp-ului este necesară pentru a lua deciziile corecte cu privire la nodurile rețelei. Fie nodul A proprietarului task-ului \textit{$T\_a$}, culoarea galbenă reprezintă faptul că task-ul nu este încă executat, în urma întâlnirilor cu nodurile B și C (la momentele de timp (1) și (2)) task-ul este transferat pentru a crește șansele de execuție. Să presupunem că nodul C execută task-ul \textit{$T\_a(c)$}, culoarea roșie arată că este vorba de un task executat și valoarea din paranteză indică nodul executant. După o perioadă de timp nodul C îl transferă nodului D (momentul (3)) și ulterior îl șterge din memoria proprie pentru că a întâlnit un nod pe care îl consideră de încredere. Între timp nodul B execută și el task-ul (\textit{$T\_a(b)$}) și îl corupe înainte de a-l transfera nodului C, nod cu care intră și contact și care îl acceptă deoarece nu îl mai deține în lista de task-uri completate. Ulterior, nodul D se întâlnește cu nodul E, care reușeste să-l transmită proprietarului, moment în care se începe verificarea drumului parcurs. Până la momentul de timp în care nodul E realizează o conexiune cu proprietarul task-ului, nodul C transferă versiunea coruptă și nodului D deoarece acesta șterge versiunea anterioară odată cu transferul la nodul E. În momentul în care se începe verificarea corectitudinii, se identifică drumul parcurs ca fiind $A->C->D->A$ și se începe verificarea datelor din fiecare nod. Verificând fiecare transfer dintre noduri, fără folosirea unei liste de versiuni cu timestamp-uri diferite, s-ar identifica între nodul C și D informație coruptă, valorile din map fiind suprascrise odată cu transferul de la momentul (6). Ținând cont că până la C task-ul nu a fost executat se trage concluzia că nodul C a corupt task-ul și se începe mecanismul de scădere pentru rating-ul nodului C, mecanism descris în Subsecțiunea~\ref{ratingSection}. Această concluzie nu este cea dorită deoarece nodul C este unul corect care nu a generat nicio corupere și un rating scăzut în mod greșit ar diminua șansele ca un task să fie propagat și executat cât mai repede prin rețea. Așadar, în implementarea propusă, se depistează existența mai multor versiuni de la nodul C către nodul D și se alege cea cu timestamp-ul mai mic față de versiunea transmisă de la nodul D la următorul nod din calea pe care a urmat-o task-ul până la proprietar. Astfel, se trage concluzia că versiunea transmisă a fost $T\_a(c)$, versiune care nu a fost coruptă și care a fost executată de nodul C, iar parcursul task-ului este cel de la momentele de timp ${(1),(3),(5),(7)}$.
+
+\subsection{Detalierea mecanismelor de asigurare a consistenței}
+
+Pentru o mai mare probabilitate de recepționare a unui task executat corect se așteaptă un număr variabil de versiuni, ce sunt salvate într-un map ale cărui chei sunt egale cu id-urile unice ale fiecărui task.
+În metoda \textit{onDataExchange()}, în momentul în care un task completat ajunge la proprietar acesta nu este considerat încă executat ci este adăugat în lista de valori asociată id-ului task-ului pe care o găsim în map. Dacă map-ul nu conține încă cheia cu valoarea id-ului task-ului primit înseamnă că aceasta este prima versiune și se creează o nouă intrare în map. În cazul în care după primirea unei versiuni lista asociată task-ului are o lungime egală cu numărul dorit de versiuni se verifică informațiile primite folosindu-se funcția descrisă în Pseudocodul~\ref{alg:waitingVerification}.
+\iftrue
+\begin{algorithm}
+\caption{Mecanismul de verificare a versiunilor primite}
+\label{alg:waitingVerification}
+\begin{algorithmic}[1]
+\scriptsize
+\State $L_{data}$ - lista versiunilor primite, $Task_{id}$ - id-ul task-ului primit, $T_{c}$ - numărul task-urilor corupte, $N_{versiuni}$ - numărul de versiuni așteptate, $Task_{data}$ - data nemodificată a task-ului curent
+
+	\State fie $Majoritate$ $-$ procentul celor mai frecvente date din $L_{data}$
+	\If {$Majoritate$ este egal cu $50\%$}
+		\State mărește numărul versiunilor așteptate pentru task-ul $Task_{id}$ cu $1$
+		\State ieșire din funcție
+	\EndIf
+	\ForAll {datele $D$ din lista $L_{data}$}
+		\If {există coliziune între $D$ și $Task_{data}$} %?nu am explicat faptul ca aceasta data proprie a taskului nu se modifica
+			\State crește $T_{c}$ cu 1
+			\State resetează valoarea boolean-ului pentru corecția Hamming
+		\EndIf
+	\EndFor
+	\If {$Majoritate$ $>$ $50\%$ și 2*$T_{c}$ $>$ $N_{versiuni}$}
+		\State se acceptă o versiune coruptă
+	\Else {} se acceptă o versiune consistentă
+	\EndIf
+	\State generare statistici în funcție de versiunile primite și de versiunile existente în rețea în acel moment de timp
+\end{algorithmic}
+\end{algorithm}    
+\fi
+
+În momentul în care se primesc toate versiunile așteptate se calculează o majoritate a datelor primite, adică procentajul informației cu cele mai multe apariții, aceea rezolvare a task-ului fiind cea care se va accepta de către proprietar. În cazul în care nu există o majoritate(liniile 2-5), adică sunt primite două sau mai multe versiuni diferite de același număr maxim de ori, nu se poate lua o decizie și se mai așteaptă o nouă versiune cu care să se formeze o majoritate (cu hamming se schimbă situația!!). Specificăm faptul că numărul de versiuni este o caracteristică a fiecărui task, astfel se crește numărul de așteptare al versiunilor doar pentru acel task, celelalte task-uri păstrând valoarea globală de așteptare. Parcurgând lista de informații primite se stabilește dacă există o diferență între datele proprii nealterate și datele primite (liniile 8-11) folosind funcția de hash descrisă în Subsecțiunea~\ref{hash}. Această funcție de verificare a coliziuniilor are un parametru de tipul \textit{MutableBoolean} care permite modificarea valorii aceluiași obiect din \textit{true} în \textit{false} și invers. Existența acestui parametru este utilă deoarece în situația în care se corectează folosind codul Hamming un bit acest lucru trebuie detectat și din exterior pentru a cunoaște faptul că un anumit nod a încercat coruperea înformației. În cazul în care majoritatea versiunilor primite au fost corupte (liniile 13-17) se salvează această informație într-un boolean și se trimite ca parametru funcției de generare a statisticilor. Această informație este necesară pentru a compara dacă acceptarea de informație coruptă a venit dintr-un număr majoritar sau minoritar de versiuni corupte existente în toată rețeaua, în acel moment.
+
+Mecanismul de verificare al rating-ului nodurilor se desfășoară conform algoritmului detaliat în Pseudocodul~\ref{alg:ratingVerification}. Fiecare nod are un timer asociat caracteristicii de rating care se scade de fiecare dată când valoarea rating-ului nodului nu scade (în momentul în care scade ratingul acest timer este resetat la valoarea inițială). Acest timer oferă posibilitatea creșterii ratingului nodului după un anumit timp în care nu a mai generat nicio corupere. Nivelul de încredere al unui nod se acordă în funcție de valoarea rating-ului, iar scăderea acestuia la fiecare corupere conduce la un număr mare de noduri evitate. Creșterea rating-ului este benefică și ajută nodurile care generează întâmplător, în funcție de anumiți factori externi la momente depărtate de timp, coruperea datelor. Majoritatea task-urilor dintre momentele respective fiind executate și transportate fără nicio corupere. Evitarea acestor noduri conduce la scăderea ratei de succes a întregii rețele deoarece rezolvarea task-urilor nu se putea termina în timp util prin îmbinarea părților (subtask-urilor) provenite de la nodurile rețelei. Prin urmare, task-ul ajungea să fie executat folosind tot puterea de calcul a nodului proprietar, însă după un timp de așteptare pierdut. 
+\begin{algorithm}
+\caption{Mecanismul de verificare a ratingului nodurilor}
+\label{alg:ratingVerification}
+\begin{algorithmic}[1]
+\scriptsize
+\State $dcNodeId$ - id-ul nodului întâlnit, $NMap_R$ - map între id-urile nodurilor întâlnite de nodul curent și valorile rating-ului(în cazul primei întâlniri în acest map nu se află și nodul $dcNodeId$), $TMap_R$ - map între id nod și timer nod, $T_R$ - timer-ul inițial al ratingului, $Social$ - lista nodurilor ce compun rețeaua socială a nodului curent
+	\If {$NMap_R$ conține nodul $dcNodeId$}
+		\State scade timer-ul nodului cu 1 și îl pune în map-ul $TMap_R$
+		\State fie $R_{value}$ valoarea cheii $dcNodeId$ conținută în $NMap_R$
+		\State fie $T_{value}$ valoarea timer-ului din map-ul $TMap_R$ 
+		\If {$R_{value}$ este între 50 și 100 și $T_{value}$ $<=$ 0}
+				\State pune în $NMap_R$ valoarea minimă dintre 100 și $R_{value}$+20
+				\State setează în $TMap_R$ pentru nodul întâlnit valoarea inițială a timer-ului $T_R$ 
+		\EndIf
+		\State $R_{value}$ - noua valoare din $NMap_R$
+		\If {$R_{value}$ $>=$ 75.0}
+			\State returnează adevărat
+		\Else {} returnează fals
+		\EndIf
+	\EndIf
+	\If {$Social$ conține $dcNodeId$}
+		\State returnează adevărat
+	\Else {} returnează fals
+	\EndIf
+\end{algorithmic}
+\end{algorithm}
+
+Schimbul de informații privind ratingul nodurilor întâlnite de fiecare dispozitiv mobil are loc în felul următor:
 \begin{itemize}
-	\item	Descrierea detaliată a algoritmilor/structurilor utilizați; Prezentarea etapizată a dezvoltării, inclusiv cu dificultăți de implementare întâmpinate, soluții descoperite; (dacă este cazul) demonstrarea corectitudinii algoritmilor utilizați. 
+	\item în momentul în care două noduri intră în contact transmit unul altuia lista proprie de ratinguri.
+	\item dacă cele două noduri aflate în contact sunt în aceeași rețea socială, informațiile se schimbă astfel:
+	\begin{itemize}
+		\item se parcurge hashmap-ul de rating-uri ale nodului vizitat.
+		\item dacă nodul curent deține în lista proprie ratingul acelui nod, se recalculează un rating nou făcând o medie aritmetică ponderată între cele două valori ( folosind o pondere de $60\%$ pentru valoarea proprie, respectiv $40\%$ pentru valoarea primită).
+		\item dacă nodul curent nu deținea ratingul acelui nod, salvează valoarea primită având încredere în nodul din aceeași rețea socială.
+	\end{itemize}
+	\item dacă cele două noduri aflate în contact nu fac parte din aceeași rețea socială, informațiile se schimbă astfel:
+		\begin{itemize}
+			\item dacă nodul curent deține în lista proprie ratingul acelei nod, se recalculează un rating nou făcând o medie aritmetică ponderată între cele două valori (de data aceasta folosindu-se o pondere de $80\%$ pentru valoarea proprie, respectiv $20\%$ pentru valoarea primită).
+			\item dacă nodul curent primește un rating pentru un nod necunoscut, nu îl salvează, așteptând o informație de la un nod familiar.
+		\end{itemize}
+	\item acest mecanism se aplică în momentul în care valoarea deținută pentru ratingul nodului întâlnit este mai mare ca 75.
 \end{itemize}
 
-\section{Indicații formatare tabele}
-Se recomandă utilizarea tabelelor de forma celui de mai jos.  Font size :  9. 
-Orice tabel prezent în teză va fi referit în text; exemplu: a se vedea Tabel~\ref{tab:criterii}.
+Mecanismul de verificare a rating-ului~\ref{alg:ratingVerification} este apelat la fiecare interacțiune în funcția \textit{onDataExchange()} atât la schimbarea de task-uri completate, cât și la balansarea listelor de task-uri încă neexecutate. În situația în care funcția întoarce \textit{false} se trece la următorul nod întâlnit, nerealizându-se niciun schimb de informații. Funcția returnează \textit{false} dacă ratingul deținut pentru acel nod nu are o valoare cel putin egală cu 75 (ratingul 75 se obține în cazul unei singure coruperi) sau dacă nu sunt în aceeași rețea socială (liniile 16-18) și nu are o valoarea salvată pentru ratingul nodului întâlnit. Timerul destinat rating-ului fiecărui nod se scade la fiecare apel de funcție (linia 3) deoarece în cazul unei recalculări se resetează la valoarea inițială (linia 8). Acest timer dă posibilitatea nodurilor să își ridice nivelul rating-ului chiar dacă au generat la un moment dat coruperi, procesând însă, într-un timp setat, doar versiuni corecte. După expirarea timer-ului, dacă nodul are un nivel promițător (rating mai mare ca 50\%, mai mult de 2 coruperi succesive fiind considerate nejustificate) se crește valoarea rating-ului cu 20 și se resetează timerul (liniile 6-8). Se salvează în hashmap valoarea minimă dintre 100 și noua valoare deoarece nu se permite unui nod să își crească intenționat ratingul o perioadă, urmând ca mai apoi să corupă un număr mare de informații și să fie considerat de încredere atât timp cât ratingul nu a scăzut sub 75. 
+ 
+Pentru a înțelege cât mai bine selectarea drumului real pe care îl parcurge un task de la generare și până ajunge executat la proprietar am adăugat în capitolul~\ref{anexe} algoritmul de selecție format din funcțiile ~\ref{alg:addNodeInPath} și ~\ref{alg:findMaxTimestamp}. Inițial, pentru salvarea drumului unui task, am folosit un graf orientat realizând o parcurgere BFS pentru a selecta drumul curent străbătut. Această abordare este detaliată în algoritmul~\ref{alg:historyOfTask}, în urma rulării descoperind multiplele posibilități de transfer între aceleași două noduri, algoritmul găsind mai multe căi până la nodul destinație. Astfel s-a observat necesitatea salvării tuturor transferurilor de task-uri împreună cu momentul de timp curent pentru a putea diferenția versiunile consistente de cele inconsistente, ceea ce conduce la aflarea nodurilor corupte.
+% am trecut la abordarea cu timestamp și cu  
+\chapter{Evaluare} \label{evaluare}
 
-\begin{table}[th]\small\linespread{1}
-\caption{Sumarizare criterii}
-\label{tab:criterii}
-\begin{tabular}{l >{\raggedright\arraybackslash}p{8cm} >{\raggedright\arraybackslash}p{4cm}}
-\textbf{Calificativ} & \textbf{Criteriu} & \textbf{Observații} \\\hline
-\textbf{Nesatisfacator} & Sunt prezentate pe scurt scheme și pseudo-cod & \\\hline
-\textbf{Satisfacator} &Descriere sumara a implementării, prezentarea unor secvențe nerelevante de cod, scheme, etc.& \\
-\hline
-\textbf{\textit{Bine}} &Descrierea detaliată a algoritmilor/structurilor utilizați; Prezentarea etapizată a dezvoltării, inclusiv cu dificultăți de implementare întâmpinate, soluții descoperite; (dacă este cazul) demonstrarea corectitudinii algoritmilor utilizați. & Pot fi incluse configurații, secvente de cod, pseudo-cod, implementări ale unor algoritmi, analize ale unor date, scripturi de testare. \\
-\hline
-\end{tabular}
-\end{table}
+În acest capitol vom prezenta atât simulările în care am testat implementarea propusă, cât și analiza rezultatelor obținute în funcție de mai multe metrici pe care le vom prezenta ulterior.
+
+Primul scenariu de mobilitate a unor dispozitive mobile a fost realizată folosind modelul HCMM~\cite{hcmm}, model ce simulează comportamentul și interacțiunile dintre mai multe noduri. Acest model include atât un comportament influențat de apartenența la o anumită rețea socială, cât și atracția asupra unor locații fizice specifice. Pentru acest scenariu, am creat următoarea simulare: 30 de noduri mobile, grupate în 5 comunități diferite, interacționează timp de 6 ore, 5 noduri dintre acestea fiind noduri călătoare (ele își pot schimba comunitatea inițială). Aria de desfășurare este de 1000 metri pătrați și viteza nodurilor este setată între 1.25 și 1.5 m/s, iar distanța până la care se poate realiza interacțiunea dintre 2 noduri este de 10 metri.
+
+Alături de acest model de mobilitate sintetic am folosit și două trace-uri reale de mobilitate (\textit{UPB 2011~\cite{upb2011} și UPB 2012~\cite{upb2012}}) înregistrate în urma unor interacțiuni dintre noduri(dispozitive) reale. Trace-ul \textit{UPB 2011} este rezultatul unui experiment desfășurat în cadrul Universității Politehnica din București care cu ajutorul unei aplicații Android au înregistrat orice dispozitiv ce avea Bluetooth-ul activat. Datele pentru trace-ul \textit{UPB 2012} au fost înregistrate tot cu ajutorul unei aplicații Android, în același cadrul, având însă un număr mai mare de participanți (66 spre deosebire de 22 în cazul \textit{UPB 2011}). Alături de conexiunea Bluetooth, cel de-al doilea trace real, folosește și conexiunea Wi-Fi, înregistrând conexiunile atât cu celelalte dispozitive, cât și cu access point-urile wireless întâlnite. Conexiunea Wi-Fi oferă o mai bună stabilitatea, în schimb necesită un consum mai mare de baterie. Aplicația rulând pe fundal(în background) înregistrează și statistici referitoare la nivelul bateriei, la memoria disponibilă și la datele înregistrate de la sensori. Ambele trace-uri salvează într-o matrice conexiunile sociale dintre participanți, în timp ce în al doilea trace se extrag și interesele comune dintre aceștia, grupate pe categorii în urma analizării profilelor de Facebook.
+
+Pentru a evalua implementarea propusă am propus trei metrici cu ajutorul cărora am luat măsurători în cazul mai multor scenarii de realizare a consistenței. Cele trei metrici sunt:
+\begin{itemize}
+	\item procentajul de task-uri corecte de ajung la proprietar executate de alte noduri din rețea.
+	\item câte task-uri ajung executate de nodurile rețelei la proprietar (rezultat care variază în funcție de numărul de versiuni așteptate înainte de a lua o decizie).
+	\item latența medie de procesare pentru fiecare task executat de alte noduri (timpul de la generare și până când proprietarul îl primește rezolvat).
+\end{itemize}
+În continuare, vom analiza rezultate obținute în următoarele situații:
+\begin{itemize}
+	\item simularea coruperii datelor, ținând cont de ambele scenarii descrise în subsecțiunea~\ref{simulareaCoruperii}, fără implicarea niciunui mecanism de realizare a consistenței.
+	\item variația numărului de versiuni așteptate (3 sau 4, reamintind faptul că în cazul în care există două versiuni cu aceași frecvență se va mai aștepta o versiune pentru task-ul respectiv).
+	\item folosirea sau absența mecanismului de rating (în cazul utilizării variind și valoarea rating-ului de referință).
+	\item variația procentului de executanți diferiți în funcția de numărul versiunilor dorite.
+	\item utilizarea codurilor de corecție Hamming (variind numărul de coruperi al aceluiași task).
+\end{itemize}
+
+Analizând cele trei metrici se poate observa cum pentru primele două ar trebui să se genereze valori mai ridicate, în urma mecanismelor de realizare a consistenței implementate (o valoare cât mai ridicată fiind de preferat în cadrul unui sistem perfect). În timp ce, în cazul ultimei metrici, o valoare cât mai apropiată de rezultatul înregistrat în urma rezolvării task-urilor folosind resurse proprii este de preferat. Această concluzie nu este însă perfect valabilă în toate cazurile în care paradigma Drop Computing se poate folosi, menționând aici posibilitatea ca rezolvarea unui task să necesite acces la Internet, în timp ce dispozitivul mobil nu poate realiza o conexiune la Internet. În acest scenariu utilizarea nodurilor întâlnite pentru rezolvarea propriilor task-uri poate fi realizată într-un timp mai scurt față de așteptarea unei eventuale conexiuni la Internet al nodului local.
+
+Setul complet de grafice este format din 45?? grafice  (3 trace-uri * 3 metrici * 5 scenarii), în fiecare dintre ele fiind calculată o metrică pentru fiecare din cele cinci situații prezentate mai sus. Valoarea metricii este dispusă pe axa \textit{Oy}, în timp ce pe axa \textit{Ox} se variază propabilitatea de corupere a task-urilor. Din setul complet de grafice s-au selectat și analizat cele mai reprezentative în acest capitol, iar restul au fost grupate pe fiecare trace în parte și adăugate în capitolul~\ref{anexe}.
 
 
-\chapter{Evaluare}
-Acest capitol trebuie să răspundă, în principiu, la 2 întrebări și să se încheie cu o discuție a rezultatelor obținute. Cele doua întrebări la care trebuie sa se răspundă sunt:
-\begin{enumerate}
-	\item  \textbf{Merge corect?} (Conform specificațiilor extrase în capitolul 2); 
-Evaluarea dacă merge corect se face pe baza cerințelor identificate în capitolele anterioare. 
-
-	\item Cât de \textit{Bine} merge / cum se compară cu soluțiile existente? (pe baza unor metrici clare). 
-Evaluarea cât de \textit{Bine} merge trebuie să fie bazată pe procente, timpi, cantitate, numere, \textbf{comparativ cu soluțiile prezentate în capitolul 3}. Poate fi vorba de performanță, overhead, resurse consumate, scalabilitate etc. 
-\end{enumerate}
 
 În realizarea discuției, se vor utiliza tabele cu procente, rezultate numerice și grafice. În mod obișnuit, aici se fac comparații și teste comparative cu alte proiecte similare (dacă există) și se extrag puncte tari și puncte slabe. Se ține cont de avantajele menționate și se demonstrează viabilitatea abordării / aplicației, de dorit prin comparație cu alte abordări (dacă acest lucru este posibil). Cuvântul cheie la evaluare este ``metrică'': trebuie să aveți noțiuni măsurabile și cuantificabile. În cadrul procesului de evaluare, explicați datele, tabelele și graficele pe care le prezentați și insistați pe relevanța lor, în următorul stil: ``este de preferat ... deoarece …''; explicați cititorului nu doar datele ci și semnificația lor și cum sunt acestea interpretate. Din această interpretare trebuie să rezulte poziționarea proiectului vostru printre alternativele existente, precum și cum poate fi acesta îmbunătățit în continuare.
 
-Criterii pentru calificativul \textit{Ne\textit{Satisfăcător}}: 
-\begin{itemize}
-	\item Aplicația este testată dar rulează pe calculatorul studentului, nu există posibilități de testare, nu a fost validată cu clienți / utilizatori;
-	\item Nu au fost realizate comparații cu alte sisteme similare.
-\end{itemize}
+\chapter{Concluzii} \label{concluzii}
+În această lucrare am prezentat anumite mecanisme de consistență pentru schimbul de task-uri dintr-o paradigmă precum Drop Computing. Am oferit exemple de situații din viața reală în care această paradigmă are o bună aplicabilitate. Totodată, am subliniat și importanța primirii unor rezolvări corecte, nealterate în urma diferitelor pierderi sau coruperi de informații. În cadrul simulatorului MobEmu am adăugat numeroase statistici și modalități de descoperire a întregului istoric al schimbului de task-uri, de la nodurile care au participat la execuția lor și până la sursa coruperii.
 
-Criterii pentru calificativul \textit{Satisfăcător}: 
-\begin{itemize}
-	\item \dezvoltare  Există teste unitare și de integrare, există o strategie de punere în funcțiune (deployment), există validare minimală cu clienții / utilizatorii.
-	\item \cercetare Principalele componente și soluția în ansamblu au fost evaluate din punct de vedere al performanței, însă nu sunt folosite seturi de date standard, există unele erori de interpretare a datelor.
-	\item \ambele Discuție minimală asupra relevanței rezultatelor prezentate, comparație minimală cu alte sisteme similare.
-\end{itemize}
+Rezultatele obținute au arătat ca mecanismele implementate pot satisface, prin setarea restricțiilor potrivite, cerințele unei rețele în ceea ce privește nivelul de încredere dorit. De exemplu, în momentul în care informațiile care se schimbă sunt foarte importante și delicate, folosind mecanismul de rating se poate ajunge la procentaje de aproape $100\%$ privind acceptarea de task-uri executate corect. Acest mecanism prezintă o scădere a mesajelor și a task-urilor transmise prin rețeaua proporțională cu creșterea probabilității de corupere. Acest lucru se datorează faptului că multiple noduri vor ajunge la o valoarea mică a ratingului și vor fi considerate corupte, moment în care se va evita orice interacțiune cu ele. În schimb, folosirea sistemului de așteptare împreună cu diverse limitări în ceea ce privește calea pe care a venit, executantul acelei versiuni conduce la un număr mare de informații calculate cu ajutorul nodurilor cu care se interacționează. Scenariul descris anterior produce o anumită întârziere față de versiunea standard, dar prezintă o probabilitate mai bună de a accepta și folosi informații corecte, lucru care poate fi preferat în ciuda tuturor costurilor.
 
-Criterii pentru calificativul \textit{Bine}: 
-\begin{itemize}
-	\item \dezvoltare Teste unitare și de integrare, instrumente de punere in funcțiune (deployment) utilizate și care arată lucru constant de-a lungul semestrului, lucrare validată cu clienții / utilizatorii, produs în producție.
-	\item \cercetare Componentele și soluția în ansamblu au fost evaluate din punct de vedere al performanței, folosind seturi de date standard și cu o interpretare corectă a rezultatelor.
-	\item \ambele Discuție cu prezentarea calitativă și cantitativă a rezultatelor, precum și a relevanței acestor rezultate printr-o comparație complexă cu alte sisteme similare.
-\end{itemize}
+În prezent, paradigma Drop Computing este la stadiul de propunere, testând toată funcționalitatea cu ajutorul acestui framework, MobEmu, care prin simularea unor interacțiuni măsurate în viața reală încearcă să demonstreze utilitatea conceptului. Pe viitor ne dorim să îmbunătățim mecanismul de rating și să încercăm să găsim soluții pentru creșterea ratei de succes, în timp ce latența de procesare și overhead-ul să fie diminuate. O altă dezvoltare ulterioară vizează creșterea altruismului nodurilor prin integrarea unor mecanisme de recunoștință, ulterior fiecare nod fiind foarte interesat de rezolvarea și propagarea task-urilor vecinilor. Această recunoștință putând fi realizată atât financiar, cât și printr-o prioritizare diferită în rețea a task-urilor generate de nodurile altruiste. ((micro-payment??
+Alături de codul de detecție și corecție Hamming, se dorește implementarea unui cod Reed-Solomon~\cite{reedSolomon}. Marele avantaj fiind posibilitatea de stabilire a overhead-ului, acest mecanism de corecție putând corecta un număr diferit de biți în funcție de numărul biților de paritate adăugați in mesaj. De asemenea, această implementare va putea rezista atât la o rafală de pierderi de un număr dorit de biți, cât și la același număr de biți corupți răspândiți aleator printre biții de date.
 
-\chapter{Concluzii}
-În acest capitol este sumarizat întreg proiectul, de la obiective, la implementare, si la relevanta rezultatelor obținute. În finalul capitolului poate exista o subsecțiune de ``Dezvoltări ulterioare''.
+%Unul dintre ele este reprezentat de posibilitatea coruperii oricărei informații, chiar și informațiile statistice și rezultatele salvate tot în memoria nodului cu privire la ratingul celorlalte noduri întâlnite. In actuala implementarea nodurile corupte fiind descoperite pe baza unor noduri de incredere....
 
-Criterii pentru calificativul \textit{Ne\textit{Satisfăcător}}: 
-\begin{itemize}
-	\item	Concluziile nu sunt corelate cu conținutul lucrării;
-\end{itemize}
-
-Criterii pentru calificativul \textit{Satisfăcător}: 
-\begin{itemize}
-	\item	Concluziile sunt corelate cu conținutul lucrării, însă nu se oferă o imagine asupra calității și relevantei rezultatelor obținute;
-\end{itemize}
-
-Criterii pentru calificativul \textit{Bine}: 
-\begin{itemize}
-	\item	Concluziile sunt corelate cu conținutul lucrării, și se oferă o imagine precisa asupra relevantei și calității rezultatelor obținute în cadrul proiectului. 
-\end{itemize}
-
-\chapter{Bibliografie}
-% * <marios.choudary@gmail.com> 2018-02-28T12:07:48.730Z:
-% 
-% > BIBLIOGRAFIE
-% Am adaugat un paragraf cu cateva detalii despre folosirea citarilor bibliografice in Latex, despre folosirea lui "\cite" si despre posibilitatea folosirii bibliografiei si direct in fisierul Latex.
-% 
-% ^.
-
-\begin{itemize}
-	\item 	NU utilizați referințe la Wikipedia sau alte surse fără autor asumat.
-	\item 	Pentru referințe la articole relevante accesibile în web (descrise prin URL) se va nota la bibliografie și data accesării.
-	\item 	Mai multe detalii despre citarea referințelor din internet se pot regăsi la:
-	\begin{itemize}
-		\item	\url{http://www.writinghelp-central.com/apa-citation-internet.html}
-		\item	\url{http://www.webliminal.com/search/search-web13.html}
-	\end{itemize}
-	\item 	Note de subsol se utilizează dacă referiți un link mai puțin semnificativ o singură dată; Dacă nota este citată de mai multe ori, atunci utilizați o referință bibliografică.
-	\item 	Dacă o imagine este introdusă în text și nu este realizată de către autorul lucrării, trebuie citată sursa ei (ca notă de subsol sau referință - este de preferat utilizarea unei note de subsol).
-	\item 	Referințele se pun direct legate de text (de exemplu ``KVM [1] uses'', ``as stated by Popescu and Ionescu [12]'', etc.). Nu este recomandat să folosiți formulări de tipul ``[1] uses'', ``as stated in [12]'', ``as described in [11]'' etc..
-	\item 	Afirmațiile de forma ``are numerous'', ``have grown exponentially'', ``are among the most used'', ``are an important topic'' trebuie să fie acoperite cu citări, date concrete si analize comparative.
-	\begin{itemize}
-		\item	Mai ales în capitolele de introducere, ``state of the art'', ``related work'' sau ``background'' trebuie să vă argumentați afirmațiile prin citări. Fiți autocritici și gândiți-vă dacă afirmațiile au nevoie de citări, chiar și cele pe care le considerați evidente.
-		\item	Cea mai mare parte dintre citări vor fi în capitolele de introducere ``state of the art'', ``related work'' sau ``background''.
-	\end{itemize}
-	\item 	Toate intrările bibliografice trebuie citate în text. Nu le adăugați pur și simplu la final.
-	\item 	Nu copiați sau traduceți niciodată din surse de informație de orice tip (online, offline, cărți, etc.). Dacă totuși doriți să oferiți, prin excepție, un citat celebru - de maxim 1 frază- utilizați ghilimele și evident menționați sursa. .
-	\item 	Dacă reformulați idei sau creați un paragraf rezumat al unor idei folosind cuvintele voastre, precizați cu citare (referință bibliografică) sau cu notă de subsol sursa sau sursele de unde ați preluat ideile.
-\end{itemize}
-
-Trebuie respectat un singur standard de trimiteri bibliografice (citare), dintre următoarele alternative:
-\begin{itemize}
-	\item APA (\url{http://pitt.libguides.com/c.php?g=12108\&p=64730})
-	\item IEEE (\url{https://ieee-dataport.org/sites/default/files/analysis/27/IEEE\%20Citation\%20Guidelines.pdf}) 
-	\item Harvard (\url{https://libweb.anglia.ac.uk/referencing/harvard.htm})
-	\item Cu numerotarea referințelor în ordine alfabetică sau în ordinea apariției în text (de exemplu, stilul cu numere folosit de unele publicații ACM - \url{https://www.acm.org/publications/authors/reference-formatting}) 
-\end{itemize}
-
-În Latex este foarte ușor să folosiți referințe într-un mod corect și unitar, fie prin adăugarea unei secțiuni
-\verb!\begin{thebibliography}!
-(vezi la sfârșitul acestei secțiuni), fie printr-un fișier separat de tip bib, folosind comanda
-\verb!\bibliography{}!,
-așa cum procedăm mai jos prin folosirea fișierului ``bibliography.bib''. În orice caz, în Latex va trebui să folosiți comanda
-\verb!\cite{}!
-pentru a adăuga referințe, iar această comandă trebuie folosită direct în text, acolo unde vreți sa apară citația, ca în exemplele următoare:
-\begin{itemize}
-	\item Articol jurnal:
-\end{itemize}
-
-\textbf{Important}: în această secțiune de obicei apar doar intrările bibliografice (adică doar listarea referințelor). Citarea lor prin comanda cite și explicații legate de ele trebuie facute în secțiunile anterioare. Citarea de mai sus a fost facută aici doar pentru exemplificare.
+\chapter{Bibliografie} \label{bibliografie}
 
 % Asa se specifica folosirea unui fisier cu referinte bibliografice:
 \bibliographystyle{plain}
-
 \bibliography{bibliografie}
 
-
-
-%% O alta varianta ar fi fost includerea de articole direct in acest fisier
-%% in felul urmator:
-%% \begin{thebibliography}{ABC}
-%%
-%% \bibitem{article}
-%%  H. Baali, H. Djelouat, A. Amira and F. Bensaali,
-%%  ``Empowering Technology Enabled Care Using IoT and Smart Devices:
-%   A Review''. In: IEEE Sensors Journal, vol. 322 (10), pp. 891--921, 1905.
-%%
-%% (more \bibitem items here...)
-%%
-%% \end{thebibliography}
-
 %% Daca vreti ca o sectiune sa inceapa pe o pagina noua, puteti forta acest lucru cu comanda "\newpage", ca mai jos:
-\newpage
+%\newpage
 
-\chapter{Anexe}
+\chapter{Anexe} \label{anexe}
+%\begin{algorithm}
+%\caption{TEst}
+%\label{}
+\newlength\someheight
+\setlength\someheight{3cm}
+%\begin{adjustbox}{width=10in,height=\someheight,keepaspectratio}
 
+\begin{lstlisting}[label={alg:historyOfTask},caption={Calea parcursă de un task până la destinație}]
+
+public boolean historyOfTask(int source, int destination, LinkedList<LinkedList<Integer>> adjcent, List<Integer> intermidiateNodes) {
+
+LinkedList<LinkedList<Integer>> paths = new LinkedList<>();	
+LinkedList<Integer> firstPath = new LinkedList<Integer>();
+firstPath.add(source);
+paths.add(firstPath);
+		
+LinkedList<List<Integer>> pathFinder = new LinkedList<>();	
+LinkedList<Integer> currentPath;
+int currentVertex, elem;
+Iterator<Integer> it;
+boolean findPath = false, findDestination = false;
+while (!paths.isEmpty() ) {
+	findDestination = false;
+	currentPath = paths.poll();
+	currentVertex = currentPath.peekLast();
+	if ( currentVertex == destination && !pathFinder.contains(currentPath)) {
+		System.out.println("S-a gasit calea intre " + source + " si " + destination);
+		printPath(currentPath);
+		pathFinder.add(currentPath);
+		findPath = true;
+		findDestination = true;
+	}
+	if (!findDestination) {
+		it = adjcent.get(currentVertex).iterator();		
+		while(it.hasNext()){
+			elem = it.next();
+			if( !isVisited(elem, currentPath )){
+				LinkedList<Integer> newPath = (LinkedList<Integer>) currentPath.clone();
+				newPath.add(elem);
+				paths.add(newPath);
+			}
+		}
+	}
+}
+if(pathFinder.size() != 1 && findPath){
+	System.out.println("S-au gasit mai multe cai se alege ultima, avand cele mai recente informatii");
+	intermidiateNodes.addAll(pathFinder.get(pathFinder.size()-1).subList(1, pathFinder.get(pathFinder.size()-1).size()));
+}	
+return findPath;
+}
+\end{lstlisting}
+
+\begin{lstlisting}[label={alg:addNodeInPath},caption={Aflarea căi potrivite}]
+
+private void addNodeInPath(List<List<Integer>> paths, int idSender, int idReceiver, int taskId, Map<SenderAndReceiver, List<ValueAndTime>> newMap, int idExecutor, int idOwner, boolean completed) {
+		
+	boolean succes = false;
+	LinkedList<Integer> list2 = null, list = null;
+	int counter = 0;
+	List<List<Integer>> foundedPaths = new LinkedList<>(); 
+	Iterator<List<Integer>> it = paths.iterator();
+	while ( it.hasNext() ) {
+		list = (LinkedList<Integer>)it.next();
+		if( list.peekLast() == idSender ) {
+			succes = true;
+			list2 = new LinkedList<Integer>(list);				
+			foundedPaths.add(list2);
+			counter++;
+		}
+	}			
+	if(counter > 1) {
+		list2 = findMaxTimestamp(foundedPaths, newMap, idExecutor, completed);
+		System.out.println("Dintre toate caile " + foundedPaths + " s-a ales calea " + list2);
+	}
+	if(succes) {
+		list2.add(idReceiver);
+		paths.add(list2);
+	}
+}
+\end{lstlisting}
+
+\begin{lstlisting}[label={alg:findMaxTimestamp},caption={Aflarea versiunii potrivite}]
+private LinkedList<Integer> findMaxTimestamp(List<List<Integer>> foundedPaths,
+			Map<SenderAndReceiver, List<ValueAndTime>> newMap, int executorId, boolean completed) {
+			
+	long maxTime = 0, time;
+	LinkedList<Integer> list2 = null;
+	List<ValueAndTime> auxList;
+	List<List<Integer>> testList = new LinkedList<>();
+	if(!completed) {		
+		/*taskul inca nu este executat inseamna ca voi alege versiunea care a venit cel mai tarziu*/
+		for(List<Integer> list : foundedPaths ) {
+			try {
+				if(list.size() == 1)
+					continue;
+				auxList = newMap.get(new SenderAndReceiver(list.get(list.size()-2), list.get(list.size()-1)));		
+				time = auxList.get(auxList.size()-1).getTimestamp(); 
+				if(time > maxTime) {
+					maxTime = time;
+					list2 = (LinkedList<Integer>)list;
+				}
+			}catch(IndexOutOfBoundsException ex) {
+				ex.printStackTrace();
+			}
+		}
+	}else{	/*inseamna ca task-ul este executat*/
+		for(List<Integer> list : foundedPaths) {
+			if(list.contains(executorId))
+				testList.add(list);
+		}
+		if(testList.size() == 1) {
+			list2 = (LinkedList<Integer>)testList.get(0);
+		}
+		if(testList.size() > 1) {		
+			/*pot contine mai multe executantul pentru ca taskul a mai putut trece si pe la nodul executant fara ca el sa fie completat*/
+			int length = testList.size(), indexExecuter;
+			ValueAndTime vat = null;
+			for(int i = 0; i < length; i++) {	
+				list2 = (LinkedList<Integer>)testList.get(length-i-1);
+				indexExecuter = list2.lastIndexOf(executorId);
+				if ( indexExecuter != list2.size()-1 ) {
+					List<ValueAndTime> vatList = newMap.get(new SenderAndReceiver(list2.get(indexExecuter), list2.get(indexExecuter+1)));
+					vat = vatList.get(vatList.size()-1);
+				}	
+			}
+		}	
+	}
+	return list2;
+	}
+\end{lstlisting}
+
+%\end{adjustbox}
 Anexele sunt opționale.
 Ce poate intra în anexe:
 \begin{itemize}
