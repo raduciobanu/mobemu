@@ -58,6 +58,11 @@ public class SocialBlueConn implements Parser {
         return socialNetwork.length;
     }
 
+	@Override
+	public int getStaticNodesNumber() {
+		return 0;
+	}
+
     /**
      * Parses the SocialBlueConn trace.
      *

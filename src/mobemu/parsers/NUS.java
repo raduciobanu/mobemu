@@ -51,6 +51,11 @@ public class NUS implements Parser {
         return socialNetwork.length;
     }
 
+	@Override
+	public int getStaticNodesNumber() {
+		return 0;
+	}
+
     /**
      * Parses a National University of Singapore trace and creates a list of
      * contacts.

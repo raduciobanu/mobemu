@@ -58,6 +58,11 @@ public class Sigcomm implements Parser {
         return socialNetwork.length;
     }
 
+	@Override
+	public int getStaticNodesNumber() {
+		return 0;
+	}
+
     /**
      * Parses a Sigcomm trace and creates a list of contacts.
      *

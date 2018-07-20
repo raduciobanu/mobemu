@@ -120,6 +120,11 @@ public class Haggle implements Parser {
         return socialNetwork.length;
     }
 
+	@Override
+	public int getStaticNodesNumber() {
+		return 0;
+	}
+
     /**
      * Subtrace types for the Haggle trace.
      */

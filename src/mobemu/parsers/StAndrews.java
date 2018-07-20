@@ -52,6 +52,11 @@ public class StAndrews implements Parser {
         return socialNetwork.length;
     }
 
+	@Override
+	public int getStaticNodesNumber() {
+		return 0;
+	}
+
     /**
      * Parses a St. Andrews trace and creates a list of contacts.
      *

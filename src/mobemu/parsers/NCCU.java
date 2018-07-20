@@ -64,6 +64,11 @@ public class NCCU implements Parser {
         return socialNetwork.length;
     }
 
+	@Override
+	public int getStaticNodesNumber() {
+		return 0;
+	}
+
     /**
      * Parses an NCCU trace in the MobEmu format.
      *
