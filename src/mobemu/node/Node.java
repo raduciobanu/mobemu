@@ -25,6 +25,7 @@ public abstract class Node {
     protected Battery battery; // the amount of battery left for the device
     protected Altruism altruism; // the node's altruism information
     protected Network network; // the current node's network information
+    protected WiFiMetrics wifiMetrics; // the current node's WiFi information
     protected Context context; // the node's context
     protected boolean[] socialNetwork; // social network of the node
 
@@ -149,6 +150,7 @@ public abstract class Node {
         this.encounters = new int[nodes];
         this.network = new Network();
         this.context = context;
+        this.wifiMetrics = new WiFiMetrics(id, traceStart, traceEnd);
     }
 
     /**
