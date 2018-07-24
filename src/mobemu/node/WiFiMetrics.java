@@ -161,7 +161,6 @@ public class WiFiMetrics {
 		for (WiFiData d : measurements) {
 			if (d.start <= timestamp && d.end >= timestamp) {
 				data = d;
-				System.out.println("New data " + timestamp + " " + d.start + " " + d.end);
 				break;
 			}
 		}
