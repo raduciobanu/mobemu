@@ -72,11 +72,11 @@ public class DropComputing extends Node {
 	 */
 	private static final int BT_SPEED = 3;
 	/**
-	 * WiFi transfer speed (in MB/s).
+	 * Mobile broadband transfer speed (in MB/s).
 	 */
 	private static final int MBB_SPEED = 3;
 	/**
-	 * Edge transfer speed (in MB/s).
+	 * Edge (Wi-Fi) transfer speed (in MB/s).
 	 */
 	private static final int EDGE_SPEED = 10; // caused by Flash write speed
 	/**
@@ -190,9 +190,12 @@ public class DropComputing extends Node {
 					}
 
 					// update battery level
-					setBatteryOpportunisticExchange(this, dcNode, task.type, sampleTime);
+					setBatteryOpportunisticExchange(this, dcNode, task.type, sampleTime, currentTime);
 				} else if ((!completedTasks.contains(task) && condition) || isWiFiAccessPoint) {
 					// get completed tasks info to disseminate it further
+					if (completedTasks.size() == 5000000) {
+						completedTasks.remove(0);
+					}
 					completedTasks.add(task);
 					exchangedData = true;
 
@@ -210,17 +213,17 @@ public class DropComputing extends Node {
 					}
 
 					// update battery level
-					setBatteryOpportunisticExchange(this, dcNode, task.type, sampleTime);
+					setBatteryOpportunisticExchange(this, dcNode, task.type, sampleTime, currentTime);
 				}
 			}
 
 			// compute transfer duration based on task types
-			long transferDuration = TaskType.getTransferDuration(TaskType.SMALL, dcNode.isWiFiAccessPoint ? 2 : 1)
-					* exchangedTasksCount[0]
-					+ TaskType.getTransferDuration(TaskType.MEDIUM, dcNode.isWiFiAccessPoint ? 2 : 1)
-							* exchangedTasksCount[1]
-					+ TaskType.getTransferDuration(TaskType.LARGE, dcNode.isWiFiAccessPoint ? 2 : 1)
-							* exchangedTasksCount[2];
+			long transferDuration = TaskType.getTransferDuration(TaskType.SMALL, dcNode.isWiFiAccessPoint ? 2 : 1,
+					dcNode, currentTime) * exchangedTasksCount[0]
+					+ TaskType.getTransferDuration(TaskType.MEDIUM, dcNode.isWiFiAccessPoint ? 2 : 1, dcNode,
+							currentTime) * exchangedTasksCount[1]
+					+ TaskType.getTransferDuration(TaskType.LARGE, dcNode.isWiFiAccessPoint ? 2 : 1, dcNode,
+							currentTime) * exchangedTasksCount[2];
 
 			// clear the current task group if all tasks have finished
 			if (exchangedData && ownTasks.hasFinished()) {
@@ -252,13 +255,13 @@ public class DropComputing extends Node {
 				// devices, increase battery decrease rate
 				for (Task task : otherTasks) {
 					if (!currentTasks.contains(task)) {
-						setBatteryOpportunisticExchange(this, dcNode, task.type, sampleTime);
+						setBatteryOpportunisticExchange(this, dcNode, task.type, sampleTime, currentTime);
 					}
 				}
 
 				for (Task task : dcNode.otherTasks) {
 					if (!otherNodeTasks.contains(task)) {
-						setBatteryOpportunisticExchange(dcNode, this, task.type, sampleTime);
+						setBatteryOpportunisticExchange(dcNode, this, task.type, sampleTime, currentTime);
 					}
 				}
 
@@ -287,7 +290,7 @@ public class DropComputing extends Node {
 						if (task.execute(deviceInfo, sampleTime, id)) {
 							otherTasks.remove(task);
 
-							setBatteryOpportunisticExchange(dcNode, this, task.type, sampleTime);
+							setBatteryOpportunisticExchange(dcNode, this, task.type, sampleTime, currentTime);
 
 							if (task.ownerID == id) {
 								// if this was a local task, check if the local task group has finished
@@ -329,16 +332,20 @@ public class DropComputing extends Node {
 	 *            type of task
 	 * @param sampleTime
 	 *            sample time of the trace
+	 * @param timestamp
+	 *            current trace time
 	 */
 	private static void setBatteryOpportunisticExchange(DropComputing first, DropComputing second, TaskType type,
-			long sampleTime) {
+			long sampleTime, long timestamp) {
 		if (!first.isWiFiAccessPoint) {
-			first.battery.setDecreaseRate(first.battery.getDecreaseRate() + first.deviceInfo
-					.getTransferBatteryMultiplier(second.isWiFiAccessPoint ? 2 : 1, type, sampleTime));
+			first.battery
+					.setDecreaseRate(first.battery.getDecreaseRate() + first.deviceInfo.getTransferBatteryMultiplier(
+							second.isWiFiAccessPoint ? 2 : 1, type, sampleTime, timestamp, first));
 		}
 		if (!second.isWiFiAccessPoint) {
-			second.battery.setDecreaseRate(second.battery.getDecreaseRate() + second.deviceInfo
-					.getTransferBatteryMultiplier(first.isWiFiAccessPoint ? 2 : 1, type, sampleTime));
+			second.battery
+					.setDecreaseRate(second.battery.getDecreaseRate() + second.deviceInfo.getTransferBatteryMultiplier(
+							first.isWiFiAccessPoint ? 2 : 1, type, sampleTime, timestamp, second));
 		}
 	}
 
@@ -786,7 +793,7 @@ public class DropComputing extends Node {
 		 */
 		protected double mbbBatteryMultiplier = 5.74;
 		/**
-		 * Battery multiplier when transferring data to the edge device (WiFi).
+		 * Battery multiplier when transferring data to the edge device (Wi-Fi).
 		 */
 		protected double edgeBatteryMultiplier = 2.87;
 		/**
@@ -816,6 +823,28 @@ public class DropComputing extends Node {
 		 */
 		public double getTransferBatteryMultiplier(int type, TaskType taskType, long sampleTime) {
 			return TaskType.getTransferDuration(taskType, type) * (type == 0 ? mbbBatteryMultiplier
+					: type == 1 ? bluetoothBatteryMultiplier : edgeBatteryMultiplier) / sampleTime;
+		}
+
+		/**
+		 * Computes the battery multiplier using this device for a task transfer.
+		 *
+		 * @param type
+		 *            0 if the transfer is done using WiFi, 1 if Bluetooth is employed,
+		 *            2 if edge is used
+		 * @param taskType
+		 *            type of task
+		 * @param sampleTime
+		 *            sample time of the trace
+		 * @param timestamp
+		 *            current trace time
+		 * @param node
+		 *            current node
+		 * @return the battery multiplier of this device when performing a transfer
+		 */
+		public double getTransferBatteryMultiplier(int type, TaskType taskType, long sampleTime, long timestamp,
+				DropComputing node) {
+			return TaskType.getTransferDuration(taskType, type, node, timestamp) * (type == 0 ? mbbBatteryMultiplier
 					: type == 1 ? bluetoothBatteryMultiplier : edgeBatteryMultiplier) / sampleTime;
 		}
 	}
@@ -1276,29 +1305,33 @@ public class DropComputing extends Node {
 		SMALL, MEDIUM, LARGE;
 
 		/**
-		 * Gets the scaling factor for a certain type of task.
+		 * Gets the duration (in ms) that it takes for a type of task to be transferred
+		 * through Bluetooth, Wi-Fi, or MBB. We assume tasks of 5 MB.
 		 *
 		 * @param type
 		 *            task type
-		 * @return scaling factor for the given task type
+		 * @param exchangeType
+		 *            0 if the task is uploaded using mobile broadband, 1 if Bluetooth
+		 *            is employed, 2 if edge is used
+		 * @return duration (in ms) that it takes to upload transfer this type of task
 		 */
-		public static int getScalingFactor(TaskType type) {
-			switch (type) {
-			default:
-			case SMALL:
-				return 1;
-			case MEDIUM:
-				return 1000;
-			case LARGE:
-				return 10000;
-			}
+		public static long getTransferDuration(TaskType type, int exchangeType, DropComputing node, long timestamp) {
+			double transferSizeMB = 5;
+			transferSizeMB /= getScalingFactor(type);
+
+			double duration = transferSizeMB;
+			duration /= exchangeType == 0 ? MBB_SPEED
+					: exchangeType == 1 ? BT_SPEED
+							: Math.max(EDGE_SPEED, getMaxSpeedBySignalLevel(node.wifiMetrics.getRssi(timestamp)));
+			// transform to ms
+			duration *= 1000;
+
+			return (long) Math.ceil(duration);
 		}
 
 		/**
 		 * Gets the duration (in ms) that it takes for a type of task to be transferred
-		 * through Bluetooth or WiFi. We assume tasks of 5 MB, a speed of 5 MB/s for
-		 * Cloud download and upload, and 3 MB/s for Bluetooth transfer (which is the
-		 * maximum speed of Bluetooth 3.0).
+		 * towards or from the Cloud. We assume tasks of 5 MB.
 		 *
 		 * @param type
 		 *            task type
@@ -1317,6 +1350,54 @@ public class DropComputing extends Node {
 			duration *= 1000;
 
 			return (long) Math.ceil(duration);
+		}
+
+		/**
+		 * Computes the maximum Wi-Fi data transfer speed based on signal level (taken
+		 * from https://bit.ly/2uNDikQ).
+		 *
+		 * @param signalLevel
+		 *            signal level
+		 * @return data rate
+		 */
+		private static int getMaxSpeedBySignalLevel(int signalLevel) {
+
+			if (signalLevel < -81) {
+				return 6;
+			} else if (signalLevel < -80) {
+				return 9;
+			} else if (signalLevel < -78) {
+				return 12;
+			} else if (signalLevel < -76) {
+				return 18;
+			} else if (signalLevel < -73) {
+				return 24;
+			} else if (signalLevel < -69) {
+				return 36;
+			} else if (signalLevel < -65) {
+				return 48;
+			} else {
+				return 54;
+			}
+		}
+
+		/**
+		 * Gets the scaling factor for a certain type of task.
+		 *
+		 * @param type
+		 *            task type
+		 * @return scaling factor for the given task type
+		 */
+		private static int getScalingFactor(TaskType type) {
+			switch (type) {
+			default:
+			case SMALL:
+				return 1;
+			case MEDIUM:
+				return 1000;
+			case LARGE:
+				return 10000;
+			}
 		}
 	}
 
